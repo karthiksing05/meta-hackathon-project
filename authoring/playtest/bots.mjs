@@ -40,18 +40,52 @@ export function inputSources(game) {
   const keys = new Set();
   let swipes = false;
   let pointer = false;
+  let text = false;
   for (const input of Object.values(game.inputs ?? {})) {
-    // An input with no key or swipe source is driven by the pointer (taps and drags).
-    if (!(input.from ?? []).some((f) => f.key || f.swipe)) pointer = true;
+    // An input with no key, swipe or text source is driven by the pointer (taps and drags).
+    if (!(input.from ?? []).some((f) => f.key || f.swipe || f.text)) pointer = true;
     for (const from of input.from ?? []) {
       if (from.key) keys.add(from.key);
       if (from.swipe) swipes = true;
-      if (!from.key && !from.swipe) pointer = true;
+      if (from.text) text = true;
+      if (!from.key && !from.swipe && !from.text) pointer = true;
     }
   }
   // Arrow keys duplicate swipes in the usual four-way games; evaluating both only doubles the cost.
   const allArrows = [...keys].every((k) => k.startsWith('Arrow'));
-  return { keys: swipes && allArrows ? [] : [...keys], swipes, pointer };
+  return { keys: swipes && allArrows ? [] : [...keys], swipes, pointer, text };
+}
+
+const MAX_TEXT_CANDIDATES = 12;
+
+/**
+ * Strings a bot may submit to a game with a text input (SPEC 2.6): the playtest copy's
+ * `__text_candidates` (from the manifest's `playtest.text_candidates`) when it has one, otherwise
+ * the strings in the game's own state (a target word, words on screen, answers left). At most 12,
+ * picked with the bot's rng when there are more.
+ */
+export function textCandidates(g, rng) {
+  let state;
+  try { state = asObject(g.state()); } catch { return []; }
+  const out = [];
+  const add = (v) => {
+    if (typeof v !== 'string') return;
+    const w = v.trim();
+    if (w && w.length <= 200 && !w.includes('\n') && !out.includes(w)) out.push(w);
+  };
+  const walk = (v, depth) => {
+    if (out.length >= 64 || depth > 4 || v == null) return;
+    if (typeof v === 'string') add(v);
+    else if (Array.isArray(v)) v.slice(0, 64).forEach((x) => walk(x, depth + 1));
+    else if (typeof v === 'object') for (const [k, x] of Object.entries(v)) if (!k.startsWith('__')) walk(x, depth + 1);
+  };
+  if (Array.isArray(state?.__text_candidates)) state.__text_candidates.forEach(add);
+  else walk(state, 0);
+  if (out.length <= MAX_TEXT_CANDIDATES) return out;
+  const pool = out.slice();
+  const picked = [];
+  for (let i = 0; i < MAX_TEXT_CANDIDATES; i++) picked.push(pool.splice(Math.floor(rng() * pool.length), 1)[0]);
+  return picked;
 }
 
 function tapAt(x, y) {
@@ -62,10 +96,12 @@ function tapAt(x, y) {
  * Tap candidates: the engine's own hit targets (`targets`, from game.hitTargets()) when the engine
  * provides them, so the bots never tap decoration such as particles or sprites; otherwise the
  * centers of drawn rects and circles (engine v0.1). Plus a row of open-screen taps for games that
- * take a pointer anywhere, and the game's keys and swipes.
+ * take a pointer anywhere, the game's keys and swipes, and `texts` to submit (textCandidates) for
+ * games with a text input.
  */
-export function candidatesFor(frame, sources, rng, targets = null) {
+export function candidatesFor(frame, sources, rng, targets = null, texts = null) {
   const out = [{ kind: 'noop' }];
+  for (const value of texts ?? []) out.push({ kind: 'text', value });
   if (!sources.pointer) {
     for (const key of sources.keys) out.push({ kind: 'key', key });
     if (sources.swipes) for (const dir of ['left', 'right', 'up', 'down']) out.push({ kind: 'swipe', dir });
@@ -115,6 +151,8 @@ export function apply(g, action) {
       break;
     case 'key': g.key(action.key); break;
     case 'swipe': g.swipe(action.dir); break;
+    // Typed and submitted at once (Enter), then the field clears, like the app's text field.
+    case 'text': g.text('submit', action.value); g.text('change', ''); break;
     default: break;
   }
 }

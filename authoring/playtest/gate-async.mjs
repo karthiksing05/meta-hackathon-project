@@ -9,7 +9,7 @@
 //
 // No Node APIs and no imports outside this folder.
 
-import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, apply, analyze, summarize } from './bots.mjs';
+import { DT, LOOKAHEAD_STEPS, DEFAULT_BOTS, mulberry32, asObject, gameObject, inputSources, candidatesFor, textCandidates, apply, analyze, summarize } from './bots.mjs';
 
 export { DEFAULT_BOTS };
 
@@ -56,7 +56,7 @@ async function playOneAsync(engine, json, sources, bot, seed, maxSeconds, sliceM
     let sliceStart = now();
     while (steps < maxSteps && g.phase() === 'playing') {
       if (steps >= nextDecision) {
-        const candidates = candidatesFor(asObject(g.frameJSON()), sources, rng, typeof g.hitTargets === 'function' ? g.hitTargets() : null);
+        const candidates = candidatesFor(asObject(g.frameJSON()), sources, rng, typeof g.hitTargets === 'function' ? g.hitTargets() : null, sources.text ? textCandidates(g, rng) : null);
         let choice;
         if (rng() < bot.skill) {
           let best = -Infinity;

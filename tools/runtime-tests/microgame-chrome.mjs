@@ -3,6 +3,9 @@
 // app does: BubbleHost.prepare + activate with the seed manifest, then real touch input through
 // the DevTools protocol. Checks the bridge messages (ready, phase playing, score, result) and
 // writes a screenshot per seed. No npm packages: Chrome's DevTools protocol over Node's WebSocket.
+// Games with a text input (mg-ferry-call) are played through the host's native text field: a tap
+// on the field, typed text, then Enter; the field must sit at the game's rect, take focus, reach the
+// game and hide when the run ends, and the result's replay must carry the text.
 //
 //   node tools/runtime-tests/microgame-chrome.mjs [seed-id ...] [--out /tmp/mg-chrome]
 //
@@ -29,6 +32,8 @@ const PLANS = {
   'mg-postcard-pairs': [{ tap: [0.3, 0.45] }, { tap: [0.7, 0.45] }, { tap: [0.3, 0.6] }, { tap: [0.7, 0.6] }],
   'mg-gust-glider': [{ tap: [0.5, 0.5] }, { tap: [0.5, 0.5] }, { tap: [0.5, 0.5] }],
   'mg-kite-day-detour': [{ tap: [0.5, 0.75] }, { tap: [0.5, 0.85] }],
+  // Type the word on the sign (read from the game) six times: a win.
+  'mg-ferry-call': [{ type: 'target' }, { type: 'zz' }, { type: 'target' }, { type: 'target' }, { type: 'target' }, { type: 'target' }, { type: 'target' }],
 };
 const targets = ids.length ? ids : Object.keys(PLANS);
 // Any other game: taps spread over the playfield, a drag and two flicks, about 6 s of play.
@@ -85,6 +90,12 @@ try {
   await send('Page.addScriptToEvaluateOnNewDocument', {
     source: 'window.__msgs = []; window.webkit = { messageHandlers: { bubble: { postMessage: (m) => window.__msgs.push(m) } } };',
   });
+  // Every game the engine loads, so a plan can read the live game's state (the word to type).
+  const hookEngine = `(() => { const e = MicrogameEngine.getEngine(); if (!e || e.__hooked) return !!e; const l = e.load.bind(e);
+    e.load = (j, s) => { const g = l(j, s); (window.__games = window.__games || []).push(g); return g; }; e.__hooked = true; return true; })()`;
+  const field = () => evaluate(`(() => { const t = document.querySelector('.bubble-text'); if (!t || t.classList.contains('hidden')) return null;
+    const r = t.getBoundingClientRect(), c = document.getElementById('bubble-canvas').getBoundingClientRect();
+    return { x: r.left, y: r.top, w: r.width, h: r.height, font: parseFloat(getComputedStyle(t).fontSize), focused: document.activeElement === t, value: t.value, cw: c.width, ch: c.height }; })()`);
 
   const touch = (type, x, y) => send('Input.dispatchTouchEvent', { type, touchPoints: type === 'touchEnd' ? [] : [{ x, y }] });
   // Playfield-relative point → page point, from the canvas the runtime sized.
@@ -95,13 +106,49 @@ try {
     const manifest = JSON.parse(readFileSync(id.endsWith('.json') ? id : join(SEEDS, `bubble-seed-${id}.json`), 'utf8'));
     await send('Page.navigate', { url: pathToFileURL(HOST).href });
     await sleep(1200);
+    await evaluate(hookEngine);
     const prep = JSON.parse(await evaluate(`BubbleHost.prepare(${JSON.stringify(JSON.stringify({ key: id, manifest, mode: 'play' }))})`));
     const act = JSON.parse(await evaluate(`BubbleHost.activate(${JSON.stringify(id)}, ${JSON.stringify(JSON.stringify({ mode: 'play', muted: true }))})`));
     await sleep(600);
     const [cx, cy] = await pt(0.5, 0.5);
     await touch('touchStart', cx, cy); await touch('touchEnd', cx, cy); // the intro card's "Tap to play"
     await sleep(900);
+    const textProblems = [];
+    let typed = 0;
     for (const step of PLANS[id] || GENERIC_PLAN) {
+      if (step.type) {
+        const f = await field();
+        if (!f) { textProblems.push('no text field while playing'); continue; }
+        const ti = manifest.content.game_json ? JSON.parse(manifest.content.game_json).presentation.text_field : null;
+        // The playfield is 360 wide here and fills the canvas width (390 x 844 fits by width).
+        const k = Math.min(f.cw / 360, f.ch / 640);
+        if (ti && Math.abs(f.w - ti.w * k) > 2) textProblems.push(`field width ${f.w} vs ${ti.w * k}`);
+        if (f.font < 16) textProblems.push(`font ${f.font}px (iOS zooms under 16px)`);
+        await touch('touchStart', f.x + f.w / 2, f.y + f.h / 2); await sleep(40); await touch('touchEnd', f.x + f.w / 2, f.y + f.h / 2);
+        await sleep(100);
+        if (!(await field())?.focused) textProblems.push('a tap on the field did not focus it');
+        const word = step.type === 'target' ? await evaluate('window.__games[window.__games.length - 1].state().target') : step.type;
+        await send('Input.insertText', { text: word });
+        await sleep(80);
+        if (!typed) {
+          // The field over the game, mid-answer.
+          await sleep(250);
+          const mid = await send('Page.captureScreenshot', { format: 'png' });
+          writeFileSync(join(out, `${id.split('/').pop().replace(/\.json$/, '')}-typing.png`), Buffer.from(mid.data, 'base64'));
+        }
+        await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+        await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+        if (!typed) {
+          // A tap on the game keeps the keyboard up (the root prevents default on its touches).
+          const [gx, gy] = await pt(0.5, 0.3);
+          await touch('touchStart', gx, gy); await sleep(40); await touch('touchEnd', gx, gy);
+          await sleep(60);
+          if (!(await field())?.focused) textProblems.push('a tap on the game took focus from the field');
+        }
+        typed++;
+        await sleep(350);
+        continue;
+      }
       if (step.tap) {
         const [x, y] = await pt(...step.tap);
         await touch('touchStart', x, y); await sleep(40); await touch('touchEnd', x, y);
@@ -124,6 +171,8 @@ try {
       await sleep(450);
     }
     await sleep(800);
+    // A typed run ends with the win: wait for the result card (after the end moment).
+    for (let i = 0; i < 20 && typed && !(await evaluate("window.__msgs.some((m) => m.type === 'result')")); i++) await sleep(150);
     const shot = await send('Page.captureScreenshot', { format: 'png' });
     const name = id.endsWith('.json') ? id.split('/').pop().replace(/\.json$/, '') : id;
     writeFileSync(join(out, `${name}.png`), Buffer.from(shot.data, 'base64'));
@@ -132,7 +181,22 @@ try {
     const errors = msgs.filter((m) => m.type === 'error');
     const scores = msgs.filter((m) => m.type === 'score').map((m) => m.value);
     const playing = types.includes('phase:playing');
-    const ok = prep.ok && act.ok && types.includes('ready') && playing && errors.length === 0;
+    if (typed) {
+      const result = msgs.find((m) => m.type === 'result');
+      const texts = result ? result.replay.inputs.filter((i) => i.a === 'text') : [];
+      if (!result) textProblems.push('no result after typing');
+      else if (!texts.some((i) => i.v[0] === 'submit')) textProblems.push('the result replay has no text');
+      if (await field()) textProblems.push('the field is still showing after the run');
+      if (result) {
+        // The live run's replay (what a challenge or Burst gets) replays to the same score, like BubbleJSRuntime.verify.
+        const opts = { bot: false, replay: result.replay, max_ticks: Math.max(result.replay.total_ticks + 120, 600) };
+        const again = JSON.parse(await evaluate(`Bubble.simulateJSON(${JSON.stringify(JSON.stringify(manifest))}, ${JSON.stringify(JSON.stringify(opts))})`));
+        if (!again.ok || again.score !== result.score) textProblems.push(`the replay scored ${again.score} (${again.error || again.outcome}), the run ${result.score}`);
+        console.log(`     typed ${typed} answers: ${result.outcome} ${result.score}, ${texts.length} text inputs in the replay; replayed: ${again.outcome} ${again.score}`);
+      }
+    }
+    for (const p of textProblems) console.log(`     text field: ${p}`);
+    const ok = prep.ok && act.ok && types.includes('ready') && playing && errors.length === 0 && !textProblems.length;
     if (!ok) failures++;
     console.log(`${ok ? 'ok  ' : 'FAIL'} ${id}: prepare ${prep.ms} ms${prep.ok ? '' : ' ' + prep.error}, activate ${act.ok ? 'ok' : act.error}, ` +
       `phases ${[...new Set(types.filter((t) => t.startsWith('phase')))].join(' ')}, scores ${scores.slice(-3).join(',') || '-'}` +

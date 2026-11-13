@@ -5,9 +5,11 @@ struct BubbleInput: Codable, Hashable, Sendable {
     /// Tick number (60 per second).
     var t: Int
     /// Pointer action: "tap" (finger down), "move" or "up". Everything else (keys, choices, launches)
-    /// is derived from these by concepts, so a replay is just the pointer log.
+    /// is derived from these by concepts, so a replay is just the pointer log. The one exception is
+    /// "text": typed text from a microgame's native text field (docs/BUBBLES.md 7.11).
     var a: String
-    /// Position in the 360x640 logical playfield as `[x, y]`, rounded to 0.1.
+    /// Position in the 360x640 logical playfield as `[x, y]`, rounded to 0.1. For "text",
+    /// `[kind, value]` with kind "submit" or "change".
     var v: JSONValue?
 
     init(t: Int, a: String, v: JSONValue? = nil) {
