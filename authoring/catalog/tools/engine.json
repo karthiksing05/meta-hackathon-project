@@ -1,0 +1,213 @@
+[
+  {
+    "id": "timers",
+    "kind": "runtime_tool",
+    "name": "Timers (every, after)",
+    "aliases": [
+      "every",
+      "after",
+      "schedule"
+    ],
+    "summary": "Engine timers: `every` fires a rule at a constant interval; `after` schedules a one-shot event after any int-ms expression (self-rescheduling after-timers make ramps).",
+    "when_to_use": "Spawning on a beat, delayed reveals, cooldowns, speed ramps that need a changing interval.",
+    "api": "timers: every <const ms> | after <int-ms expr>; time_limit is a constant",
+    "status": "shipped",
+    "path": "authoring/SPEC.md",
+    "notes": "every and time_limit take constants only; after takes expressions"
+  },
+  {
+    "id": "tick_rules",
+    "kind": "runtime_tool",
+    "name": "Tick rules",
+    "aliases": [
+      "per-frame update",
+      "game loop"
+    ],
+    "summary": "Rules that run every step at a fixed 60 Hz with dt, for movement, custom collisions and accumulators.",
+    "when_to_use": "Any custom real-time movement or check not covered by a fragment.",
+    "api": "rules on tick; dt in ms; collisions are expressions in tick rules",
+    "status": "shipped",
+    "path": "authoring/SPEC.md"
+  },
+  {
+    "id": "physics_bodies",
+    "kind": "runtime_tool",
+    "name": "Physics bodies",
+    "aliases": [
+      "physics",
+      "gravity",
+      "bounce",
+      "rigid bodies"
+    ],
+    "summary": "Optional engine physics: circle or axis-aligned box bodies on state records, gravity, bounds with bounce, max speed, solid collisions with a contact normal, and collision and bounds events.",
+    "when_to_use": "Falling, bouncing, stacking-on-top and landing mechanics: ball games, simple platformers, drop-and-stack. Not rotation, joints or segments (see gaps).",
+    "api": "\"physics\": {gravity: [x, y], bounds: [x, y, w, h], bodies: {group: {state, static?, bounded?, bounce?, gravity?, max_speed?}}, collisions: [{a, b, solid?, emit}], on_bounds: [{body, emit}]}; emit payload a, b, nx, ny",
+    "status": "shipped",
+    "path": "engine/SPEC-v0.2.md",
+    "events": [
+      "<collision emit>",
+      "<on_bounds emit>"
+    ],
+    "notes": "engine v0.2; no fragment wraps it yet; shapes are circles and unrotated boxes only"
+  },
+  {
+    "id": "camera_scroll",
+    "kind": "runtime_tool",
+    "name": "Camera",
+    "aliases": [
+      "scrolling",
+      "side scroller",
+      "follow camera"
+    ],
+    "summary": "A camera that offsets the world view (x, y as expressions), with fixed HUD nodes; hit-testing and pointers use world coordinates.",
+    "when_to_use": "Side-scrollers, tall towers, big maps and runners whose world is larger than one screen.",
+    "api": "\"presentation\": {\"camera\": {\"x\": \"= expr\", \"y\": \"= expr\"}}; nodes with \"fixed\": true ignore it",
+    "status": "shipped",
+    "path": "engine/SPEC-v0.2.md",
+    "notes": "engine v0.2"
+  },
+  {
+    "id": "hold_buttons",
+    "kind": "runtime_tool",
+    "name": "Hold buttons",
+    "aliases": [
+      "press and hold",
+      "on_press",
+      "on_release",
+      "d-pad"
+    ],
+    "summary": "Nodes that send an input on pointer down and another on release, for hold-to-move controls and charge-up mechanics.",
+    "when_to_use": "Hold to charge, hold to move with on-screen buttons, hold-and-release timing games.",
+    "api": "node props on_press / on_release {input, with}; pattern in engine/examples/lantern_ridge.json",
+    "status": "shipped",
+    "path": "engine/SPEC-v0.2.md",
+    "notes": "engine v0.2.1"
+  },
+  {
+    "id": "pointer_input",
+    "kind": "runtime_tool",
+    "name": "Pointer input",
+    "aliases": [
+      "swipe",
+      "drag anywhere",
+      "pointer move"
+    ],
+    "summary": "Canvas-wide pointer down, up and move sources (move only while down), in world coordinates, plus on_tap and on_drag nodes.",
+    "when_to_use": "Swipes, slingshot pulls, aiming, tracing paths and drag gestures not tied to a node.",
+    "api": "inputs.<name>.from: {\"pointer\": \"down\" | \"up\" | \"move\"} with pointer {x, y}; node on_tap / on_drag",
+    "status": "shipped",
+    "path": "engine/SPEC-v0.2.md",
+    "notes": "engine v0.2; one pointer at a time (see multi_touch gap)"
+  },
+  {
+    "id": "key_input",
+    "kind": "runtime_tool",
+    "name": "Key input",
+    "aliases": [
+      "keyboard keys",
+      "hardware keyboard"
+    ],
+    "summary": "Hardware key sources: a named key or any key, down or up, with code and printable char.",
+    "when_to_use": "Desktop and web-player controls, and as a second source next to on-screen controls.",
+    "api": "inputs.<name>.from: {\"key\": \"Space\" | \"any\", \"on\"?: \"up\"} with key {code, char}",
+    "status": "shipped",
+    "path": "engine/SPEC-v0.2.md",
+    "notes": "engine v0.2"
+  },
+  {
+    "id": "vector_shapes",
+    "kind": "runtime_tool",
+    "name": "Lines and polygons",
+    "aliases": [
+      "line",
+      "poly",
+      "shapes"
+    ],
+    "summary": "Line and polygon nodes (up to 256 points) besides rect, circle and text, for drawn paths, ropes, graphs and shapes.",
+    "when_to_use": "Drawing a traced path, a trajectory preview, a maze wall, a chart or a custom silhouette.",
+    "api": "nodes line {x1, y1, x2, y2, stroke, stroke_width}, poly {points, closed, fill, stroke}",
+    "status": "shipped",
+    "path": "engine/SPEC-v0.2.md",
+    "notes": "engine v0.2; drawing only, no collision against them"
+  },
+  {
+    "id": "image_assets",
+    "kind": "runtime_tool",
+    "name": "Image and sprite assets",
+    "aliases": [
+      "sprites",
+      "images",
+      "animation frames"
+    ],
+    "summary": "Image nodes with asset ids, sprite-sheet frames, flip, rotation and scale; the game's art roles fill fragment sprites.",
+    "when_to_use": "Any game with drawn characters, tiles, cards or backgrounds (the art pipeline makes them).",
+    "api": "node image {asset, w, h, frame, flip_x, flip_y, rotation, scale}; art roles avatar, hazard, pickup, tile, card, ...",
+    "status": "shipped",
+    "path": "engine/SPEC-v0.2.md",
+    "notes": "engine v0.2; bots tap rect/circle ops, so sprites need a transparent rect under them"
+  },
+  {
+    "id": "particles_haptics",
+    "kind": "runtime_tool",
+    "name": "Particles and haptics",
+    "aliases": [
+      "juice",
+      "effects",
+      "vibration"
+    ],
+    "summary": "Feedback actions: seeded particle bursts and haptics (light to heavy, success, warning, error), plus conditional feedback.",
+    "when_to_use": "Juice for hits, pickups, merges and wins in any game.",
+    "api": "feedback {particles: {x, y, count, color, speed, size, ms, gravity, spread}} | {haptic: light | medium | heavy | success | warning | error}",
+    "status": "shipped",
+    "path": "engine/SPEC-v0.2.md",
+    "notes": "engine v0.2"
+  },
+  {
+    "id": "synth_sound",
+    "kind": "runtime_tool",
+    "name": "Synth sound and music",
+    "aliases": [
+      "sound effects",
+      "jingle",
+      "music loop",
+      "notes"
+    ],
+    "summary": "Sound feedback as samples, synth notes with slides, or note jingles, plus a looping music asset; note pitch can come from an expression.",
+    "when_to_use": "Rhythm and music-making games, and sound moments in any game.",
+    "api": "feedback {sound: {asset} | {wave, note, ms, slide} | {wave, notes, step_ms}}; presentation.music {asset, volume, playing}",
+    "status": "shipped",
+    "path": "engine/SPEC-v0.2.md",
+    "notes": "engine v0.2"
+  },
+  {
+    "id": "text_wrap",
+    "kind": "runtime_tool",
+    "name": "Wrapped and outlined text",
+    "aliases": [
+      "wrap",
+      "text box",
+      "outline"
+    ],
+    "summary": "Text nodes that wrap to a box width and can carry an outline stroke.",
+    "when_to_use": "Story text, prompts, long questions and readable labels over busy art.",
+    "api": "text {w, wrap: true, stroke, stroke_width}",
+    "status": "shipped",
+    "path": "engine/SPEC-v0.2.md",
+    "notes": "engine v0.2.1"
+  },
+  {
+    "id": "dictionary",
+    "kind": "runtime_tool",
+    "name": "English dictionary",
+    "aliases": [
+      "word list",
+      "spell check",
+      "is it a word"
+    ],
+    "summary": "The engine's built-in English word list, checked case-insensitively with in_dictionary(word).",
+    "when_to_use": "Word games that accept any real word: anagrams, word chains, boggle-like grids, spelling bees.",
+    "api": "in_dictionary(string) -> bool",
+    "status": "shipped",
+    "path": "engine/crates/mg-core/src/builtins.rs"
+  }
+]

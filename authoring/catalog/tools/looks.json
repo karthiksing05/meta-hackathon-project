@@ -1,0 +1,70 @@
+[
+  {
+    "id": "neon",
+    "kind": "look",
+    "name": "Neon",
+    "aliases": [
+      "look_neon",
+      "night",
+      "glow",
+      "synthwave",
+      "arcade"
+    ],
+    "summary": "Night-sky neon: deep navy ground, cyan and magenta light, crisp sans type (Inter).",
+    "when_to_use": "Arcade, shooters, runners and anything fast or at night: high contrast, glowing.",
+    "api": "manifest \"look\": {\"id\": \"neon\", \"tokens\": {...overrides}}; 360 x 640 canvas; slots playfield, hud_top, hud_bottom, overlay; tokens bg #0A0F24, primary #00E5FF, secondary #7C5CFF, accent #FF3DB4",
+    "status": "shipped",
+    "path": "authoring/looks/neon.look.json"
+  },
+  {
+    "id": "paper",
+    "kind": "look",
+    "name": "Paper",
+    "aliases": [
+      "look_paper",
+      "book",
+      "storybook",
+      "newspaper",
+      "cozy"
+    ],
+    "summary": "Warm paper and ink: off-white ground, soft shadows, a calm serif (Fraunces).",
+    "when_to_use": "Stories, mysteries, word and puzzle games, calm and cozy play: anything that reads like a book or a newspaper puzzle.",
+    "api": "manifest \"look\": {\"id\": \"paper\", \"tokens\": {...overrides}}; 360 x 640 canvas; slots playfield, hud_top, hud_bottom, overlay; tokens bg #F4F1EA, primary #3A6EA5, accent #E4572E, ink #1F1B16",
+    "status": "shipped",
+    "path": "authoring/looks/paper.look.json"
+  },
+  {
+    "id": "pixel",
+    "kind": "look",
+    "name": "Pixel",
+    "aliases": [
+      "look_pixel",
+      "retro",
+      "8-bit",
+      "arcade",
+      "console"
+    ],
+    "summary": "Chunky pixel art: hard edges, stepped motion, a bitmap font (Silkscreen).",
+    "when_to_use": "Retro platformers, dungeon crawls, 8-bit arcade and anything that should feel like an old console.",
+    "api": "manifest \"look\": {\"id\": \"pixel\", \"tokens\": {...overrides}}; 360 x 640 canvas; slots playfield, hud_top, hud_bottom, overlay; tokens bg #0F1A12, primary #7BD389, accent #F2C14E",
+    "status": "shipped",
+    "path": "authoring/looks/pixel.look.json"
+  },
+  {
+    "id": "riso",
+    "kind": "look",
+    "name": "Riso",
+    "aliases": [
+      "look_riso",
+      "zine",
+      "print",
+      "poster",
+      "playful"
+    ],
+    "summary": "Risograph print: two bold inks over lavender paper, chunky geometric type (Space Grotesk).",
+    "when_to_use": "Party, social and trivia games, playful quizzes and zine-like designs: bright and friendly.",
+    "api": "manifest \"look\": {\"id\": \"riso\", \"tokens\": {...overrides}}; 360 x 640 canvas; slots playfield, hud_top, hud_bottom, overlay; tokens bg #F3F1FA, primary #5B4BDB, secondary #FF6FAE, accent #2BB3A3",
+    "status": "shipped",
+    "path": "authoring/looks/riso.look.json"
+  }
+]

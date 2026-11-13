@@ -1,0 +1,337 @@
+[
+  {
+    "id": "fuzzy_match",
+    "kind": "runtime_tool",
+    "name": "Fuzzy answer match",
+    "aliases": [
+      "typo tolerance",
+      "close enough",
+      "answer matching"
+    ],
+    "summary": "Does a typed answer match an accepted one? Normalizes case, accents, punctuation and articles, checks aliases, then a Damerau-Levenshtein ratio, a token-set ratio, plural and stem folding, and optionally a phonetic key. Deterministic, no LLM.",
+    "when_to_use": "Any typed or open answer: trivia, naming, guess the character, spelling with tolerance.",
+    "api": "fuzzy.match(input, accepted[], {threshold}) -> {ok, best, score, tier}",
+    "events": [],
+    "params": {
+      "threshold": "0..1, default 0.82"
+    },
+    "status": "building",
+    "gaps_it_closes": [
+      "typed_answer matches only exact text with a trailing-s fold"
+    ],
+    "example_types": [
+      "rare_answer_trivia",
+      "name_all_x",
+      "guess_the_character"
+    ],
+    "path": "docs/HARNESS_V2.md"
+  },
+  {
+    "id": "text_input",
+    "kind": "runtime_tool",
+    "name": "Native text field",
+    "aliases": [
+      "text field",
+      "type freely",
+      "system keyboard"
+    ],
+    "summary": "A native text field in the game runtime kit, so typing has spaces, numbers and autocorrect, and replays record the text. The engine already has text submit/change input sources; the phone and bot runtime do not show the field yet.",
+    "when_to_use": "Typed answers longer than one word, numbers, names, free-text prompts; replaces the on-screen keyboard fragment for typing.",
+    "api": "inputs.<name>.from: {\"text\": \"submit\" | \"change\", placeholder?, max_len?} with text {value}; presentation.text_field {x, y, w, h, size}",
+    "status": "building",
+    "gaps_it_closes": [
+      "typing only through the keyboard fragment grid"
+    ],
+    "example_types": [
+      "rare_answer_trivia"
+    ],
+    "path": "engine/SPEC-v0.2.md",
+    "notes": "runtime side lives in FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame.js"
+  },
+  {
+    "id": "answer_bank",
+    "kind": "content_tool",
+    "name": "Answer bank",
+    "aliases": [
+      "accepted answers",
+      "answer list"
+    ],
+    "summary": "Server-side content step: for each prompt, the accepted answers with aliases and also_accept lists, written by Muse at build time and checked for duplicates and reach.",
+    "when_to_use": "Open-answer games where many answers are right: name a…, list games, rare-answer trivia.",
+    "api": "answer_bank(prompts[], {theme, per_prompt}) -> [{prompt, answers: [{text, aliases[], also_accept[]}]}]",
+    "status": "planned",
+    "example_types": [
+      "rare_answer_trivia",
+      "name_all_x"
+    ]
+  },
+  {
+    "id": "rarity_tiers",
+    "kind": "content_tool",
+    "name": "Rarity tiers",
+    "aliases": [
+      "obscurity tiers",
+      "common to legendary"
+    ],
+    "summary": "Sorts each prompt's accepted answers into tiers (common, uncommon, rare, legendary) by how often people would give them, so rarer answers can score more.",
+    "when_to_use": "Rare-answer trivia and any typed game that rewards obscure answers; feeds typed_answer's tier string.",
+    "api": "rarity_tiers(answer_bank) -> per prompt \"a,b,c|d,e|f|g\" (most common tier first)",
+    "status": "planned",
+    "example_types": [
+      "rare_answer_trivia"
+    ]
+  },
+  {
+    "id": "question_bank",
+    "kind": "content_tool",
+    "name": "Question bank",
+    "aliases": [
+      "trivia questions",
+      "quiz content"
+    ],
+    "summary": "Server-side content step: themed questions with a difficulty rating, the right answer and plausible distractors, checked for one right answer and no repeats.",
+    "when_to_use": "Quizzes and trivia that should ramp in difficulty or draw from a large themed pool.",
+    "api": "question_bank({theme, count, difficulty: [lo, hi], choices}) -> [{q, answer, distractors[], difficulty}]",
+    "status": "planned",
+    "example_types": []
+  },
+  {
+    "id": "level_list",
+    "kind": "content_tool",
+    "name": "Level list",
+    "aliases": [
+      "levels",
+      "stages",
+      "puzzle set"
+    ],
+    "summary": "Server-side content step: an ordered list of levels or puzzle boards for one mechanic, each checked solvable by a solver or bot, with rising difficulty.",
+    "when_to_use": "Puzzle and platform games played as a sequence of hand-made-feeling levels.",
+    "api": "level_list({type_id, count, difficulty_curve}) -> [{level, data, solution?, difficulty}]",
+    "status": "planned",
+    "example_types": []
+  },
+  {
+    "id": "word_list",
+    "kind": "content_tool",
+    "name": "Themed word list",
+    "aliases": [
+      "vocabulary",
+      "word bank"
+    ],
+    "summary": "Server-side content step: a themed word list with lengths and filters (only dictionary words, a fixed length, no proper nouns), for word games.",
+    "when_to_use": "Hidden-word guessing, word search, hangman-like and spelling games with a theme.",
+    "api": "word_list({theme, count, length?, dictionary_only?}) -> [string]",
+    "status": "planned",
+    "example_types": []
+  },
+  {
+    "id": "web_lookup",
+    "kind": "server_tool",
+    "name": "Web lookup",
+    "aliases": [
+      "look it up",
+      "wikipedia lookup"
+    ],
+    "summary": "When the catalog misses a named game, looks it up on Wikipedia and the named site, and has Muse write a candidate game_type (mechanic only, with source URLs), saved as learned.",
+    "when_to_use": "A request names a game, site or format the catalog has no alias for, or retrieval scores are low.",
+    "api": "lookup(name) -> {game_type (status learned), refs[]}; budget 8 s; on failure the job continues without it",
+    "status": "building",
+    "path": "docs/HARNESS_V2.md"
+  },
+  {
+    "id": "friend_answers",
+    "kind": "server_tool",
+    "name": "Friend answers",
+    "aliases": [
+      "how well do you know me",
+      "answers from friends"
+    ],
+    "summary": "Collects short answers or picks from specific friends or a Group (about themselves or each other) so a game can ask players to guess them.",
+    "when_to_use": "Guess-your-friends and party games whose content is the players themselves.",
+    "api": "POST answers per game and person; GET a game's collected answers for players",
+    "status": "planned",
+    "notes": "needs a backend endpoint; not in backend/README.md yet"
+  },
+  {
+    "id": "async_turns",
+    "kind": "server_tool",
+    "name": "Async turns",
+    "aliases": [
+      "your move",
+      "turn-based with friends",
+      "correspondence play"
+    ],
+    "summary": "Turn-based play between friends on their own phones: the server stores the game state and whose move it is, and notifies the next player.",
+    "when_to_use": "Board, word and strategy games played move by move over hours, not on one phone (that is the turns fragment).",
+    "api": "create match {gameId, players}; submit move; get match state",
+    "status": "planned",
+    "notes": "needs a backend endpoint; challenges today are score-only"
+  },
+  {
+    "id": "freehand_draw",
+    "kind": "runtime_tool",
+    "name": "Freehand drawing",
+    "aliases": [
+      "draw",
+      "sketch",
+      "doodle"
+    ],
+    "summary": "Captures a finger-drawn stroke as points the game can keep, show and score. Can be approximated today with pointer move input plus a poly node (256 points); there is no stroke recognition.",
+    "when_to_use": "Drawing and tracing games, draw-a-path puzzles, doodle guessing.",
+    "api": "approximation: inputs from {\"pointer\": \"move\"} pushing points to state; poly {points}",
+    "status": "planned",
+    "gaps_it_closes": [
+      "draw input"
+    ]
+  },
+  {
+    "id": "share_grid",
+    "kind": "runtime_tool",
+    "name": "Share grid",
+    "aliases": [
+      "emoji grid",
+      "spoiler-free result"
+    ],
+    "summary": "A spoiler-free result grid (rows of coloured squares) a player can share after a run. Microgames share score text only today.",
+    "when_to_use": "Daily puzzles and word games whose result people post to compare.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "share_grid"
+    ]
+  },
+  {
+    "id": "segment_collision",
+    "kind": "runtime_tool",
+    "name": "Segment collision",
+    "aliases": [
+      "line collision",
+      "ray cast"
+    ],
+    "summary": "Collision against line segments and polylines (walls, ropes, laser beams, drawn lines). Physics and helpers cover circles and unrotated boxes only.",
+    "when_to_use": "Bouncing off drawn lines, mazes with thin walls, lasers, slicing.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "segment_collision"
+    ]
+  },
+  {
+    "id": "joints",
+    "kind": "runtime_tool",
+    "name": "Joints and constraints",
+    "aliases": [
+      "ropes",
+      "hinges",
+      "ragdoll",
+      "springs"
+    ],
+    "summary": "Physics joints: ropes, hinges, springs and chains between bodies.",
+    "when_to_use": "Swinging, rope cutting, ragdolls, bridges, cranes.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "joints"
+    ]
+  },
+  {
+    "id": "rotated_shapes",
+    "kind": "runtime_tool",
+    "name": "Rotated collision shapes",
+    "aliases": [
+      "rotation physics",
+      "spinning boxes",
+      "tumbling"
+    ],
+    "summary": "Bodies that rotate and collide as rotated boxes or polygons, with angular velocity. Images can be drawn rotated, but physics and overlap tests are axis-aligned.",
+    "when_to_use": "Stacking that topples, tumbling blocks, angled platforms, spinning obstacles.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "rotated_shapes"
+    ]
+  },
+  {
+    "id": "device_sensors",
+    "kind": "runtime_tool",
+    "name": "Device sensors (tilt)",
+    "aliases": [
+      "tilt",
+      "accelerometer",
+      "gyroscope",
+      "shake"
+    ],
+    "summary": "Tilt, motion and shake from the phone's sensors as game inputs.",
+    "when_to_use": "Tilt to roll a ball, tilt to steer, shake to roll dice.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "device_sensors",
+      "tilt input"
+    ],
+    "notes": "approximate tilt with player_drag or hold_buttons"
+  },
+  {
+    "id": "live_multiplayer",
+    "kind": "server_tool",
+    "name": "Live multiplayer",
+    "aliases": [
+      "real-time multiplayer",
+      "online play",
+      "live match"
+    ],
+    "summary": "Two or more people playing the same game at the same time on their own phones.",
+    "when_to_use": "Live duels, races and party games across phones.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "live_multiplayer"
+    ],
+    "notes": "approximate with turns (one phone), ghost_score or score_challenge (async)"
+  },
+  {
+    "id": "three_d",
+    "kind": "runtime_tool",
+    "name": "3D",
+    "aliases": [
+      "3d",
+      "three dimensional",
+      "first person"
+    ],
+    "summary": "Three-dimensional scenes and cameras. The engine is 2D only.",
+    "when_to_use": "Requests that need real 3D; usually re-planned as top-down, side-on or layered 2D.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "3d"
+    ],
+    "notes": "the anatomy prompt names this gap \"3d\"; catalog ids must start with a letter"
+  },
+  {
+    "id": "voice_input",
+    "kind": "runtime_tool",
+    "name": "Voice input",
+    "aliases": [
+      "speak",
+      "say the answer",
+      "microphone"
+    ],
+    "summary": "Spoken answers transcribed into the game as text input.",
+    "when_to_use": "Say-the-answer trivia, singing or shouting games, accessibility.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "voice input"
+    ],
+    "notes": "Muse has a transcription model (muse-voice-transcribe-1.0); nothing in the runtime records audio"
+  },
+  {
+    "id": "multi_touch",
+    "kind": "runtime_tool",
+    "name": "Multi-touch",
+    "aliases": [
+      "two fingers",
+      "two thumbs",
+      "pinch"
+    ],
+    "summary": "More than one finger at a time. The engine tracks one pointer: a second press releases the first.",
+    "when_to_use": "Two-thumb controls, two players on one screen at once, pinch gestures.",
+    "status": "gap",
+    "gaps_it_closes": [
+      "multi_touch input"
+    ],
+    "notes": "approximate with alternating turns or one-thumb controls"
+  }
+]

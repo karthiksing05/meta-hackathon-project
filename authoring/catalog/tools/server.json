@@ -1,0 +1,75 @@
+[
+  {
+    "kind": "server_tool",
+    "status": "shipped",
+    "path": "backend/README.md",
+    "id": "leaderboard",
+    "name": "Leaderboard",
+    "aliases": [
+      "high scores",
+      "friends leaderboard",
+      "group leaderboard"
+    ],
+    "summary": "Best score per person for a game, for everyone, only my friends, or a Group's members.",
+    "when_to_use": "Any scored game: rank against friends or a Group.",
+    "api": "GET /v1/games/{id}/leaderboard?scope=everyone|friends|group&groupId=; POST /v1/games/{id}/scores"
+  },
+  {
+    "kind": "server_tool",
+    "status": "shipped",
+    "path": "backend/README.md",
+    "id": "score_challenge",
+    "name": "Beat my score challenge",
+    "aliases": [
+      "challenge a friend",
+      "beat my score"
+    ],
+    "summary": "Send a \"beat my score\" challenge for a game to up to 20 friends and see who beat it.",
+    "when_to_use": "Async friend play: pairs with beat_target and ghost_score on the game side.",
+    "api": "POST /v1/challenges {gameId, toUserIds[]}; GET /v1/challenges",
+    "example_types": []
+  },
+  {
+    "kind": "server_tool",
+    "status": "shipped",
+    "path": "backend/README.md",
+    "id": "group_games",
+    "name": "Group games",
+    "aliases": [
+      "made for a group",
+      "group set"
+    ],
+    "summary": "Games made for a Group or Event, listed on that Group, with member-only leaderboards.",
+    "when_to_use": "Group daily sets, team totals (with shared_progress) and games about a Group.",
+    "api": "GET /v1/groups/{id}/games; leaderboard scope=group"
+  },
+  {
+    "kind": "server_tool",
+    "status": "shipped",
+    "path": "backend/README.md",
+    "id": "blend",
+    "name": "Blend",
+    "aliases": [
+      "games for a set of people",
+      "group blend"
+    ],
+    "summary": "Builds a game spec for a set of people from their skill, taste and recent games.",
+    "when_to_use": "Making one game a specific group of friends will all enjoy.",
+    "api": "POST /v1/blend {group, members, count}; POST /v1/groups/{id}/blend"
+  },
+  {
+    "kind": "server_tool",
+    "status": "shipped",
+    "path": "backend/README.md",
+    "id": "next_level",
+    "name": "Next level or remix",
+    "aliases": [
+      "remix",
+      "sequel",
+      "new level"
+    ],
+    "summary": "Makes a new game from an existing one: a tweak, a new look, a next level or a remix (remixOf is set).",
+    "when_to_use": "Level progression across games and remixing a friend's game.",
+    "api": "POST /v1/generate {baseGameId, change?, look?, nextLevel?}"
+  }
+]
