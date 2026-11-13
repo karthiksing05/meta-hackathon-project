@@ -51,7 +51,7 @@
                 "on_tap": { "input": "tap_cell", "with": { "cell": "cell" } }
               },
               {
-                "node": "text", "x": "@cell_size", "y": "@cell_size", "anchor": "center", "size": 24, "weight": 700, "color": "$ink",
+                "node": "text", "x": "= @cell_size / 2", "y": "= @cell_size / 2", "anchor": "center", "size": 24, "weight": 700, "color": "$ink", "stroke": "$bg", "stroke_width": 5,
                 "text": "= cell_label(cell)"
               }
             ]
