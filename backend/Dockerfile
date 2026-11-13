@@ -53,10 +53,13 @@ LABEL org.opencontainers.image.source="https://github.com/karthiksing05/meta-hac
 WORKDIR /app
 COPY backend/generator/ ./
 COPY FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame-engine.js FacebookClone/Bubbles/Studio/web/microgame-studio.js /app/vendor/
-# Compose's server-side hooks (src/hooks.mjs): the picture codec and the layout fixes and lint, with what they import.
-# No Chrome in the image, so only the structural layout fixes run.
-COPY authoring/expander/image-codec.mjs authoring/expander/layout-fix.mjs authoring/expander/engine.mjs /app/authoring/expander/
-COPY authoring/playtest/layout-check.mjs authoring/playtest/bots.mjs authoring/playtest/frame-render.mjs /app/authoring/playtest/
+# Compose's server-side hooks (src/hooks.mjs AUTHORING_FILES): the picture codec, the layout fixes and lint, and the
+# blocking layout verifier (authoring/verify/), with what they import. No Chrome in the image, so the verifier runs
+# without pixels (estimated text widths, shapes-only contrast) and only the structural layout fixes run.
+COPY authoring/expander/image-codec.mjs authoring/expander/layout-fix.mjs authoring/expander/engine.mjs authoring/expander/canvas.mjs authoring/expander/requirements.mjs authoring/expander/verify-layout.mjs /app/authoring/expander/
+COPY authoring/playtest/layout-check.mjs authoring/playtest/bots.mjs authoring/playtest/frame-render.mjs authoring/playtest/fill-check.mjs authoring/playtest/requirements-check.mjs /app/authoring/playtest/
+COPY authoring/verify/verify.mjs authoring/verify/registry.mjs authoring/verify/frames.mjs authoring/verify/scene.mjs authoring/verify/solve.mjs authoring/verify/prove.mjs /app/authoring/verify/
+COPY authoring/verify/checks/fill.mjs authoring/verify/checks/layout.mjs authoring/verify/checks/requirements.mjs authoring/verify/checks/style.mjs authoring/verify/checks/targets.mjs /app/authoring/verify/checks/
 RUN addgroup -g 10001 app && adduser -D -u 10001 -G app app
 USER 10001:10001
 ENV NODE_ENV=production PORT=8090 GENERATOR_VENDOR_DIR=/app/vendor GENERATOR_AUTHORING_DIR=/app/authoring
