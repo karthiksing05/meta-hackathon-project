@@ -361,6 +361,18 @@ Every explicit number, name and rule in a request becomes a requirement, and the
     `requirements_checked` event is emitted.
   - The Muse judge and one targeted revise run only with `context.requirements_repair: true` (off by default).
   - Default cost: one extra Muse call per game, the extraction.
+- **Layout** (layout-fix.mjs, layout-check.mjs; server-side only, not in the Studio bundle):
+  - The caller passes `{fixLayout, layoutCheck}` in compose's 4th argument (`hooks`, next to the picture-art
+    `image`, `decode` and `deflate`).
+  - After expand and before each gate, `fixLayout` makes presentation-only fixes, so rules and replays don't
+    change. It emits `layout_fixed {count}` and fills `stats.layoutFixes`. Without Chrome, only the structural
+    fixes run. `context.layout_fix: false` turns it off.
+  - After the score step, `layoutCheck` puts its findings in `stats.layout.warnings`; they never block.
+  - The critique loop (it costs Muse calls) is not wired.
+- **Genre conventions** (ported from Bayan's MicrogamePrompts.swift, 904f2aa): the compose prompt keeps a named
+  genre's core rules (flappy: 1 life, `gravity_jump` flap plus `gap_walls`; runner scores distance; pairs and
+  quizzes have no lives; snake and merge keep their endings; hand-written obstacles draw and collide with the
+  same numbers). The person's quoted requirements win over these defaults.
 - **One gold example** when the top type is a confident catalog match (score >= 0.85, not learned), else two. On the
   dodge sample the system prompt drops from 112k to 91k characters (19%).
 
