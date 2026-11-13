@@ -306,6 +306,13 @@ for games with no right answer, how closely people agree (`opinion_compare`).
   version's twist" and lists the person's earlier picks (`context.preferences`). `context.notes` stays out of the
   prompt: they are notes for people. In Go, `Request.preferences` goes into the context; a look pick fills
   `theme.look` when the request names no style and settles the art style slot (guessed false).
+- **Picture art** (docs/harness-gaps/images.md): Go sets `plan.art = "image"` for art-heavy plans (a story, or 3 or
+  more drawn pieces) and adds the shared `art_style` slot (`checklists/shared/`). The request's own style words or a
+  look pick settle it; otherwise an art-heavy plan may ask, and the answer is `spec.theme.art_style`. After the
+  score step, when the caller passes `{image, decode, deflate}` (compose's 4th argument), muse-image draws the
+  pictures behind the same asset ids (`makeImageArt`, or `makeStoryArt` plus a re-expand for stories), with a
+  512 KB art budget (`SVG_LIMITS.image_art_bytes`, for art that holds pictures). Any failure keeps the SVG art;
+  `stats.image_art` says what happened. No re-gate: rules and replays don't change.
 - **One gold example** when the top type is a confident catalog match (score >= 0.85, not learned), else two. On the
   dodge sample the system prompt drops from 112k to 91k characters (19%).
 
