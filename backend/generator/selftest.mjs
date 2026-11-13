@@ -397,6 +397,71 @@ check('extractObject finds fenced and padded JSON', extractObject('```json\n{"a"
   fakeMuse.close();
 }
 
+// ---- the person's photos and video (src/media.mjs): frames, Muse vision with a fake Muse, the brief, the pictures ----
+{
+  const M = await import('./src/media.mjs');
+  const times = M.frameTimes(13000, [8000], { every: 4000, max: 16 });
+  check('key frame times: the start, just after each cut, then every 4 s', times[0].t === 300 && times[0].cut && times.some((x) => x.t === 8150 && x.cut) && times.every((x, i) => i === 0 || x.t - times[i - 1].t >= 800), JSON.stringify(times));
+  const norm = M.normalizeDescription({ summary: 's', people: 'yes', frames: [{ t: 99999, desc: 'late' }], beats: [{ t: 5000, text: 'b2' }, { t: 0, end: 0, text: 'b1' }], extra: 1 }, { kind: 'video', durationMs: 13000 });
+  check('a description is clamped to the clip, ordered, and keeps known fields only', norm.people === false && norm.frames[0].t === 13000 && norm.beats[0].text === 'b1' && norm.beats[0].end === 5000 && norm.beats[1].end === 13000 && !('extra' in norm), JSON.stringify(norm));
+
+  const ffmpeg = await M.hasFFmpeg();
+  let probe = null;
+  if (!ffmpeg) console.log('SKIP ffmpeg checks: ffmpeg is not installed here (the generator image has it)');
+  else {
+    const { mkdtemp, readFile, rm } = await import('node:fs/promises');
+    const { tmpdir } = await import('node:os');
+    const dir = await mkdtemp(join(tmpdir(), 'media-test-'));
+    const out = join(dir, 'clip.mp4');
+    // A synthetic clip: 6 s of dark blue, then a hard cut to 5 s of pale yellow, with a box on top (no real footage).
+    await new Promise((res) => spawn('ffmpeg', ['-v', 'error', '-y', '-f', 'lavfi', '-i', 'color=c=0x101830:s=320x180:d=6:r=25', '-f', 'lavfi', '-i', 'color=c=0xf0e0a0:s=320x180:d=5:r=25',
+      '-filter_complex', '[0][1]concat=n=2:v=1:a=0,drawbox=x=120:y=60:w=80:h=100:color=0xf2c9a0:t=fill', '-c:v', 'libx264', '-pix_fmt', 'yuv420p', out]).on('close', res));
+    probe = await M.videoFrames(await readFile(out));
+    check('videoFrames reads the size and length', probe.width === 320 && probe.height === 180 && Math.abs(probe.durationMs - 11000) < 200, JSON.stringify({ w: probe.width, h: probe.height, d: probe.durationMs }));
+    check('videoFrames finds the scene cut at 6 s', probe.cuts.some((t) => Math.abs(t - 6000) < 200) && probe.frames.some((f) => f.cut && Math.abs(f.t - 6150) < 200), JSON.stringify(probe.cuts));
+    check('videoFrames returns JPEG key frames and a thumbnail', probe.frames.length >= 3 && probe.frames.every((f) => M.jpegSize(Buffer.from(f.jpg, 'base64'))?.w === 320) && M.jpegSize(Buffer.from(probe.thumb, 'base64')), probe.frames.length);
+    let bad;
+    try { await M.videoFrames(Buffer.from('not a video at all')); } catch (e) { bad = e; }
+    check('a file that is not a video is a 422', bad instanceof M.MediaError && bad.status === 422, bad?.message);
+    await rm(dir, { recursive: true, force: true });
+  }
+
+  // describe(): one vision call with every frame as an image part; the reply is normalized.
+  const frames = probe ? probe.frames.map((f) => ({ t: f.t, jpg: f.jpg })) : [{ t: 300, jpg: 'A'.repeat(200) }, { t: 6150, jpg: 'B'.repeat(200) }];
+  const vision = new ScriptedMuse([{ summary: 'A mayor promises a bridge on time, then the news says it is late.', people: true, captions: ['BREAKING'],
+    frames: frames.map((f, i) => ({ t: f.t, desc: i ? 'red screen' : 'blue screen' })), beats: [{ t: 0, end: 6000, text: 'the promise' }, { t: 6000, end: 11000, text: 'the bad news' }] }]);
+  const d = await M.describe({ kind: 'video', durationMs: 11000, note: 'make a quiz', frames }, vision);
+  check('describe sends the frames as images in one call', vision.prompts.length === 1 && vision.imageCounts[0] === Math.min(8, frames.length) && /make a quiz/.test(vision.prompts[0]), JSON.stringify(vision.imageCounts));
+  check('describe returns the beats', d.description.beats.length === 2 && d.description.people === true, JSON.stringify(d.description));
+
+  // The brief names the pictures; applyMedia swaps them in behind those sprite names.
+  const media = [{ id: 'v1', ref: 'm1', kind: 'video', durationMs: 11000, summary: d.description.summary, people: true,
+    frames: frames.map((f, i) => ({ t: f.t, desc: 'x', asset: `m1_f${i + 1}` })), beats: [{ t: 0, end: 6000, text: 'the promise', asset: 'm1_beat1' }, { t: 6000, end: 11000, text: 'the bad news', asset: 'm1_beat2' }], assets: { clip: 'm1_clip' }, note: 'make a quiz' }];
+  const brief = M.mediaBrief(media);
+  check('the brief names the picture sprites and the beats', /m1_beat2/.test(brief) && /m1_f1/.test(brief) && /m1_clip/.test(brief) && /make a quiz/.test(brief) && /never make a rule/.test(brief), brief.slice(0, 300));
+  const game = structuredClone(catalog.examples.find((e) => e.manifest?.art?.sprites?.avatar).manifest);
+  const stand = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 90"><rect width="160" height="90" fill="#ccc"/></svg>';
+  game.art.sprites.avatar = { svg: stand };
+  game.art.sprites.m1_f1 = { svg: stand };
+  const fake = new ScriptedMuse([game]);
+  const out = await compose({ request: 'make a quiz from this clip', brief: {}, context: { media }, mediaFiles: { v1: { kind: 'video', durationMs: 11000, frames } } }, { studio, muse: fake });
+  check('compose puts the media brief in the request Muse sees', /m1_beat1/.test(fake.prompts[0]), fake.prompts[0]?.slice(0, 200));
+  const authored = JSON.parse(out.manifest.content.authoring_json);
+  if (probe) {
+    check('the picture went in behind the sprite name', /^data:image\/jpeg;base64,/.test(authored.art.sprites.m1_f1?.image ?? '') && out.stats.media?.applied === true, JSON.stringify(out.stats.media));
+    game.art.sprites = { avatar: { svg: stand } };
+    const clip = structuredClone(game);
+    clip.art.sprites.avatar = { svg: stand }; // the game draws the avatar role; make it the beat slideshow by name
+    const named = await M.applyMedia({ manifest: { ...out.manifest, content: { ...out.manifest.content, authoring_json: JSON.stringify({ ...authored, art: { ...authored.art, sprites: { ...authored.art.sprites, m1_beat2: { svg: stand } } } }) } }, media, files: { v1: { kind: 'video', durationMs: 11000, frames } }, studio });
+    const s2 = JSON.parse(named.manifest.content.authoring_json).art.sprites.m1_beat2;
+    check('a beat becomes a timed-frame slideshow (a sheet with fps)', s2?.image && s2.frames >= 2 && s2.cols === s2.frames && s2.fps > 0, JSON.stringify({ ...s2, image: s2?.image?.slice(0, 30) }));
+    const g = JSON.parse(named.manifest.content.game_json);
+    check('the slideshow is an engine image asset with fps (presentation clock only)', JSON.stringify(g.assets ?? g).includes('m1_beat2'), Object.keys(g));
+  }
+  check('a game with no media sprites is left as compose made it', (await M.applyMedia({ manifest: out.manifest, media, files: {}, studio })).report.applied === false);
+  check('a restyle prompt is always a cartoon, never photoreal', /NOT photorealistic/.test(M.restylePrompt({ m: { people: true, subjects: ['a man'] } })) && /caricature/.test(M.restylePrompt({ m: { people: true } })));
+}
+
 // ---- without a key the server says so ----
 {
   const port = 18992;

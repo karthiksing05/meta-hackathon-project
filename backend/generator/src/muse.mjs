@@ -81,10 +81,10 @@ export class MuseClient {
    * One image from muse-image-1.0 (the responses API's image_generation tool). guide: an optional PNG the model
    * sees with the prompt (the game's real layout). Returns {png: Buffer, model, seconds}.
    */
-  async image({ prompt, size = '1024x1024', guide = null, model = 'muse-image-1.0', timeout = 150, maxAttempts = 2 }) {
+  async image({ prompt, size = '1024x1024', guide = null, guideMime = 'image/png', model = 'muse-image-1.0', timeout = 150, maxAttempts = 2 }) {
     if (!this.isConfigured) throw new MuseError('Muse is not configured on this server.');
     const content = [{ type: 'input_text', text: prompt }];
-    if (guide) content.push({ type: 'input_image', image_url: 'data:image/png;base64,' + Buffer.from(guide).toString('base64') });
+    if (guide) content.push({ type: 'input_image', image_url: `data:${guideMime};base64,` + Buffer.from(guide).toString('base64') });
     const started = Date.now();
     const data = await this.#send('responses', {
       model, store: false, input: [{ role: 'user', content }],
@@ -97,7 +97,7 @@ export class MuseClient {
 
   /** One system + user turn in JSON mode. Returns the reply text and the model that answered.
    *  Asks again once if the reply holds no JSON object. */
-  async chatJSON({ model, system, user, maxTokens = 16000, reasoningEffort = 'medium', timeout = 150, maxAttempts = 2 }) {
+  async chatJSON({ model, system, user, images = null, maxTokens = 16000, reasoningEffort = 'medium', timeout = 150, maxAttempts = 2 }) {
     const usage = { prompt_tokens: 0, completion_tokens: 0, reasoning_tokens: 0, total_tokens: 0, calls: 0 };
     const tally = (u) => {
       usage.calls++;
@@ -115,7 +115,8 @@ export class MuseClient {
       for (let pass = 0; pass < 2; pass++) {
         const body = {
           model,
-          messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
+          // images (data: URIs) go with the user turn as image parts: Muse vision (muse-wonder-1.0 reads images).
+          messages: [{ role: 'system', content: system }, { role: 'user', content: Array.isArray(images) && images.length ? [{ type: 'text', text: user }, ...images.map((url) => ({ type: 'image_url', image_url: { url } }))] : user }],
           response_format: { type: 'json_object' },
           max_tokens: budget,
         };
@@ -150,8 +151,9 @@ export class ScriptedMuse {
     this.isConfigured = true;
   }
 
-  async chatJSON({ user }) {
+  async chatJSON({ user, images = null }) {
     this.prompts.push(user);
+    (this.imageCounts ??= []).push(Array.isArray(images) ? images.length : 0); // images sent with each call
     const r = this.replies[Math.min(this.prompts.length - 1, this.replies.length - 1)];
     return { content: typeof r === 'string' ? r : JSON.stringify(r), model: this.model, usage: { prompt_tokens: 0, completion_tokens: 0, reasoning_tokens: 0, total_tokens: 0, calls: 1 } };
   }

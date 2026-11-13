@@ -17,6 +17,9 @@
 //   POST /internal/muse/json {model, system, user, maxTokens?, effort?, timeoutSeconds?} -> {content, model, usage}
 //        one JSON turn on a Muse model, for the Go API's harness steps; the key never leaves this container
 //   POST /internal/muse/image {prompt, size?, guide?, timeoutSeconds?}  -> {png_base64, model, seconds}   (one muse-image-1.0 picture)
+//   POST /internal/media/video  (raw video bytes, Content-Type video/mp4 or video/quicktime, up to 85 MB)
+//        -> {width, height, durationMs, thumb, cuts, frames: [{t, cut, jpg, w, h}]}  (ffmpeg; jpg/thumb base64 JPEG); 422 unreadable
+//   POST /internal/media/describe {kind, durationMs?, note?, frames: [{t, jpg}]} -> {description, model}   (one Muse vision call)
 //   POST /verify          {game, log, state?: [names]} (text)               -> the engine's replay result {ok, game_hash_ok, recomputed, claimed, problems}
 //   GET /healthz -> {"status":"ok","museConfigured":bool,"fragments":n}
 
@@ -27,6 +30,7 @@ import { compose } from './src/composer.mjs';
 import { MuseClient, extractObject } from './src/muse.mjs';
 import * as Anatomy from './src/anatomy.mjs';
 import { loadStudio } from './src/studio.mjs';
+import { MediaError, describe as describeMedia, videoFrames } from './src/media.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const env = process.env;
@@ -34,8 +38,9 @@ const PORT = Number(env.PORT ?? 8090);
 const MAX_CONCURRENT = Number(env.GENERATOR_MAX_CONCURRENT ?? 2);
 const JOB_TIMEOUT_MS = Number(env.GENERATOR_JOB_TIMEOUT_SECONDS ?? 780) * 1000;
 const MODEL = env.MUSE_MODEL || 'muse-wonder-1.0';
-// A change to a game sends the whole stored manifest (the game script alone can be 150 KB or more).
-const COMPOSE_BODY_LIMIT = 8 * 1024 * 1024;
+// A change to a game sends the whole stored manifest (the game script alone can be 150 KB or more); a new game with the
+// person's photos and video carries their pictures (media_files, about 2 MB at most).
+const COMPOSE_BODY_LIMIT = 12 * 1024 * 1024;
 const MAX_CONTEXT_BYTES = 48 * 1024;
 const FAST_MODEL = env.MUSE_FAST_MODEL || 'muse-ember-1.0';
 const ANATOMY_TIMEOUT_S = Number(env.GENERATOR_ANATOMY_TIMEOUT_SECONDS ?? 40);
@@ -141,6 +146,59 @@ async function museImage(req, res) {
   }
 }
 
+/** A video's key frames and scene cuts (ffmpeg), for the API's POST /v1/media. The bytes come raw. */
+const VIDEO_LIMIT = 85 * 1024 * 1024;
+async function mediaVideo(req, res) {
+  const type = String(req.headers['content-type'] ?? '');
+  if (!/^video\/(mp4|quicktime)\b/.test(type)) return json(res, 415, { error: 'send video/mp4 or video/quicktime' });
+  const chunks = [];
+  let size = 0;
+  for await (const c of req) {
+    size += c.length;
+    if (size > VIDEO_LIMIT) return json(res, 413, { error: 'video too large' });
+    chunks.push(c);
+  }
+  if (running >= MAX_CONCURRENT + 4) return json(res, 429, { error: 'busy' });
+  running++;
+  const started = Date.now();
+  try {
+    const out = await videoFrames(Buffer.concat(chunks));
+    log('media video ok', { seconds: (Date.now() - started) / 1000, frames: out.frames.length, cuts: out.cuts.length, durationMs: out.durationMs });
+    return json(res, 200, out);
+  } catch (e) {
+    log('media video failed', { error: String(e?.message ?? e).slice(0, 200) });
+    if (e instanceof MediaError) return json(res, e.status, { error: 'media', message: e.message });
+    return json(res, 500, { error: 'media_failed' });
+  } finally {
+    running--;
+  }
+}
+
+/** Muse vision describes a photo or a video's frames: who and what is on screen, captions, the beats. */
+async function mediaDescribe(req, res) {
+  let input;
+  try {
+    input = await readBody(req, 8 * 1024 * 1024);
+  } catch {
+    return json(res, 400, { error: 'invalid JSON body' });
+  }
+  if (!muse.isConfigured) return json(res, 503, { error: 'muse_not_configured' });
+  if (running >= MAX_CONCURRENT + 4) return json(res, 429, { error: 'busy' });
+  running++;
+  const started = Date.now();
+  try {
+    const r = await describeMedia(input, muse, { model: env.MUSE_VISION_MODEL || 'muse-wonder-1.0' });
+    log('media describe ok', { kind: input.kind, seconds: (Date.now() - started) / 1000, model: r.model, usage: r.usage });
+    return json(res, 200, { description: r.description, model: r.model });
+  } catch (e) {
+    log('media describe failed', { seconds: (Date.now() - started) / 1000, error: String(e?.message ?? e).slice(0, 200) });
+    if (e instanceof MediaError) return json(res, e.status, { error: 'media', message: e.message });
+    return json(res, 502, { error: 'muse_failed', message: String(e?.message ?? e).slice(0, 300) });
+  } finally {
+    running--;
+  }
+}
+
 /** Replays a run's log against the exact game text, so a score can be trusted without trusting the phone. */
 async function verifyRun(req, res) {
   let input;
@@ -205,6 +263,8 @@ const server = createServer(async (req, res) => {
     if (req.method === 'POST' && req.url === '/verify') return verifyRun(req, res);
     if (req.method === 'POST' && req.url === '/internal/muse/json') return museJSON(req, res);
     if (req.method === 'POST' && req.url === '/internal/muse/image') return museImage(req, res);
+    if (req.method === 'POST' && req.url === '/internal/media/video') return mediaVideo(req, res);
+    if (req.method === 'POST' && req.url === '/internal/media/describe') return mediaDescribe(req, res);
     if (req.method === 'POST' && (req.url === '/anatomy' || req.url === '/anatomy/revise')) return anatomy(req, res);
     if (req.method !== 'POST' || req.url !== '/compose') return json(res, 404, { error: 'not found' });
 
@@ -230,7 +290,8 @@ const server = createServer(async (req, res) => {
     try {
       const base = input.base && typeof input.base === 'object' ? input.base : null;
       const context = input.context && typeof input.context === 'object' ? input.context : null;
-      const out = await compose({ request, brief: input.brief ?? null, base, remixOf: input.remixOf ?? null, level: Number(input.level) || null, context }, {
+      const mediaFiles = input.media_files && typeof input.media_files === 'object' ? input.media_files : null;
+      const out = await compose({ request, brief: input.brief ?? null, base, remixOf: input.remixOf ?? null, level: Number(input.level) || null, context, mediaFiles }, {
         muse, studio, model: MODEL, signal: abort.signal,
         onEvent: (event) => send({ type: 'event', event }),
       });

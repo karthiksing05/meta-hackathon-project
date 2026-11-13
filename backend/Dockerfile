@@ -50,6 +50,8 @@ ENTRYPOINT ["/app/games"]
 # to install. The Studio and engine bundles are copied from the app's folders (they are not kept twice).
 FROM node:22-alpine AS generator
 LABEL org.opencontainers.image.source="https://github.com/karthiksing05/meta-hackathon-project"
+# ffmpeg (with ffprobe): a person's uploaded video -> key frames, scene cuts and the clip slideshows (src/media.mjs).
+RUN apk add --no-cache ffmpeg
 WORKDIR /app
 COPY backend/generator/ ./
 COPY FacebookClone/Bubbles/Runtime/web/bubble-kit-microgame-engine.js FacebookClone/Bubbles/Studio/web/microgame-studio.js /app/vendor/

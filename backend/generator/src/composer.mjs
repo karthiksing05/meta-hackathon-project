@@ -6,6 +6,7 @@
 
 import { paintArt, imageArtOn } from './art.mjs';
 import { composeHooks, pictureArtOn } from './hooks.mjs';
+import { applyMedia, mediaBrief } from './media.mjs';
 
 export { summarize } from './events.mjs';
 
@@ -119,7 +120,7 @@ export function visualSection(visual) {
  * always a new game: a fresh id, `lineage.remix_of` set to remixOf, and `chain.index` set to level.
  * Throws GenerationError when the game never validates, or whatever Muse or the page threw.
  */
-export async function compose({ request, brief, base = null, remixOf = null, level = null, context = null }, { muse, studio, model = 'muse-wonder-1.0', onEvent = () => {}, signal, renderFrame = null, env = process.env, hooks = undefined }) {
+export async function compose({ request, brief, base = null, remixOf = null, level = null, context = null, mediaFiles = null }, { muse, studio, model = 'muse-wonder-1.0', onEvent = () => {}, signal, renderFrame = null, env = process.env, hooks = undefined }) {
   // Studio bundle version 3 and up put the harness context into the prompt themselves (only the planned tools in the
   // menu, plus the spec and the matched gold examples). An older bundle only gets the additive section, and only on
   // compose calls, not on the score review or repair that name their own model.
@@ -149,6 +150,10 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
   const canvas = ['tall', 'classic'].includes(context?.canvas) ? context.canvas : (String(env.GENERATOR_CANVAS ?? '').trim().toLowerCase() === 'tall' ? 'tall' : 'classic');
   const layoutBlock = context?.layout_block === true || (context?.layout_block === undefined && ['1', 'on', 'true', 'yes'].includes(String(env.GENERATOR_LAYOUT_BLOCK ?? '').trim().toLowerCase()));
   context = { ...(context ?? {}), canvas, ...(layoutBlock ? { layout_block: true } : {}) };
+  // The person's own photos and video (context.media, src/media.mjs): Muse composes from their description and names the
+  // picture sprites it draws; the real pictures go in after the gate. New games only.
+  const media = !base && Array.isArray(context.media) && context.media.length ? context.media : null;
+  if (media) request = request + '\n' + mediaBrief(media);
   const out = await studio.compose({ request, brief, base, context }, ask, (e) => onEvent(JSON.parse(JSON.stringify(e))), hooks);
   // The art step paints what the plan's visual stage marked "image". New games only for now: a revision sends the
   // whole authoring manifest back through Muse, and painted images would ride along as base64. With
@@ -161,6 +166,15 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
       out.stats = { ...(out.stats ?? {}), art: art.report };
     } catch (e) {
       out.stats = { ...(out.stats ?? {}), art: { applied: false, error: String(e?.message ?? e).slice(0, 300) } };
+    }
+  }
+  if (media && mediaFiles && typeof mediaFiles === 'object') {
+    try {
+      const r = await applyMedia({ manifest: out.manifest, media, files: mediaFiles, studio, muse, style: context?.plan?.spec?.visual?.style ?? '', onEvent: (e) => onEvent(e), signal });
+      out.manifest = r.manifest;
+      out.stats = { ...(out.stats ?? {}), media: r.report };
+    } catch (e) {
+      out.stats = { ...(out.stats ?? {}), media: { applied: false, error: String(e?.message ?? e).slice(0, 300) } };
     }
   }
   const m = out.manifest;
