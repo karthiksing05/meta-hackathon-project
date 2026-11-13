@@ -422,6 +422,19 @@ const describePath = (g, steps) => steps.map((p) => `"${g.nodes[p.s].choices[p.j
 
 // ---------- validate ----------
 
+/** UTF-8 byte length without TextEncoder, which the app's bare JavaScriptCore context doesn't have. */
+function utf8Length(s) {
+  let n = 0;
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charCodeAt(i);
+    if (c < 0x80) n += 1;
+    else if (c < 0x800) n += 2;
+    else if (c >= 0xd800 && c <= 0xdbff) { n += 4; i++; } // a surrogate pair is one 4-byte character
+    else n += 3;
+  }
+  return n;
+}
+
 /**
  * The deterministic story check. Returns {ok, errors, warnings, stats, graph}. Errors block; each
  * has {code, at, message} with a message written so Muse can fix it.
@@ -590,7 +603,7 @@ export function validateStoryGraph(raw, opts = {}) {
 
   // Size of what the engine carries.
   const compiled = compileContent(g);
-  stats.content_bytes = new TextEncoder().encode(JSON.stringify(compiled)).length;
+  stats.content_bytes = utf8Length(JSON.stringify(compiled));
   if (stats.content_bytes > STORY_LIMITS.contentBytes) err('S_SIZE', '/nodes', `the story is ${stats.content_bytes} bytes as game content; keep it under ${STORY_LIMITS.contentBytes}`);
   stats.words = g.nodes.reduce((a, n) => a + n.text.split(' ').length, 0);
 
