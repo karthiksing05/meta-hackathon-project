@@ -285,7 +285,7 @@
     ],
     "family": "deduction",
     "summary": "Ask up to 20 yes/no questions to figure out what the other player is thinking of.",
-    "core_loop": "ask a yes/no question → narrow it down → guess",
+    "core_loop": "One player picks a secret thing; the other asks up to 20 yes or no questions, narrowing the options until they make a final guess",
     "verbs": [
       "ask",
       "deduce"
@@ -313,7 +313,8 @@
     ],
     "difficulty_levers": [
       "category",
-      "question limit"
+      "question limit",
+      "guesses allowed"
     ],
     "tools": [
       "typed_answer",
@@ -338,7 +339,7 @@
     ],
     "family": "deduction",
     "summary": "Two players each set a secret code and race to crack the other's with feedback on each guess.",
-    "core_loop": "set a code → guess theirs → read feedback → crack it first",
+    "core_loop": "Each player sets a secret code, then both take turns guessing the other's and reading right-place and right-color feedback, racing to crack it first",
     "verbs": [
       "deduce",
       "guess"
@@ -365,7 +366,9 @@
       "duel a friend async"
     ],
     "difficulty_levers": [
-      "code length"
+      "code length",
+      "colors",
+      "turn time"
     ],
     "tools": [
       "grid_board",
@@ -393,7 +396,7 @@
     ],
     "family": "deduction",
     "summary": "Play cards face down claiming a rank; others can call your bluff.",
-    "core_loop": "play cards claiming a rank → others call or pass → liar takes the pile",
+    "core_loop": "Play cards face down while claiming a rank; others call your bluff or pass, and whoever is caught or wrong picks up the pile",
     "verbs": [
       "bluff",
       "call"
@@ -419,7 +422,9 @@
       "party card game"
     ],
     "difficulty_levers": [
-      "deck size"
+      "deck size",
+      "cards per play",
+      "call penalty"
     ],
     "tools": [
       "turns",
@@ -497,7 +502,7 @@
     ],
     "family": "deduction",
     "summary": "Read statements from suspects; exactly one is lying. Find the liar from the contradictions.",
-    "core_loop": "read testimonies → find contradictions → accuse",
+    "core_loop": "Read short statements from each suspect, knowing exactly one is lying, find where they contradict, and accuse the liar",
     "verbs": [
       "deduce",
       "reason"
@@ -524,7 +529,8 @@
     ],
     "difficulty_levers": [
       "suspects",
-      "statements"
+      "statements",
+      "liars count"
     ],
     "tools": [
       "quiz",
@@ -549,7 +555,7 @@
     ],
     "family": "deduction",
     "summary": "Search a scene for clues, then answer who, how and why.",
-    "core_loop": "search → collect clues → answer the case",
+    "core_loop": "Search a crime scene for clues, collect them in a notebook, then answer who did it, how and why",
     "verbs": [
       "search",
       "deduce"
@@ -575,7 +581,9 @@
       "case files for friends"
     ],
     "difficulty_levers": [
-      "clue count"
+      "clue count",
+      "red herrings",
+      "question count"
     ],
     "tools": [
       "reveal",
@@ -600,7 +608,7 @@
     ],
     "family": "deduction",
     "summary": "Each player hides a number; take turns asking higher or lower questions to find it.",
-    "core_loop": "ask a question → get higher or lower → narrow → guess",
+    "core_loop": "Each player hides a number; take turns asking higher-or-lower questions to narrow the range and guess the other's first",
     "verbs": [
       "ask",
       "deduce"
@@ -627,7 +635,9 @@
       "quick duel"
     ],
     "difficulty_levers": [
-      "range"
+      "range",
+      "question types",
+      "guess penalty"
     ],
     "tools": [
       "turns",
@@ -760,7 +770,7 @@
     ],
     "family": "deduction",
     "summary": "Watch a sequence of outcomes and decide whether it's random or rigged.",
-    "core_loop": "watch the sequence → judge random or rigged → reveal",
+    "core_loop": "Watch a sequence of coin flips or dice outcomes, judge whether it's truly random or secretly rigged, then see the reveal",
     "verbs": [
       "judge",
       "deduce"
@@ -786,7 +796,9 @@
       "stats nerds compare"
     ],
     "difficulty_levers": [
-      "sequence length"
+      "sequence length",
+      "rig subtlety",
+      "time"
     ],
     "tools": [
       "quiz",
@@ -811,7 +823,7 @@
     ],
     "family": "deduction",
     "summary": "Teammates each write a one-word hint; duplicate hints are erased; the guesser uses the rest.",
-    "core_loop": "everyone writes a hint → duplicates cancel → the guesser guesses",
+    "core_loop": "Teammates each write a one-word hint for the secret word; duplicate hints cancel out, and the guesser uses what's left",
     "verbs": [
       "clue",
       "guess"
@@ -836,7 +848,9 @@
       "co-op for a Group"
     ],
     "difficulty_levers": [
-      "team size"
+      "team size",
+      "word difficulty",
+      "guesses"
     ],
     "tools": [
       "typed_answer",
@@ -862,7 +876,7 @@
     ],
     "family": "deduction",
     "summary": "Everyone knows the location except the spy; ask each other questions and find the spy before they figure out where you are.",
-    "core_loop": "ask a question → answer → suspect → vote or the spy guesses",
+    "core_loop": "Everyone but the spy knows the location; take turns asking questions, and vote out the spy before they deduce where you are",
     "verbs": [
       "ask",
       "bluff",
@@ -890,7 +904,8 @@
     ],
     "difficulty_levers": [
       "locations",
-      "timer"
+      "timer",
+      "players"
     ],
     "tools": [
       "turns",
@@ -969,7 +984,7 @@
     ],
     "family": "deduction",
     "summary": "Pin clues to a board and draw links between people, places and events to find the culprit.",
-    "core_loop": "pin clues → draw connections → test a theory → accuse",
+    "core_loop": "Pin clues to a board, draw links between people, places and events, and test a theory before you accuse the culprit",
     "verbs": [
       "link",
       "deduce"
@@ -995,7 +1010,9 @@
       "solve together with a friend"
     ],
     "difficulty_levers": [
-      "clue count"
+      "clue count",
+      "suspects",
+      "accusations allowed"
     ],
     "tools": [
       "player_drag",
@@ -1020,7 +1037,7 @@
     ],
     "family": "deduction",
     "summary": "Draw colored tokens from a hidden bag and guess its contents.",
-    "core_loop": "draw a token → update your guess → declare the mix",
+    "core_loop": "Draw colored tokens one at a time from a hidden bag, update your estimate, and declare its mix when you're confident",
     "verbs": [
       "infer",
       "estimate"
@@ -1046,7 +1063,9 @@
       "stats class"
     ],
     "difficulty_levers": [
-      "bag size"
+      "bag size",
+      "colors",
+      "draws allowed"
     ],
     "tools": [
       "reveal",
@@ -1070,7 +1089,7 @@
     ],
     "family": "deduction",
     "summary": "Tap spots to search; feedback says warmer or colder until you find the hidden thing.",
-    "core_loop": "tap a spot → warmer or colder → narrow → find it",
+    "core_loop": "Tap a spot to search; feedback says warmer or colder than your last tap, narrowing in until you find the hidden thing",
     "verbs": [
       "search",
       "infer"
@@ -1096,7 +1115,9 @@
       "hide something for a friend"
     ],
     "difficulty_levers": [
-      "area size"
+      "area size",
+      "taps allowed",
+      "feedback detail"
     ],
     "tools": [
       "grid_board",
@@ -1121,7 +1142,7 @@
     ],
     "family": "deduction",
     "summary": "Two partners agree on nothing in advance and try to sync on the same answer from limited signals.",
-    "core_loop": "send a signal → partner interprets → match answers",
+    "core_loop": "Two partners see the same options and send one limited signal at a time, trying to land on the same answer without planning ahead",
     "verbs": [
       "signal",
       "read"
@@ -1147,7 +1168,9 @@
       "best-friend sync test"
     ],
     "difficulty_levers": [
-      "options"
+      "options",
+      "signal types",
+      "rounds"
     ],
     "tools": [
       "turns",
@@ -1172,7 +1195,7 @@
     ],
     "family": "deduction",
     "summary": "Ask a suspect questions from a list; catch contradictions in their answers.",
-    "core_loop": "pick a question → read the answer → catch a contradiction → confront",
+    "core_loop": "Pick questions from a list to ask a suspect, read their answers, catch a contradiction, and confront them with it",
     "verbs": [
       "ask",
       "deduce"
@@ -1198,7 +1221,9 @@
       "case to send a friend"
     ],
     "difficulty_levers": [
-      "question budget"
+      "question budget",
+      "suspects",
+      "lie subtlety"
     ],
     "tools": [
       "choice_story",
@@ -1223,7 +1248,7 @@
     ],
     "family": "deduction",
     "summary": "Choose a door; the host reveals info; decide to stay or switch.",
-    "core_loop": "pick a door → a goat is revealed → stay or switch → reveal",
+    "core_loop": "Pick one of several doors; the host opens a losing door, and you decide whether to stay or switch before the reveal",
     "verbs": [
       "choose",
       "reason"
@@ -1249,7 +1274,9 @@
       "settle the debate with friends"
     ],
     "difficulty_levers": [
-      "doors"
+      "doors",
+      "host behavior",
+      "rounds"
     ],
     "tools": [
       "reveal",
@@ -1273,7 +1300,7 @@
     ],
     "family": "deduction",
     "summary": "Find a hidden item using distance feedback on each guess.",
-    "core_loop": "guess a cell → see the distance → triangulate → find it",
+    "core_loop": "Guess a cell on a grid, see how far it is from the hidden item, and triangulate from several guesses to find it",
     "verbs": [
       "triangulate",
       "infer"
@@ -1299,7 +1326,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "guesses",
+      "distance type"
     ],
     "tools": [
       "grid_board",
@@ -1324,7 +1353,7 @@
     ],
     "family": "deduction",
     "summary": "A picture is hidden; ask category questions to narrow a grid of candidates.",
-    "core_loop": "ask a question → grid narrows → guess",
+    "core_loop": "A grid of character pictures sits face up; ask yes-or-no category questions, flip down the ruled-out ones, and guess the hidden one",
     "verbs": [
       "ask",
       "eliminate"
@@ -1350,7 +1379,9 @@
       "kids game"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "question types",
+      "guesses"
     ],
     "tools": [
       "grid_board",
@@ -1374,7 +1405,7 @@
     ],
     "family": "deduction",
     "summary": "Clues and a disguised voice or avatar hint at someone you know; guess who it is.",
-    "core_loop": "get a clue → guess or wait → more clues → reveal",
+    "core_loop": "Clues about a friend from your group arrive one at a time behind a disguised avatar; guess who it is early to score more",
     "verbs": [
       "infer",
       "guess"
@@ -1401,7 +1432,9 @@
       "built from your friends"
     ],
     "difficulty_levers": [
-      "clue count"
+      "clue count",
+      "group size",
+      "guesses"
     ],
     "tools": [
       "reveal",
@@ -1426,7 +1459,7 @@
     ],
     "family": "deduction",
     "summary": "Cards are dealt one by one; track what's left and predict the next.",
-    "core_loop": "watch cards → track counts → predict → score",
+    "core_loop": "Cards are dealt face up one by one; track what's left in the deck and predict the next card's suit or rank",
     "verbs": [
       "remember",
       "infer"
@@ -1452,7 +1485,9 @@
       "practice with friends"
     ],
     "difficulty_levers": [
-      "deck size"
+      "deck size",
+      "prediction type",
+      "speed"
     ],
     "tools": [
       "sequence_memory",
@@ -1477,7 +1512,7 @@
     ],
     "family": "deduction",
     "summary": "Line up each suspect's alibi on a timeline to find who had the window.",
-    "core_loop": "read alibis → place on the timeline → find the gap",
+    "core_loop": "Read each suspect's alibi, place it on a shared timeline, and find who had the unaccounted window",
     "verbs": [
       "order",
       "deduce"
@@ -1503,7 +1538,9 @@
       "daily case"
     ],
     "difficulty_levers": [
-      "suspects"
+      "suspects",
+      "time span",
+      "overlapping alibis"
     ],
     "tools": [
       "sort_bins",
@@ -1528,7 +1565,7 @@
     ],
     "family": "deduction",
     "summary": "During a heist, events go wrong; deduce which crew member is sabotaging.",
-    "core_loop": "read the event → check who had access → narrow → accuse",
+    "core_loop": "During a heist, events go wrong; check who had access to each failure, narrow the crew, and accuse the saboteur",
     "verbs": [
       "deduce"
     ],
@@ -1553,7 +1590,9 @@
       "case shared with friends"
     ],
     "difficulty_levers": [
-      "crew size"
+      "crew size",
+      "events",
+      "saboteurs"
     ],
     "tools": [
       "choice_story",

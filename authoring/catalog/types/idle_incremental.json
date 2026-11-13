@@ -64,7 +64,7 @@
     ],
     "family": "idle_incremental",
     "summary": "Buy businesses that earn on timers; hire managers to automate them; invest profits to expand.",
-    "core_loop": "buy a business → wait for payout → hire a manager → expand",
+    "core_loop": "Buy businesses that pay out on timers, hire managers to collect automatically, and invest profits into more and bigger businesses",
     "verbs": [
       "buy",
       "automate",
@@ -91,7 +91,9 @@
       "compare empires with friends"
     ],
     "difficulty_levers": [
-      "cost curve"
+      "cost curve",
+      "payout time",
+      "manager cost"
     ],
     "tools": [
       "timers",
@@ -117,7 +119,7 @@
     ],
     "family": "idle_incremental",
     "summary": "Reset progress for a permanent multiplier and climb faster each run.",
-    "core_loop": "build up → hit a wall → prestige for a multiplier → rebuild faster",
+    "core_loop": "Build up your income until progress slows, then reset for a permanent multiplier and rebuild faster each run",
     "verbs": [
       "build",
       "reset",
@@ -144,7 +146,9 @@
       "compare prestige levels"
     ],
     "difficulty_levers": [
-      "prestige formula"
+      "prestige formula",
+      "wall steepness",
+      "multiplier size"
     ],
     "tools": [
       "timers",
@@ -169,7 +173,7 @@
     ],
     "family": "idle_incremental",
     "summary": "Buy low-level generators and merge pairs into higher ones that earn more.",
-    "core_loop": "buy → merge pairs → higher tier → more income",
+    "core_loop": "Buy low-level generators and merge matching pairs into higher tiers that earn more, filling limited slots",
     "verbs": [
       "merge",
       "buy"
@@ -195,7 +199,9 @@
       "share top tiers"
     ],
     "difficulty_levers": [
-      "slots"
+      "slots",
+      "tier income",
+      "buy cost"
     ],
     "tools": [
       "grid_board",
@@ -221,7 +227,7 @@
     ],
     "family": "idle_incremental",
     "summary": "Heroes fight automatically; collect loot over time and upgrade them to push further.",
-    "core_loop": "heroes auto-fight → collect loot → upgrade → push the next stage",
+    "core_loop": "Your heroes fight stage after stage on their own; collect loot over time and upgrade them to push further",
     "verbs": [
       "upgrade",
       "collect"
@@ -247,7 +253,9 @@
       "guild progress in a Group"
     ],
     "difficulty_levers": [
-      "power curve"
+      "power curve",
+      "stage difficulty",
+      "loot rate"
     ],
     "tools": [
       "timers",
@@ -272,7 +280,7 @@
     ],
     "family": "idle_incremental",
     "summary": "Plant things that grow while you're offline; come back to harvest and replant.",
-    "core_loop": "plant → leave → come back → harvest → replant",
+    "core_loop": "Plant crops that grow while you're away, then come back to harvest and replant for bigger yields",
     "verbs": [
       "plant",
       "wait",
@@ -299,7 +307,9 @@
       "send seeds to friends"
     ],
     "difficulty_levers": [
-      "growth times"
+      "growth times",
+      "plot count",
+      "offline cap"
     ],
     "tools": [
       "timers",
@@ -324,7 +334,7 @@
     ],
     "family": "idle_incremental",
     "summary": "Spend currency on a branching upgrade tree that changes how the game works.",
-    "core_loop": "earn → buy upgrades → new mechanics unlock → keep going",
+    "core_loop": "Spend currency on a branching upgrade tree where each upgrade changes how the game earns, unlocking new mechanics",
     "verbs": [
       "buy",
       "plan"
@@ -349,7 +359,9 @@
       "compare routes"
     ],
     "difficulty_levers": [
-      "tree depth"
+      "tree depth",
+      "upgrade costs",
+      "branch count"
     ],
     "tools": [
       "timers",
@@ -374,7 +386,7 @@
     ],
     "family": "idle_incremental",
     "summary": "Mine planets automatically, smelt and craft, and expand to new planets.",
-    "core_loop": "mine → smelt → craft → sell → new planets",
+    "core_loop": "Mine planets automatically, smelt ore and craft goods to sell, and use the profit to reach new planets",
     "verbs": [
       "automate",
       "expand"
@@ -400,7 +412,9 @@
       "race to galaxies"
     ],
     "difficulty_levers": [
-      "chain length"
+      "chain length",
+      "planet costs",
+      "mining rate"
     ],
     "tools": [
       "timers",
@@ -425,7 +439,7 @@
     ],
     "family": "idle_incremental",
     "summary": "Build a production line where outputs feed the next machine; fix bottlenecks.",
-    "core_loop": "add machines → link outputs → find the slowest step → upgrade it",
+    "core_loop": "Build a production line where each machine feeds the next, find the slowest step and upgrade it to raise output",
     "verbs": [
       "build",
       "optimize"
@@ -452,7 +466,9 @@
       "compare factories"
     ],
     "difficulty_levers": [
-      "chain length"
+      "chain length",
+      "machine speeds",
+      "upgrade costs"
     ],
     "tools": [
       "timers",
@@ -476,7 +492,7 @@
     ],
     "family": "idle_incremental",
     "summary": "Everyone in a Group taps toward one shared goal; individual taps add to the total.",
-    "core_loop": "tap → your taps add to the group → reach the goal together",
+    "core_loop": "Everyone in a Group taps toward one shared goal; your taps add to the group total, and the whole Group unlocks rewards together",
     "verbs": [
       "tap",
       "cooperate"
@@ -502,7 +518,9 @@
       "the whole Group works toward one goal"
     ],
     "difficulty_levers": [
-      "goal size"
+      "goal size",
+      "group size",
+      "time window"
     ],
     "tools": [
       "shared_progress",
@@ -527,7 +545,7 @@
     ],
     "family": "idle_incremental",
     "summary": "Merge creatures to evolve them through stages toward the final form.",
-    "core_loop": "spawn → merge → evolve → discover forms",
+    "core_loop": "Spawn creatures, merge matching ones to evolve them through stages, and discover every form",
     "verbs": [
       "merge",
       "discover"
@@ -553,7 +571,9 @@
       "compare collections"
     ],
     "difficulty_levers": [
-      "stages"
+      "stages",
+      "spawn rate",
+      "merge rules"
     ],
     "tools": [
       "grid_board",
@@ -578,7 +598,7 @@
     ],
     "family": "idle_incremental",
     "summary": "Tap to damage bosses on a timer; heroes add passive damage.",
-    "core_loop": "tap → damage the boss → beat it before time → next",
+    "core_loop": "Tap to damage a boss before its timer runs out while your heroes add passive damage, then move to the next stage",
     "verbs": [
       "tap",
       "upgrade"
@@ -604,7 +624,9 @@
       "clan raids in a Group"
     ],
     "difficulty_levers": [
-      "boss health"
+      "boss health",
+      "timer",
+      "hero damage"
     ],
     "tools": [
       "timers",
@@ -629,7 +651,7 @@
     ],
     "family": "idle_incremental",
     "summary": "One number, many ways to raise it; discover combos that multiply.",
-    "core_loop": "try actions → find multipliers → number climbs",
+    "core_loop": "Try different actions to raise a single number, discover combos that multiply it, and watch it climb",
     "verbs": [
       "experiment",
       "tap"
@@ -654,7 +676,9 @@
       "screenshot your number"
     ],
     "difficulty_levers": [
-      "combo variety"
+      "combo variety",
+      "multiplier size",
+      "action costs"
     ],
     "tools": [
       "timers",

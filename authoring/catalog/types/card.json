@@ -8,7 +8,7 @@
     ],
     "family": "card",
     "summary": "Build four foundation piles from ace to king by moving alternating-color runs in the tableau.",
-    "core_loop": "draw from stock → move runs → free aces → build foundations",
+    "core_loop": "Draw from the stock, move alternating-color runs around the tableau to free aces, and build all four foundations from ace to king",
     "verbs": [
       "sort",
       "plan"
@@ -38,7 +38,8 @@
     ],
     "difficulty_levers": [
       "draw 1 or 3",
-      "passes"
+      "passes",
+      "undo allowed"
     ],
     "tools": [
       "grid_board",
@@ -64,7 +65,7 @@
     ],
     "family": "card",
     "summary": "Build full same-suit runs from king to ace to clear them from the tableau.",
-    "core_loop": "move runs → build same-suit sequences → clear full runs",
+    "core_loop": "Move runs around the tableau to build full same-suit sequences from king to ace, which clear off the board",
     "verbs": [
       "sort",
       "plan"
@@ -91,7 +92,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "suits"
+      "suits",
+      "deals",
+      "undo allowed"
     ],
     "tools": [
       "grid_board",
@@ -116,7 +119,7 @@
     ],
     "family": "card",
     "summary": "Use four free cells to sort every card onto foundations; nearly every deal is solvable.",
-    "core_loop": "park cards in free cells → move → build foundations",
+    "core_loop": "Park cards in four free cells to dig out the cards you need, and move every card onto the foundations; nearly every deal can be won",
     "verbs": [
       "plan",
       "sort"
@@ -142,7 +145,9 @@
       "daily deal"
     ],
     "difficulty_levers": [
-      "free cells"
+      "free cells",
+      "deal difficulty",
+      "undo allowed"
     ],
     "tools": [
       "grid_board",
@@ -167,7 +172,7 @@
     ],
     "family": "card",
     "summary": "Remove exposed pairs that add to 13, or cards one higher or lower, to clear the layout.",
-    "core_loop": "find exposed pairs → remove → uncover more",
+    "core_loop": "Remove exposed pairs of cards that add up to 13 to uncover more of the pyramid, and clear the whole layout",
     "verbs": [
       "match",
       "calculate"
@@ -194,7 +199,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "layout"
+      "layout",
+      "passes through stock",
+      "deal difficulty"
     ],
     "tools": [
       "grid_board",
@@ -218,7 +225,7 @@
     ],
     "family": "card",
     "summary": "Draw cards to get closer to 21 than the dealer without going over.",
-    "core_loop": "see your hand → hit or stand → dealer plays → win or lose",
+    "core_loop": "Look at your hand and the dealer's up card, hit or stand to get closer to 21 than the dealer without going over",
     "verbs": [
       "decide",
       "calculate"
@@ -245,7 +252,9 @@
       "chip leaderboard with friends"
     ],
     "difficulty_levers": [
-      "decks"
+      "decks",
+      "dealer rules",
+      "doubling allowed"
     ],
     "tools": [
       "turns",
@@ -271,7 +280,7 @@
     ],
     "family": "card",
     "summary": "Two hole cards and five shared; bet, raise or fold; best five-card hand wins.",
-    "core_loop": "deal → bet → flop → bet → turn → river → showdown",
+    "core_loop": "Get two private cards, bet through the flop, turn and river as five shared cards appear, and win with the best five-card hand",
     "verbs": [
       "bet",
       "bluff",
@@ -299,7 +308,9 @@
       "home game with friends"
     ],
     "difficulty_levers": [
-      "blinds"
+      "blinds",
+      "starting stack",
+      "players"
     ],
     "tools": [
       "turns",
@@ -325,7 +336,7 @@
     ],
     "family": "card",
     "summary": "Play a card matching the top card's color or number; action cards skip, reverse and draw.",
-    "core_loop": "match the top card → play actions → shout when one left → empty your hand",
+    "core_loop": "Play a card that matches the top card's color or number, use action cards to skip, reverse or make others draw, and empty your hand first",
     "verbs": [
       "match",
       "plan"
@@ -353,7 +364,9 @@
       "uno night with friends"
     ],
     "difficulty_levers": [
-      "action cards"
+      "action cards",
+      "hand size",
+      "stacking draws"
     ],
     "tools": [
       "turns",
@@ -379,7 +392,7 @@
     ],
     "family": "card",
     "summary": "Both players flip a card; higher takes both; ties start a war.",
-    "core_loop": "flip → compare → winner takes → war on ties",
+    "core_loop": "Both players flip their top card; the higher card takes both, and a tie starts a war with extra cards at stake",
     "verbs": [
       "flip",
       "compare"
@@ -405,7 +418,9 @@
       "quick game with a kid"
     ],
     "difficulty_levers": [
-      "none"
+      "deck size",
+      "war stake",
+      "round limit"
     ],
     "tools": [
       "turns",
@@ -430,7 +445,7 @@
     ],
     "family": "card",
     "summary": "Ask others for ranks to collect sets of four.",
-    "core_loop": "ask for a rank → get cards or go fish → collect sets",
+    "core_loop": "Ask another player for a rank you hold; take their cards or go fish from the pile, and collect sets of four",
     "verbs": [
       "ask",
       "remember"
@@ -457,7 +472,9 @@
       "family card night"
     ],
     "difficulty_levers": [
-      "players"
+      "players",
+      "hand size",
+      "deck size"
     ],
     "tools": [
       "turns",
@@ -481,7 +498,7 @@
     ],
     "family": "card",
     "summary": "Avoid taking hearts and the queen of spades in tricks, or shoot the moon.",
-    "core_loop": "pass three cards → follow suit → avoid points → shoot the moon",
+    "core_loop": "Pass three cards, then follow suit through each trick, avoiding hearts and the queen of spades, or take them all to shoot the moon",
     "verbs": [
       "plan",
       "avoid"
@@ -508,7 +525,9 @@
       "hearts with friends"
     ],
     "difficulty_levers": [
-      "passing"
+      "passing",
+      "points to lose",
+      "players"
     ],
     "tools": [
       "turns",
@@ -533,7 +552,7 @@
     ],
     "family": "card",
     "summary": "Bid how many tricks you'll take with a partner; spades are trump.",
-    "core_loop": "bid → play tricks → meet the bid",
+    "core_loop": "Bid how many tricks you and your partner will take, then play tricks with spades as trump to meet your bid",
     "verbs": [
       "bid",
       "plan"
@@ -559,7 +578,9 @@
       "partner spades night"
     ],
     "difficulty_levers": [
-      "bidding"
+      "bidding",
+      "points to win",
+      "nil bids"
     ],
     "tools": [
       "turns",
@@ -585,7 +606,7 @@
     ],
     "family": "card",
     "summary": "Draw and discard to form sets and runs, then knock or go out.",
-    "core_loop": "draw → form sets and runs → discard → knock",
+    "core_loop": "Draw and discard to form sets and runs in your hand, then lay them down and go out before your opponents",
     "verbs": [
       "collect",
       "plan"
@@ -613,7 +634,9 @@
       "rummy with grandma"
     ],
     "difficulty_levers": [
-      "deck count"
+      "deck count",
+      "hand size",
+      "wild cards"
     ],
     "tools": [
       "turns",
@@ -639,7 +662,7 @@
     ],
     "family": "card",
     "summary": "Race to play cards one higher or lower onto two center piles at the same time as your opponent.",
-    "core_loop": "watch the piles → slap down cards fast → empty your hand",
+    "core_loop": "Both players race at once to play cards one higher or lower onto two center piles and empty their hands first",
     "verbs": [
       "react",
       "match"
@@ -665,7 +688,9 @@
       "head-to-head on one phone"
     ],
     "difficulty_levers": [
-      "pile count"
+      "pile count",
+      "hand size",
+      "stall rule"
     ],
     "tools": [
       "live_multiplayer",
@@ -690,7 +715,7 @@
     ],
     "family": "card",
     "summary": "Guess whether the next card is higher or lower; keep the streak.",
-    "core_loop": "see a card → guess → reveal → continue",
+    "core_loop": "See a card, guess whether the next will be higher or lower, and keep the streak going as long as you can",
     "verbs": [
       "guess",
       "risk"
@@ -716,7 +741,9 @@
       "streak challenge"
     ],
     "difficulty_levers": [
-      "deck tracking"
+      "deck tracking",
+      "payout steps",
+      "ties rule"
     ],
     "tools": [
       "reveal",
@@ -740,7 +767,7 @@
     ],
     "family": "card",
     "summary": "Flip two cards from a full deck to find matching ranks.",
-    "core_loop": "flip two → match ranks → clear",
+    "core_loop": "Lay out a full deck face down, flip two at a time, and keep matching pairs of the same rank until the board is clear",
     "verbs": [
       "flip",
       "remember"
@@ -767,7 +794,9 @@
       "family"
     ],
     "difficulty_levers": [
-      "deck size"
+      "deck size",
+      "players",
+      "shuffle on miss"
     ],
     "tools": [
       "match_pairs",
@@ -791,7 +820,7 @@
     ],
     "family": "card",
     "summary": "Make fifteens, pairs and runs; peg points around the board.",
-    "core_loop": "discard to the crib → play to 31 → count hands → peg",
+    "core_loop": "Discard to the crib, play cards toward 31, count fifteens, pairs and runs in your hand, and peg points around the board",
     "verbs": [
       "count",
       "plan"
@@ -817,7 +846,9 @@
       "cribbage with grandpa"
     ],
     "difficulty_levers": [
-      "counting help"
+      "counting help",
+      "points to win",
+      "players"
     ],
     "tools": [
       "turns",
@@ -842,7 +873,7 @@
     ],
     "family": "card",
     "summary": "Pick trump and take three of five tricks with your partner.",
-    "core_loop": "pick trump → play tricks → win three",
+    "core_loop": "Choose trump from the turned card, then work with your partner to take at least three of five tricks",
     "verbs": [
       "plan",
       "bid"
@@ -868,7 +899,9 @@
       "euchre with friends"
     ],
     "difficulty_levers": [
-      "difficulty"
+      "difficulty",
+      "points to win",
+      "going alone"
     ],
     "tools": [
       "turns",
@@ -893,7 +926,7 @@
     ],
     "family": "card",
     "summary": "Shout-trade cards to collect a full set of one commodity first.",
-    "core_loop": "offer cards → trade → complete a set → ring",
+    "core_loop": "Everyone trades at once, shouting offers of matching cards, to be first to collect a full set of one commodity",
     "verbs": [
       "trade",
       "collect"
@@ -918,7 +951,9 @@
       "chaotic party trading"
     ],
     "difficulty_levers": [
-      "players"
+      "players",
+      "set size",
+      "round time"
     ],
     "tools": [
       "live_multiplayer",
@@ -942,7 +977,7 @@
     ],
     "family": "card",
     "summary": "Pick a stat on your top card; higher stat wins both cards.",
-    "core_loop": "read your card → pick a stat → compare → winner takes",
+    "core_loop": "Read your top card, pick the stat you think is strongest, compare with your opponent's card, and the higher stat takes both",
     "verbs": [
       "choose",
       "compare"
@@ -968,7 +1003,9 @@
       "top trumps with our friends' stats"
     ],
     "difficulty_levers": [
-      "stat spread"
+      "stat spread",
+      "deck size",
+      "stat count"
     ],
     "tools": [
       "turns",
@@ -992,7 +1029,7 @@
     ],
     "family": "card",
     "summary": "Clear columns by playing cards one higher or lower than the waste pile.",
-    "core_loop": "play up or down → clear columns → draw when stuck",
+    "core_loop": "Play cards one higher or lower than the top of the waste pile to clear the columns, drawing from the stock when stuck",
     "verbs": [
       "sequence",
       "plan"
@@ -1018,7 +1055,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "wrapping"
+      "wrapping",
+      "stock size",
+      "columns"
     ],
     "tools": [
       "grid_board",

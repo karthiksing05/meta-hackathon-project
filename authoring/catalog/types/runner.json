@@ -240,7 +240,7 @@
     ],
     "family": "runner",
     "summary": "Hold to fly up and release to fall while the run auto-scrolls past lasers and missiles.",
-    "core_loop": "hold to rise → release to fall → thread gaps → grab coins",
+    "core_loop": "The run scrolls on its own; hold to fire the jetpack and rise, release to fall, and thread gaps between lasers and missiles while grabbing coins",
     "verbs": [
       "fly",
       "dodge",
@@ -270,7 +270,8 @@
     ],
     "difficulty_levers": [
       "hazard density",
-      "speed"
+      "speed",
+      "lift strength"
     ],
     "tools": [
       "gravity_jump",
@@ -297,7 +298,7 @@
     ],
     "family": "runner",
     "summary": "Tap to flap upward through gaps in pipes; gravity pulls you down between taps.",
-    "core_loop": "tap to flap → pass a gap → score a point → repeat",
+    "core_loop": "Gravity pulls you down; tap to flap upward through each gap between pipes, scoring a point per gap, until you hit one",
     "verbs": [
       "flap",
       "time"
@@ -475,7 +476,7 @@
     ],
     "family": "runner",
     "summary": "Bounce between two walls going upward; tap to jump to the other wall, avoiding spikes.",
-    "core_loop": "tap to leap to the other wall → avoid spikes → climb higher",
+    "core_loop": "Cling to one of two walls; tap to leap to the other side, dodging spikes, and climb as high as you can",
     "verbs": [
       "jump",
       "time"
@@ -503,7 +504,8 @@
     ],
     "difficulty_levers": [
       "spike density",
-      "climb speed"
+      "climb speed",
+      "moving hazards"
     ],
     "tools": [
       "gravity_jump",
@@ -591,7 +593,7 @@
     ],
     "family": "runner",
     "summary": "Steer a snake that grows as it eats; don't hit walls or yourself.",
-    "core_loop": "steer → eat food → grow longer → avoid your own tail",
+    "core_loop": "Steer a snake around the arena; each food makes it longer, and the run ends if it hits a wall or its own tail",
     "verbs": [
       "steer",
       "collect"
@@ -621,7 +623,8 @@
     ],
     "difficulty_levers": [
       "speed",
-      "arena size"
+      "arena size",
+      "food spawn rate"
     ],
     "tools": [
       "player_drag",
@@ -981,7 +984,7 @@
     ],
     "family": "runner",
     "summary": "Tap to grapple an anchor and swing forward; release at the right moment to fly.",
-    "core_loop": "tap to grab → swing → release to fly → grab the next",
+    "core_loop": "Tap to grab the next anchor, swing forward on the rope, and release at the top of the arc to fly to the one after",
     "verbs": [
       "swing",
       "time"
@@ -1009,7 +1012,9 @@
       "ghost race friends"
     ],
     "difficulty_levers": [
-      "anchor spacing"
+      "anchor spacing",
+      "speed",
+      "rope length"
     ],
     "tools": [
       "gravity_jump",
@@ -1092,7 +1097,7 @@
     ],
     "family": "runner",
     "summary": "Run across rooftops and swipe to vault, slide and wall-run past a chaser.",
-    "core_loop": "swipe for moves → clear gaps → keep ahead of the chaser",
+    "core_loop": "Run across rooftops with a chaser behind you; swipe to vault, slide and wall-run past obstacles to stay ahead",
     "verbs": [
       "run",
       "vault",
@@ -1119,7 +1124,9 @@
       "ghost race"
     ],
     "difficulty_levers": [
-      "chaser speed"
+      "chaser speed",
+      "obstacle density",
+      "gap size"
     ],
     "tools": [
       "gravity_jump",
@@ -1202,7 +1209,7 @@
     ],
     "family": "runner",
     "summary": "A chaser follows; stumbles bring it closer and two stumbles end the run.",
-    "core_loop": "dodge obstacles → avoid stumbles → keep the chaser behind",
+    "core_loop": "Run ahead of a chaser; each stumble on an obstacle brings it closer, and a second stumble before recovering ends the run",
     "verbs": [
       "dodge",
       "run"
@@ -1230,7 +1237,9 @@
       "friends compare escapes"
     ],
     "difficulty_levers": [
-      "stumble recovery time"
+      "stumble recovery time",
+      "speed",
+      "obstacle density"
     ],
     "tools": [
       "lanes",
@@ -1312,7 +1321,7 @@
     ],
     "family": "runner",
     "summary": "Swim forward through currents; tap to rise, release to sink, eat small fish, avoid big ones.",
-    "core_loop": "rise and sink → eat smaller fish → avoid bigger → grow",
+    "core_loop": "Swim forward through currents; tap to rise and release to sink, eat smaller fish to grow, and avoid bigger ones",
     "verbs": [
       "swim",
       "eat",
@@ -1341,7 +1350,9 @@
       "aquarium leaderboard"
     ],
     "difficulty_levers": [
-      "growth rate"
+      "growth rate",
+      "current strength",
+      "predator count"
     ],
     "tools": [
       "gravity_jump",
@@ -1368,7 +1379,7 @@
     ],
     "family": "runner",
     "summary": "Glide forward; tap to catch updrafts and keep altitude, avoiding obstacles.",
-    "core_loop": "glide → tap for lift → ride updrafts → don't touch the ground",
+    "core_loop": "Your plane glides and slowly loses height; tap to catch updrafts and keep altitude while weaving past obstacles",
     "verbs": [
       "glide",
       "steer"
@@ -1397,7 +1408,9 @@
       "longest flight in the group"
     ],
     "difficulty_levers": [
-      "lift strength"
+      "lift strength",
+      "updraft spacing",
+      "obstacle density"
     ],
     "tools": [
       "gravity_jump",
@@ -1540,7 +1553,7 @@
     ],
     "family": "runner",
     "summary": "Hold to rise and release to fall through a cave that narrows.",
-    "core_loop": "hold to rise → release to fall → stay in the cave → go far",
+    "core_loop": "Hold to rise and release to fall as you fly through a cave whose ceiling and floor slowly close in",
     "verbs": [
       "hold",
       "steer"
@@ -1566,7 +1579,9 @@
       "classic helicopter high scores"
     ],
     "difficulty_levers": [
-      "narrowing rate"
+      "narrowing rate",
+      "speed",
+      "cave wiggle"
     ],
     "tools": [
       "gravity_jump",
@@ -1592,7 +1607,7 @@
     ],
     "family": "runner",
     "summary": "Follow a trail of collectibles; staying on the trail builds a multiplier.",
-    "core_loop": "follow the trail → collect in a row → keep the multiplier → avoid hazards",
+    "core_loop": "Follow a winding trail of collectibles; grabbing them in a row builds a multiplier that resets if you leave the trail or hit a hazard",
     "verbs": [
       "collect",
       "steer"
@@ -1619,7 +1634,9 @@
       "multiplier bragging"
     ],
     "difficulty_levers": [
-      "trail complexity"
+      "trail complexity",
+      "speed",
+      "hazard count"
     ],
     "tools": [
       "pickups",
@@ -1646,7 +1663,7 @@
     ],
     "family": "runner",
     "summary": "Climb stairs that turn left or right; tap the correct direction before the step crumbles.",
-    "core_loop": "see the next step → tap left or right → climb → speed rises",
+    "core_loop": "Each next step turns left or right; tap the correct direction before the step crumbles, climbing faster as you go",
     "verbs": [
       "turn",
       "react"
@@ -1674,7 +1691,9 @@
       "daily stairs ghost"
     ],
     "difficulty_levers": [
-      "crumble speed"
+      "crumble speed",
+      "turn frequency",
+      "hazards"
     ],
     "tools": [
       "endless",
@@ -1757,7 +1776,7 @@
     ],
     "family": "runner",
     "summary": "Controls periodically flip; adapt to inverted steering while running.",
-    "core_loop": "run → steer → controls flip → adapt",
+    "core_loop": "Run and steer around obstacles; every so often the controls flip, and you adapt to inverted steering mid-run",
     "verbs": [
       "steer",
       "adapt"
@@ -1783,7 +1802,9 @@
       "party challenge"
     ],
     "difficulty_levers": [
-      "flip frequency"
+      "flip frequency",
+      "speed",
+      "warning time"
     ],
     "tools": [
       "lanes",
@@ -1808,7 +1829,7 @@
     ],
     "family": "runner",
     "summary": "Tap to shrink under gaps or hold to grow to break barriers.",
-    "core_loop": "read the obstacle → shrink or grow → pass → continue",
+    "core_loop": "Read each obstacle ahead; tap to shrink under low gaps or hold to grow and smash through barriers",
     "verbs": [
       "resize",
       "react"
@@ -1835,7 +1856,9 @@
       "beat friends"
     ],
     "difficulty_levers": [
-      "obstacle mix"
+      "obstacle mix",
+      "speed",
+      "switch time"
     ],
     "tools": [
       "lanes",
@@ -1861,7 +1884,7 @@
     ],
     "family": "runner",
     "summary": "Steer a crowd through math gates (x2, +10, -5) to grow it before a final battle.",
-    "core_loop": "steer → pick the better gate → grow the crowd → beat the boss crowd",
+    "core_loop": "Steer a crowd through pairs of math gates such as x2 or minus 5, pick the better gate each time, and face a boss crowd at the end",
     "verbs": [
       "steer",
       "choose",
@@ -1890,7 +1913,9 @@
       "share final crowd size"
     ],
     "difficulty_levers": [
-      "gate values"
+      "gate values",
+      "gate spacing",
+      "boss size"
     ],
     "tools": [
       "lanes",
@@ -1917,7 +1942,7 @@
     ],
     "family": "runner",
     "summary": "Collect blocks on your head while running; obstacles knock some off; spend the stack at the end.",
-    "core_loop": "run → collect blocks → protect the stack → bank at the finish",
+    "core_loop": "Collect blocks onto a stack as you run; obstacles knock some off, and you spend the stack at the finish for points",
     "verbs": [
       "collect",
       "steer"
@@ -1945,7 +1970,9 @@
       "stack size bragging"
     ],
     "difficulty_levers": [
-      "obstacle density"
+      "obstacle density",
+      "speed",
+      "stack cap"
     ],
     "tools": [
       "pickups",
@@ -1971,7 +1998,7 @@
     ],
     "family": "runner",
     "summary": "Run and leave a color trail; cover the most of the floor before time ends.",
-    "core_loop": "run → paint tiles → avoid painted-over zones → cover more",
+    "core_loop": "Run around an arena leaving a color trail on the floor; cover more of the floor than rivals before time ends",
     "verbs": [
       "paint",
       "steer"
@@ -2000,7 +2027,8 @@
     ],
     "difficulty_levers": [
       "rival count",
-      "time"
+      "time",
+      "arena size"
     ],
     "tools": [
       "player_drag",
@@ -2026,7 +2054,7 @@
     ],
     "family": "runner",
     "summary": "Collect planks while running and spend them to build bridges across gaps.",
-    "core_loop": "collect planks → reach a gap → build → keep running",
+    "core_loop": "Collect planks as you run, then spend them to build bridges across gaps; run short and you fall",
     "verbs": [
       "collect",
       "build"
@@ -2053,7 +2081,9 @@
       "race friends"
     ],
     "difficulty_levers": [
-      "gap size"
+      "gap size",
+      "plank spawn rate",
+      "speed"
     ],
     "tools": [
       "pickups",
@@ -2137,7 +2167,7 @@
     ],
     "family": "runner",
     "summary": "Run a short course grabbing treasures; the more you carry, the slower you go.",
-    "core_loop": "grab treasure → slow down → decide when to bank → beat the clock",
+    "core_loop": "Grab treasures on a short course; every item slows you down, so choose when to bank before the clock runs out",
     "verbs": [
       "collect",
       "risk"
@@ -2165,7 +2195,9 @@
       "risk-takers compare"
     ],
     "difficulty_levers": [
-      "slow factor"
+      "slow factor",
+      "time",
+      "course length"
     ],
     "tools": [
       "pickups",
@@ -2245,7 +2277,7 @@
     ],
     "family": "runner",
     "summary": "Run automatically while tapping to shoot obstacles and enemies ahead.",
-    "core_loop": "run → tap to shoot → clear the path → collect power-ups",
+    "core_loop": "Run automatically to the right and tap to shoot obstacles and enemies ahead, collecting power-ups as you go",
     "verbs": [
       "shoot",
       "run"
@@ -2271,7 +2303,9 @@
       "kill count board"
     ],
     "difficulty_levers": [
-      "enemy density"
+      "enemy density",
+      "speed",
+      "ammo"
     ],
     "tools": [
       "spawn_wave",
@@ -2297,7 +2331,7 @@
     ],
     "family": "runner",
     "summary": "Run in darkness with a light that shrinks; collect lights to see further.",
-    "core_loop": "run → collect lights → your view grows → avoid unseen obstacles",
+    "core_loop": "Run in the dark with a light that slowly shrinks; collect lights to see further and spot obstacles in time",
     "verbs": [
       "run",
       "collect"
@@ -2323,7 +2357,9 @@
       "spooky night runs with friends"
     ],
     "difficulty_levers": [
-      "shrink rate"
+      "shrink rate",
+      "light spawn rate",
+      "speed"
     ],
     "tools": [
       "pickups",
@@ -2349,7 +2385,7 @@
     ],
     "family": "runner",
     "summary": "Wind, rain and ice change how you move as the run goes on.",
-    "core_loop": "run → weather shifts → adjust timing → keep going",
+    "core_loop": "Run a long course where wind, rain and ice keep changing how you move, and adjust your timing to keep going",
     "verbs": [
       "adapt",
       "dodge"
@@ -2376,7 +2412,9 @@
       "daily weather seed"
     ],
     "difficulty_levers": [
-      "change frequency"
+      "change frequency",
+      "weather strength",
+      "speed"
     ],
     "tools": [
       "lanes",
@@ -2402,7 +2440,7 @@
     ],
     "family": "runner",
     "summary": "Each lap a different teammate's runner takes over, each with a different move set.",
-    "core_loop": "run your leg → hand off → next runner's move → finish the relay",
+    "core_loop": "Each leg is run by a different teammate's runner with its own move, and you hand off to finish the relay fastest",
     "verbs": [
       "run",
       "cooperate"
@@ -2430,7 +2468,9 @@
       "Group relay where each friend runs a leg"
     ],
     "difficulty_levers": [
-      "leg length"
+      "leg length",
+      "runner moves",
+      "handoff window"
     ],
     "tools": [
       "lanes",
@@ -2456,7 +2496,7 @@
     ],
     "family": "runner",
     "summary": "Toggle a magnet that pulls coins but also pulls hazards.",
-    "core_loop": "run → turn the magnet on near coins → off near hazards → collect",
+    "core_loop": "Toggle a magnet that pulls nearby coins but also hazards; switch it on near coins and off near danger",
     "verbs": [
       "toggle",
       "collect"
@@ -2483,7 +2523,9 @@
       "coin board"
     ],
     "difficulty_levers": [
-      "hazard ratio"
+      "hazard ratio",
+      "magnet range",
+      "speed"
     ],
     "tools": [
       "pickups",
@@ -2509,7 +2551,7 @@
     ],
     "family": "runner",
     "summary": "Run automatically across platforms; tap to jump, hold for higher, and vault enemies.",
-    "core_loop": "run → tap to jump → hold for high jumps → reach the flag",
+    "core_loop": "Run automatically across platforms; tap to jump, hold for a higher jump, and vault enemies to reach the flag",
     "verbs": [
       "jump",
       "time"
@@ -2537,7 +2579,9 @@
       "race friends' coins"
     ],
     "difficulty_levers": [
-      "level length"
+      "level length",
+      "gap size",
+      "enemy count"
     ],
     "tools": [
       "gravity_jump",
@@ -2563,7 +2607,7 @@
     ],
     "family": "runner",
     "summary": "Run the same course as a friend's recorded ghost and try to beat it.",
-    "core_loop": "run → see the friend's ghost → beat it to the finish",
+    "core_loop": "Run the same course as a friend's recorded ghost and try to beat their time to the finish",
     "verbs": [
       "run",
       "race"
@@ -2590,7 +2634,9 @@
       "made for sending to a specific friend"
     ],
     "difficulty_levers": [
-      "course"
+      "course",
+      "ghost count",
+      "obstacle seed"
     ],
     "tools": [
       "ghost_score",

@@ -117,7 +117,7 @@
     ],
     "family": "memory",
     "summary": "Numbers flash on screen; after the first tap they hide; tap them in order.",
-    "core_loop": "see numbers → tap 1 → the rest hide → tap in order",
+    "core_loop": "Numbers flash in random spots; after you tap 1 the rest hide, and you tap the remaining spots in number order from memory",
     "verbs": [
       "remember",
       "order"
@@ -144,7 +144,8 @@
     ],
     "difficulty_levers": [
       "count",
-      "flash time"
+      "flash time",
+      "grid size"
     ],
     "tools": [
       "grid_board",
@@ -169,7 +170,7 @@
     ],
     "family": "memory",
     "summary": "A number flashes; type it back; it gets one digit longer each round.",
-    "core_loop": "see the number → it hides → type it → longer",
+    "core_loop": "A number flashes, hides, and you type it back; each round it grows by one digit until you miss",
     "verbs": [
       "remember",
       "type"
@@ -195,7 +196,9 @@
       "compare spans with friends"
     ],
     "difficulty_levers": [
-      "flash time"
+      "flash time",
+      "start length",
+      "reverse mode"
     ],
     "tools": [
       "keyboard",
@@ -275,7 +278,7 @@
     ],
     "family": "memory",
     "summary": "Study objects on a tray, then list as many as you can.",
-    "core_loop": "study the tray → it hides → type or pick items → score",
+    "core_loop": "Study a tray of objects for a few seconds, then it hides and you type or pick as many items as you remember",
     "verbs": [
       "remember",
       "list"
@@ -304,7 +307,8 @@
     ],
     "difficulty_levers": [
       "items",
-      "study time"
+      "study time",
+      "decoys"
     ],
     "tools": [
       "typed_answer",
@@ -329,7 +333,7 @@
     ],
     "family": "memory",
     "summary": "Meet a set of characters with names, then match names to faces later.",
-    "core_loop": "meet faces → later match each to its name",
+    "core_loop": "Meet a set of characters with names, play a distraction round, then match each face to its name",
     "verbs": [
       "remember",
       "match"
@@ -357,7 +361,8 @@
     ],
     "difficulty_levers": [
       "faces",
-      "delay"
+      "delay",
+      "similar names"
     ],
     "tools": [
       "match_pairs",
@@ -435,7 +440,7 @@
     ],
     "family": "memory",
     "summary": "Tap when the current item matches the one N steps back.",
-    "core_loop": "watch items → compare to N back → tap on matches",
+    "core_loop": "Items appear one at a time; tap whenever the current item matches the one shown a set number of steps back",
     "verbs": [
       "remember",
       "compare"
@@ -462,7 +467,8 @@
     ],
     "difficulty_levers": [
       "how many steps back",
-      "speed"
+      "speed",
+      "item types"
     ],
     "tools": [
       "sequence_memory",
@@ -487,7 +493,7 @@
     ],
     "family": "memory",
     "summary": "Read or hear a short story, then answer detail questions.",
-    "core_loop": "read the story → it hides → answer questions",
+    "core_loop": "Read or hear a short story, then it hides and you answer questions about its details",
     "verbs": [
       "remember",
       "answer"
@@ -514,7 +520,8 @@
     ],
     "difficulty_levers": [
       "story length",
-      "detail"
+      "detail",
+      "question count"
     ],
     "tools": [
       "quiz",
@@ -538,7 +545,7 @@
     ],
     "family": "memory",
     "summary": "Watch a path drawn across a grid, then trace it back.",
-    "core_loop": "watch the path → it hides → trace it",
+    "core_loop": "Watch a path draw itself across a grid, then it hides and you trace the same path from memory",
     "verbs": [
       "remember",
       "trace"
@@ -564,7 +571,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "path length"
+      "path length",
+      "grid size",
+      "draw speed"
     ],
     "tools": [
       "grid_board",
@@ -589,7 +598,7 @@
     ],
     "family": "memory",
     "summary": "A color shows briefly; recreate it by mixing sliders.",
-    "core_loop": "see the color → it hides → match it → see your score",
+    "core_loop": "A color shows for a moment, then hides; mix sliders to recreate it and score by how close you get",
     "verbs": [
       "remember",
       "match"
@@ -616,7 +625,9 @@
       "daily color memory"
     ],
     "difficulty_levers": [
-      "display time"
+      "display time",
+      "slider count",
+      "delay"
     ],
     "tools": [
       "reveal",
@@ -641,7 +652,7 @@
     ],
     "family": "memory",
     "summary": "Hear a short melody, then play it back on pads or keys.",
-    "core_loop": "listen → play back → longer melody",
+    "core_loop": "Hear a short melody on a few pads or keys, then play it back; it grows by a note each round",
     "verbs": [
       "listen",
       "remember",
@@ -669,7 +680,8 @@
     ],
     "difficulty_levers": [
       "tempo",
-      "pads"
+      "pads",
+      "start length"
     ],
     "tools": [
       "sequence_memory",
@@ -693,7 +705,7 @@
     ],
     "family": "memory",
     "summary": "A list shows; later pick the items from a bigger set.",
-    "core_loop": "read the list → it hides → pick list items from many",
+    "core_loop": "Read a shopping list, then it hides; pick the listed items from a larger shelf full of decoys",
     "verbs": [
       "remember",
       "choose"
@@ -720,7 +732,8 @@
     ],
     "difficulty_levers": [
       "list length",
-      "decoys"
+      "decoys",
+      "delay"
     ],
     "tools": [
       "quiz",
@@ -745,7 +758,7 @@
     ],
     "family": "memory",
     "summary": "Study an arrangement of pieces, then rebuild it from memory.",
-    "core_loop": "study → it hides → place pieces → compare",
+    "core_loop": "Study an arrangement of pieces for a few seconds, then rebuild it from memory and compare to the original",
     "verbs": [
       "remember",
       "place"
@@ -771,7 +784,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "pieces"
+      "pieces",
+      "study time",
+      "colors"
     ],
     "tools": [
       "player_drag",
@@ -797,7 +812,7 @@
     ],
     "family": "memory",
     "summary": "Watch a ball hidden under one cup as the cups shuffle; tap where it ended.",
-    "core_loop": "watch the hide → follow the shuffle → tap the cup",
+    "core_loop": "Watch a ball hidden under one cup, follow the cups as they shuffle, then tap the cup you think hides it",
     "verbs": [
       "track",
       "watch"
@@ -824,7 +839,8 @@
     ],
     "difficulty_levers": [
       "shuffle speed",
-      "cups"
+      "cups",
+      "shuffle count"
     ],
     "tools": [
       "reveal",
@@ -849,7 +865,7 @@
     ],
     "family": "memory",
     "summary": "Place items in rooms of a house to remember them, then walk the house to recall them in order.",
-    "core_loop": "place items in rooms → later walk the rooms → recall in order",
+    "core_loop": "Place each item to remember in a room of a house, then walk the house later and recall the items in order",
     "verbs": [
       "associate",
       "remember"
@@ -876,7 +892,9 @@
       "study buddies"
     ],
     "difficulty_levers": [
-      "items"
+      "items",
+      "rooms",
+      "delay"
     ],
     "tools": [
       "sequence_memory",
@@ -901,7 +919,7 @@
     ],
     "family": "memory",
     "summary": "Learn which symbol goes with which, then recall partners.",
-    "core_loop": "learn pairs → test → missed pairs repeat",
+    "core_loop": "Learn which symbol goes with which partner, then get tested; any missed pairs repeat until you know them all",
     "verbs": [
       "learn",
       "recall"
@@ -927,7 +945,9 @@
       "learn a language alphabet with friends"
     ],
     "difficulty_levers": [
-      "pairs"
+      "pairs",
+      "study time",
+      "symbol similarity"
     ],
     "tools": [
       "match_pairs",
@@ -951,7 +971,7 @@
     ],
     "family": "memory",
     "summary": "Hear a list of words, then type as many as you remember.",
-    "core_loop": "listen → type words → score",
+    "core_loop": "Hear a list of words read aloud, then type as many as you can remember in any order",
     "verbs": [
       "listen",
       "remember",
@@ -978,7 +998,9 @@
       "compare with friends"
     ],
     "difficulty_levers": [
-      "list length"
+      "list length",
+      "word speed",
+      "delay"
     ],
     "tools": [
       "audio_clip",
@@ -1003,7 +1025,7 @@
     ],
     "family": "memory",
     "summary": "Flip pairs of your own photos to match them.",
-    "core_loop": "flip two → remember → match all",
+    "core_loop": "Your own or your Group's photos are laid face down in pairs; flip two at a time and match them all in as few turns as possible",
     "verbs": [
       "flip",
       "remember"
@@ -1030,7 +1052,9 @@
       "made from a Group's photos"
     ],
     "difficulty_levers": [
-      "pairs"
+      "pairs",
+      "time",
+      "shuffle on miss"
     ],
     "tools": [
       "match_pairs",
@@ -1055,7 +1079,7 @@
     ],
     "family": "memory",
     "summary": "Watch a sequence of moves, then swipe them in order.",
-    "core_loop": "watch moves → swipe them back → more moves",
+    "core_loop": "Watch a dancer perform a sequence of moves, then swipe them back in order; each round adds a move",
     "verbs": [
       "watch",
       "remember",
@@ -1082,7 +1106,9 @@
       "dance-off challenge"
     ],
     "difficulty_levers": [
-      "speed"
+      "speed",
+      "move set",
+      "start length"
     ],
     "tools": [
       "sequence_memory",
@@ -1106,7 +1132,7 @@
     ],
     "family": "memory",
     "summary": "Watch a route on a map, then retrace it on a blank map.",
-    "core_loop": "watch the route → blank map → retrace",
+    "core_loop": "Watch a route trace across a map, then the map goes blank and you retrace the same route",
     "verbs": [
       "remember",
       "trace"
@@ -1132,7 +1158,9 @@
       "city friends"
     ],
     "difficulty_levers": [
-      "route length"
+      "route length",
+      "map detail",
+      "trace speed"
     ],
     "tools": [
       "player_drag",
@@ -1156,7 +1184,7 @@
     ],
     "family": "memory",
     "summary": "Characters enter one by one; recall the order they arrived.",
-    "core_loop": "watch arrivals → put them in order",
+    "core_loop": "Characters enter a room one by one; afterward, drag them into the order they arrived",
     "verbs": [
       "remember",
       "order"
@@ -1182,7 +1210,9 @@
       "party game"
     ],
     "difficulty_levers": [
-      "count"
+      "count",
+      "entry speed",
+      "similar looks"
     ],
     "tools": [
       "sort_bins",
@@ -1206,7 +1236,7 @@
     ],
     "family": "memory",
     "summary": "Each round adds an item; tap the one you haven't seen before.",
-    "core_loop": "see items → tap the new one → more items",
+    "core_loop": "Each round shows the previous items plus one new one in shuffled spots; tap the item you haven't seen before",
     "verbs": [
       "remember",
       "spot"
@@ -1232,7 +1262,9 @@
       "streak duels"
     ],
     "difficulty_levers": [
-      "items per round"
+      "items per round",
+      "shuffle",
+      "time"
     ],
     "tools": [
       "quiz",
@@ -1256,7 +1288,7 @@
     ],
     "family": "memory",
     "summary": "Watch a sequence and repeat it in reverse order.",
-    "core_loop": "watch → repeat backward → longer",
+    "core_loop": "Watch a sequence of lights or symbols, then repeat it in reverse order; it gets longer each round",
     "verbs": [
       "remember",
       "reverse"
@@ -1282,7 +1314,9 @@
       "harder simon for friends"
     ],
     "difficulty_levers": [
-      "speed"
+      "speed",
+      "start length",
+      "symbol count"
     ],
     "tools": [
       "sequence_memory",

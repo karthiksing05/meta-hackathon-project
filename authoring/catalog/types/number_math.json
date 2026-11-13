@@ -119,7 +119,7 @@
     ],
     "family": "number_math",
     "summary": "Solve as many arithmetic problems as you can in 60 seconds.",
-    "core_loop": "read a problem → type the answer → next",
+    "core_loop": "Arithmetic problems appear one after another; type each answer as fast as you can and solve as many as possible in 60 seconds",
     "verbs": [
       "calculate",
       "react"
@@ -147,7 +147,8 @@
     ],
     "difficulty_levers": [
       "operations",
-      "number range"
+      "number range",
+      "time limit"
     ],
     "tools": [
       "keyboard",
@@ -172,7 +173,7 @@
     ],
     "family": "number_math",
     "summary": "Find the next number in a pattern.",
-    "core_loop": "read the sequence → find the rule → type the next number",
+    "core_loop": "Read a sequence of numbers, work out the rule behind it, and type the next number before the timer; a hint reveals the rule type",
     "verbs": [
       "infer",
       "calculate"
@@ -198,7 +199,9 @@
       "puzzle duels"
     ],
     "difficulty_levers": [
-      "rule complexity"
+      "rule complexity",
+      "sequence length",
+      "hints"
     ],
     "tools": [
       "keyboard",
@@ -278,7 +281,7 @@
     ],
     "family": "number_math",
     "summary": "Drop numbered blocks into columns; matching neighbors merge and double.",
-    "core_loop": "drop a block → matches merge → chains combo → don't overflow",
+    "core_loop": "Drop numbered blocks into columns; touching equal blocks merge and double, chains combo, and the round ends when a column overflows",
     "verbs": [
       "drop",
       "merge"
@@ -305,7 +308,9 @@
       "weekly score board"
     ],
     "difficulty_levers": [
-      "spawn values"
+      "spawn values",
+      "columns",
+      "drop speed"
     ],
     "tools": [
       "grid_board",
@@ -385,7 +390,7 @@
     ],
     "family": "number_math",
     "summary": "Guess a hidden 8-character equation; tiles color by position like a word deduction game.",
-    "core_loop": "type an equation → tiles color → narrow down → solve",
+    "core_loop": "Type a guess at a hidden 8-character equation; tiles color for right place, wrong place or absent, and you narrow it down in six tries",
     "verbs": [
       "deduce",
       "calculate"
@@ -413,7 +418,9 @@
       "daily share grid"
     ],
     "difficulty_levers": [
-      "equation length"
+      "equation length",
+      "tries",
+      "operators allowed"
     ],
     "tools": [
       "keyboard",
@@ -439,7 +446,7 @@
     ],
     "family": "number_math",
     "summary": "Glance at a crowd of objects and estimate how many there are.",
-    "core_loop": "look briefly → type an estimate → closeness scores",
+    "core_loop": "A crowd of objects flashes briefly; type your estimate of how many there were, and score by how close you land",
     "verbs": [
       "estimate"
     ],
@@ -467,7 +474,8 @@
     ],
     "difficulty_levers": [
       "glance time",
-      "count"
+      "count",
+      "object clustering"
     ],
     "tools": [
       "reveal",
@@ -493,7 +501,7 @@
     ],
     "family": "number_math",
     "summary": "Cut a shape into the asked-for fraction with swipes.",
-    "core_loop": "read the fraction → swipe cuts → compare → score",
+    "core_loop": "Read a fraction, swipe cuts across a shape to slice off that portion, and score by how close your piece is to the target",
     "verbs": [
       "estimate",
       "cut"
@@ -520,7 +528,9 @@
       "kids vs parents"
     ],
     "difficulty_levers": [
-      "tolerance"
+      "tolerance",
+      "shape type",
+      "cuts allowed"
     ],
     "tools": [
       "player_drag",
@@ -545,7 +555,7 @@
     ],
     "family": "number_math",
     "summary": "Drop a number in the right spot on a number line.",
-    "core_loop": "read the number → drop it → see the distance",
+    "core_loop": "A number is shown; drop it at the right spot on a number line and see how far off you were before the next one",
     "verbs": [
       "estimate",
       "place"
@@ -573,7 +583,8 @@
     ],
     "difficulty_levers": [
       "range",
-      "decimals"
+      "decimals",
+      "tick marks shown"
     ],
     "tools": [
       "player_drag",
@@ -598,7 +609,7 @@
     ],
     "family": "number_math",
     "summary": "Swipe each number as prime or composite before time runs out.",
-    "core_loop": "see a number → swipe prime or not → next, faster",
+    "core_loop": "Numbers appear one by one; swipe each as prime or composite before it drops, and the pace speeds up as you go",
     "verbs": [
       "judge",
       "react"
@@ -625,7 +636,8 @@
     ],
     "difficulty_levers": [
       "number size",
-      "speed"
+      "speed",
+      "lives"
     ],
     "tools": [
       "sort_bins",
@@ -703,7 +715,7 @@
     ],
     "family": "number_math",
     "summary": "Pay an amount using the fewest coins and bills.",
-    "core_loop": "read the price → tap coins → reach exact change",
+    "core_loop": "Read a price and tap coins and bills to pay it exactly, using as few pieces as possible to score more",
     "verbs": [
       "calculate",
       "count"
@@ -729,7 +741,9 @@
       "family practice"
     ],
     "difficulty_levers": [
-      "coin set"
+      "coin set",
+      "amount range",
+      "time"
     ],
     "tools": [
       "grid_board",
@@ -753,7 +767,7 @@
     ],
     "family": "number_math",
     "summary": "Add weights to both pans until the scale balances; solve for the mystery weight.",
-    "core_loop": "place weights → see the tilt → balance → find x",
+    "core_loop": "Place weights on both pans of a scale, watch it tilt, and balance it to work out the value of the mystery weight",
     "verbs": [
       "balance",
       "solve"
@@ -779,7 +793,9 @@
       "intro algebra practice"
     ],
     "difficulty_levers": [
-      "unknowns"
+      "unknowns",
+      "weight values",
+      "moves allowed"
     ],
     "tools": [
       "player_drag",
@@ -803,7 +819,7 @@
     ],
     "family": "number_math",
     "summary": "Roll dice and combine the faces to hit a target before your opponent.",
-    "core_loop": "roll → combine faces → hit the target → score",
+    "core_loop": "Roll several dice and combine the faces with arithmetic to hit a target number before your opponent does",
     "verbs": [
       "calculate",
       "race"
@@ -829,7 +845,9 @@
       "family game night"
     ],
     "difficulty_levers": [
-      "dice count"
+      "dice count",
+      "operations allowed",
+      "target size"
     ],
     "tools": [
       "dice",
@@ -854,7 +872,7 @@
     ],
     "family": "number_math",
     "summary": "See a pie or bar and estimate the percentage shown.",
-    "core_loop": "look → type the percent → closeness scores",
+    "core_loop": "A pie, bar or filled shape appears; type the percentage you think is filled, and score by how close you are",
     "verbs": [
       "estimate"
     ],
@@ -880,7 +898,9 @@
       "data nerds compare"
     ],
     "difficulty_levers": [
-      "precision"
+      "precision",
+      "chart type",
+      "time"
     ],
     "tools": [
       "reveal",
@@ -905,7 +925,7 @@
     ],
     "family": "number_math",
     "summary": "Flip bits to make a number in binary, against the clock.",
-    "core_loop": "read the decimal → flip bits → match → next",
+    "core_loop": "Read a decimal number and flip bit switches until the binary value matches, racing the clock through a set",
     "verbs": [
       "convert",
       "toggle"
@@ -931,7 +951,9 @@
       "CS class battle"
     ],
     "difficulty_levers": [
-      "bit count"
+      "bit count",
+      "time",
+      "direction of conversion"
     ],
     "tools": [
       "grid_board",
@@ -956,7 +978,7 @@
     ],
     "family": "number_math",
     "summary": "Convert numbers to and from Roman numerals.",
-    "core_loop": "read → convert → type → next",
+    "core_loop": "Read a number in Arabic or Roman numerals, convert it to the other form, type it, and move to the next",
     "verbs": [
       "convert"
     ],
@@ -981,7 +1003,9 @@
       "trivia night bonus"
     ],
     "difficulty_levers": [
-      "range"
+      "range",
+      "direction of conversion",
+      "time"
     ],
     "tools": [
       "keyboard",
@@ -1006,7 +1030,7 @@
     ],
     "family": "number_math",
     "summary": "Tap the larger expression of two, fast.",
-    "core_loop": "compare two expressions → tap the bigger → next",
+    "core_loop": "Two expressions appear side by side; tap the larger one as fast as you can, with streaks building a multiplier",
     "verbs": [
       "compare",
       "react"
@@ -1032,7 +1056,9 @@
       "streak duels"
     ],
     "difficulty_levers": [
-      "expression complexity"
+      "expression complexity",
+      "speed",
+      "ties possible"
     ],
     "tools": [
       "quiz",
@@ -1057,7 +1083,7 @@
     ],
     "family": "number_math",
     "summary": "Trace a path through a number grid whose total equals the target.",
-    "core_loop": "trace cells → running total updates → hit the target at the exit",
+    "core_loop": "Trace a path through a grid of numbers from start to exit so the running total equals the target when you arrive",
     "verbs": [
       "add",
       "plan"
@@ -1084,7 +1110,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "operations",
+      "target size"
     ],
     "tools": [
       "grid_board",
@@ -1108,7 +1136,7 @@
     ],
     "family": "number_math",
     "summary": "Fill a square so every row, column and diagonal sums the same.",
-    "core_loop": "place numbers → check sums → fix → solve",
+    "core_loop": "Place numbers in a square grid so every row, column and diagonal adds to the same total, fixing sums until it works",
     "verbs": [
       "calculate",
       "place"
@@ -1136,7 +1164,8 @@
     ],
     "difficulty_levers": [
       "size",
-      "givens"
+      "givens",
+      "number set"
     ],
     "tools": [
       "grid_board",
@@ -1213,7 +1242,7 @@
     ],
     "family": "number_math",
     "summary": "Pick which package is the better deal by unit price.",
-    "core_loop": "compare two deals → tap the better → reveal",
+    "core_loop": "Two packages show prices and sizes; tap the better deal by unit price, then see the per-unit math",
     "verbs": [
       "calculate",
       "compare"
@@ -1239,7 +1268,9 @@
       "shopping friends"
     ],
     "difficulty_levers": [
-      "price closeness"
+      "price closeness",
+      "unit types",
+      "time"
     ],
     "tools": [
       "quiz",
@@ -1263,7 +1294,7 @@
     ],
     "family": "number_math",
     "summary": "Split a restaurant bill with tax and tip among friends; type each share.",
-    "core_loop": "read the bill → calculate shares → type → check",
+    "core_loop": "Read a restaurant bill, add tax and tip, split it among friends, and type each person's share",
     "verbs": [
       "calculate"
     ],
@@ -1289,7 +1320,8 @@
     ],
     "difficulty_levers": [
       "tip rate",
-      "people"
+      "people",
+      "uneven orders"
     ],
     "tools": [
       "keyboard",
@@ -1313,7 +1345,7 @@
     ],
     "family": "number_math",
     "summary": "Choose which of two events is more likely, then see the math.",
-    "core_loop": "read two events → pick → see odds",
+    "core_loop": "Read two possible events and pick which is more likely, then see the odds worked out and a quick simulation",
     "verbs": [
       "estimate",
       "compare"
@@ -1339,7 +1371,9 @@
       "stats class duel"
     ],
     "difficulty_levers": [
-      "closeness"
+      "closeness",
+      "event complexity",
+      "time"
     ],
     "tools": [
       "quiz",
@@ -1363,7 +1397,7 @@
     ],
     "family": "number_math",
     "summary": "Tap the coordinate on a grid as fast as possible.",
-    "core_loop": "read the coordinates → tap the grid → next",
+    "core_loop": "Read a pair of coordinates and tap that point on a grid as fast as possible, with points racing through all four quadrants",
     "verbs": [
       "locate"
     ],
@@ -1389,7 +1423,8 @@
     ],
     "difficulty_levers": [
       "quadrant",
-      "speed"
+      "speed",
+      "grid scale"
     ],
     "tools": [
       "grid_board",
@@ -1414,7 +1449,7 @@
     ],
     "family": "number_math",
     "summary": "Estimate the angle shown in degrees.",
-    "core_loop": "see the angle → type a guess → closeness scores",
+    "core_loop": "An angle appears; type your estimate in degrees and score by how close you are, with streaks for tight guesses",
     "verbs": [
       "estimate"
     ],
@@ -1440,7 +1475,9 @@
       "geometry duel"
     ],
     "difficulty_levers": [
-      "precision"
+      "precision",
+      "angle range",
+      "time"
     ],
     "tools": [
       "reveal",
@@ -1465,7 +1502,7 @@
     ],
     "family": "number_math",
     "summary": "Calculate a shape's area from given lengths.",
-    "core_loop": "read the shape → compute → type → check",
+    "core_loop": "Read a shape with labeled side lengths, compute its area, type it, and check; harder rounds combine shapes",
     "verbs": [
       "calculate"
     ],
@@ -1490,7 +1527,9 @@
       "homework helper battle"
     ],
     "difficulty_levers": [
-      "shape complexity"
+      "shape complexity",
+      "number size",
+      "time"
     ],
     "tools": [
       "keyboard",
@@ -1515,7 +1554,7 @@
     ],
     "family": "number_math",
     "summary": "Pop two bubbles that make the target number.",
-    "core_loop": "find a pair → pop both → new bubbles rise",
+    "core_loop": "Numbered bubbles rise; pop two that add up to the target before they float off the top",
     "verbs": [
       "add",
       "find"
@@ -1542,7 +1581,8 @@
     ],
     "difficulty_levers": [
       "target",
-      "rise speed"
+      "rise speed",
+      "bubble count"
     ],
     "tools": [
       "grid_board",
@@ -1567,7 +1607,7 @@
     ],
     "family": "number_math",
     "summary": "Round numbers to the asked place before time runs out.",
-    "core_loop": "read → round → type",
+    "core_loop": "Read a number and round it to the asked place value, typing each answer before the timer runs out",
     "verbs": [
       "round",
       "calculate"
@@ -1593,7 +1633,9 @@
       "class sprint"
     ],
     "difficulty_levers": [
-      "place value"
+      "place value",
+      "decimals",
+      "time"
     ],
     "tools": [
       "keyboard",
@@ -1617,7 +1659,7 @@
     ],
     "family": "number_math",
     "summary": "Slide rows of numbers so each column adds to its target.",
-    "core_loop": "slide a row → column sums update → match all targets",
+    "core_loop": "Slide rows of number tiles left or right until every column adds up to its target total",
     "verbs": [
       "slide",
       "add"
@@ -1644,7 +1686,8 @@
     ],
     "difficulty_levers": [
       "rows",
-      "numbers"
+      "numbers",
+      "moves allowed"
     ],
     "tools": [
       "tile_slide",
@@ -1668,7 +1711,7 @@
     ],
     "family": "number_math",
     "summary": "Set up a bet, simulate thousands of tries and guess the outcome before seeing it.",
-    "core_loop": "pick a bet → predict the result → run the simulation → compare",
+    "core_loop": "Pick a bet, predict how often it wins, then run thousands of simulated tries and compare your guess to the result",
     "verbs": [
       "predict",
       "estimate"
@@ -1695,7 +1738,9 @@
       "stats nerds compare"
     ],
     "difficulty_levers": [
-      "bet type"
+      "bet type",
+      "trials",
+      "guess tolerance"
     ],
     "tools": [
       "reveal",
@@ -1719,7 +1764,7 @@
     ],
     "family": "number_math",
     "summary": "Numbers flash quickly; add them all and type the total.",
-    "core_loop": "watch the flashes → add mentally → type the total",
+    "core_loop": "Numbers flash on screen one at a time; add them in your head and type the total at the end",
     "verbs": [
       "add",
       "remember"
@@ -1746,7 +1791,8 @@
     ],
     "difficulty_levers": [
       "count",
-      "speed"
+      "speed",
+      "number size"
     ],
     "tools": [
       "sequence_memory",
@@ -1825,7 +1871,7 @@
     ],
     "family": "number_math",
     "summary": "Repeatedly sum digits to reach a single digit quickly.",
-    "core_loop": "see a number → sum digits → repeat → type the root",
+    "core_loop": "See a large number, add its digits, repeat until one digit is left, and type that root as fast as you can",
     "verbs": [
       "calculate"
     ],
@@ -1850,7 +1896,9 @@
       "quick duels"
     ],
     "difficulty_levers": [
-      "number size"
+      "number size",
+      "time",
+      "streak target"
     ],
     "tools": [
       "keyboard",
@@ -1874,7 +1922,7 @@
     ],
     "family": "number_math",
     "summary": "Each brick is the sum of the two below; fill the missing bricks.",
-    "core_loop": "read the pyramid → fill bricks → check sums",
+    "core_loop": "Each brick equals the sum of the two below it; fill the missing bricks from the given ones until the pyramid checks out",
     "verbs": [
       "add",
       "deduce"
@@ -1902,7 +1950,8 @@
     ],
     "difficulty_levers": [
       "levels",
-      "givens"
+      "givens",
+      "operation"
     ],
     "tools": [
       "grid_board",
@@ -1927,7 +1976,7 @@
     ],
     "family": "number_math",
     "summary": "Work out the weekday of a given date.",
-    "core_loop": "read the date → compute → tap the weekday",
+    "core_loop": "Read a date and work out which weekday it falls on, then tap it; faster answers score more",
     "verbs": [
       "calculate",
       "recall"
@@ -1953,7 +2002,9 @@
       "party trick practice"
     ],
     "difficulty_levers": [
-      "year range"
+      "year range",
+      "time",
+      "hints"
     ],
     "tools": [
       "quiz",
@@ -1978,7 +2029,7 @@
     ],
     "family": "number_math",
     "summary": "Take objects from piles on your turn; whoever takes the last one wins.",
-    "core_loop": "pick a pile → take some → opponent moves → take the last",
+    "core_loop": "Take turns removing objects from piles; whoever takes the last object wins, so plan moves to leave a losing position",
     "verbs": [
       "plan",
       "calculate"
@@ -2006,7 +2057,8 @@
     ],
     "difficulty_levers": [
       "piles",
-      "take limit"
+      "take limit",
+      "last-taker loses variant"
     ],
     "tools": [
       "turns",

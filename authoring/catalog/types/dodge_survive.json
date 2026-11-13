@@ -8,7 +8,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Things fall from the sky; slide left and right to avoid them as they get faster.",
-    "core_loop": "slide → avoid falling things → speed rises → survive",
+    "core_loop": "Objects fall from the sky; slide left and right to avoid them as they come faster and denser, and survive as long as you can",
     "verbs": [
       "dodge",
       "move"
@@ -37,7 +37,8 @@
     ],
     "difficulty_levers": [
       "fall speed",
-      "density"
+      "density",
+      "object size"
     ],
     "tools": [
       "spawn_wave",
@@ -66,7 +67,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Move a small heart or shape in a box while patterns of projectiles sweep through.",
-    "core_loop": "patterns appear → weave through → survive the round",
+    "core_loop": "Move a small shape inside a box while patterns of projectiles sweep through it, and weave through each pattern to survive the round",
     "verbs": [
       "dodge",
       "read"
@@ -92,7 +93,9 @@
       "share clears"
     ],
     "difficulty_levers": [
-      "pattern speed"
+      "pattern speed",
+      "pattern density",
+      "box size"
     ],
     "tools": [
       "waves",
@@ -118,7 +121,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Stay inside a shrinking circle while hazards spawn; the edge hurts.",
-    "core_loop": "move → stay in the circle → dodge hazards → circle shrinks",
+    "core_loop": "Stay inside a circle that keeps shrinking while hazards spawn around you; touching the edge costs health",
     "verbs": [
       "move",
       "dodge"
@@ -145,7 +148,9 @@
       "last-one-standing with friends"
     ],
     "difficulty_levers": [
-      "shrink rate"
+      "shrink rate",
+      "hazard spawn rate",
+      "health"
     ],
     "tools": [
       "spawn_wave",
@@ -172,7 +177,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Tiles vanish after you step on them; keep moving and don't fall through.",
-    "core_loop": "run → tiles crumble behind you → plan a path → survive",
+    "core_loop": "Each floor tile crumbles a moment after you step on it; keep moving and plan a path so you don't fall through",
     "verbs": [
       "move",
       "plan"
@@ -200,7 +205,9 @@
       "last-one-standing with friends"
     ],
     "difficulty_levers": [
-      "crumble delay"
+      "crumble delay",
+      "floor layers",
+      "rivals"
     ],
     "tools": [
       "grid_board",
@@ -226,7 +233,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Enemies chase you around a maze or field; keep away and collect what you can.",
-    "core_loop": "move → enemies chase → grab items → survive",
+    "core_loop": "Enemies chase you around a maze or field; keep moving to stay away from them while collecting items for points",
     "verbs": [
       "flee",
       "collect"
@@ -255,7 +262,8 @@
     ],
     "difficulty_levers": [
       "chaser speed",
-      "count"
+      "count",
+      "item spawn rate"
     ],
     "tools": [
       "grid_board",
@@ -281,7 +289,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Eat every dot in a maze while ghosts hunt you; power pellets let you eat them briefly.",
-    "core_loop": "move through the maze → eat dots → power up → chase ghosts",
+    "core_loop": "Move through a maze eating every dot while ghosts hunt you; a power pellet lets you chase and eat them for a short time",
     "verbs": [
       "navigate",
       "eat",
@@ -310,7 +318,8 @@
     ],
     "difficulty_levers": [
       "ghost speed",
-      "power duration"
+      "power duration",
+      "ghost count"
     ],
     "tools": [
       "grid_board",
@@ -336,7 +345,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Lasers warn, then fire across the grid; step out of their lines in time.",
-    "core_loop": "see the warning lines → move off them → lasers fire → repeat",
+    "core_loop": "Warning lines flash across the grid, then lasers fire along them; step off the lines in time and survive each wave",
     "verbs": [
       "read",
       "dodge"
@@ -363,7 +372,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "warning time"
+      "warning time",
+      "lines per wave",
+      "grid size"
     ],
     "tools": [
       "grid_board",
@@ -388,7 +399,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Steer a ship through a field of drifting meteors; grab fuel to keep going.",
-    "core_loop": "steer → avoid meteors → grab fuel → go farther",
+    "core_loop": "Steer a ship through a field of drifting meteors, grabbing fuel cans to keep going farther before you run dry",
     "verbs": [
       "steer",
       "dodge",
@@ -416,7 +427,9 @@
       "distance board"
     ],
     "difficulty_levers": [
-      "meteor density"
+      "meteor density",
+      "fuel rate",
+      "ship speed"
     ],
     "tools": [
       "spawn_wave",
@@ -444,7 +457,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Barricade and move through a map avoiding zombies until sunrise; no weapons.",
-    "core_loop": "hide → move → patch barricades → wait for dawn",
+    "core_loop": "With no weapons, hide, move between rooms and patch barricades to avoid zombies until the sun comes up",
     "verbs": [
       "hide",
       "move",
@@ -472,7 +485,9 @@
       "compare nights survived"
     ],
     "difficulty_levers": [
-      "zombie count"
+      "zombie count",
+      "night length",
+      "barricade strength"
     ],
     "tools": [
       "spawn_wave",
@@ -497,7 +512,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Hop across roads and rivers to reach the far side, then go back for the next.",
-    "core_loop": "hop → time gaps → ride logs → reach home slots",
+    "core_loop": "Hop across busy roads and ride logs over a river, timing each hop through the gaps, to fill every home slot on the far side",
     "verbs": [
       "hop",
       "time"
@@ -524,7 +539,9 @@
       "arcade classic board"
     ],
     "difficulty_levers": [
-      "traffic speed"
+      "traffic speed",
+      "lanes",
+      "time limit"
     ],
     "tools": [
       "lanes",
@@ -549,7 +566,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Your dot orbits a circle; tap to switch direction and avoid incoming spikes.",
-    "core_loop": "orbit → tap to reverse → avoid spikes → survive",
+    "core_loop": "Your dot orbits a circle; tap to reverse its direction and avoid incoming spikes for as long as you can",
     "verbs": [
       "time",
       "switch"
@@ -575,7 +592,9 @@
       "quick streaks"
     ],
     "difficulty_levers": [
-      "spike speed"
+      "spike speed",
+      "spike rate",
+      "orbit speed"
     ],
     "tools": [
       "collide",
@@ -600,7 +619,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Move through spotlights and guard cones without being seen.",
-    "core_loop": "wait → move between cones → reach the exit unseen",
+    "core_loop": "Wait for the right moment, then move between spotlights and guards' view cones to reach the exit without being seen",
     "verbs": [
       "sneak",
       "time"
@@ -627,7 +646,9 @@
       "share stealth runs"
     ],
     "difficulty_levers": [
-      "guard count"
+      "guard count",
+      "cone size",
+      "patrol speed"
     ],
     "tools": [
       "grid_board",
@@ -652,7 +673,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Keep a ball from touching hazards by tilting or nudging the platform.",
-    "core_loop": "nudge → balance → avoid edges and holes → survive",
+    "core_loop": "Nudge or tilt a platform to keep a rolling ball away from the edges and holes for as long as possible",
     "verbs": [
       "balance",
       "nudge"
@@ -679,7 +700,9 @@
       "balance duels"
     ],
     "difficulty_levers": [
-      "hole count"
+      "hole count",
+      "ball speed",
+      "platform size"
     ],
     "tools": [
       "physics_world",
@@ -705,7 +728,7 @@
     ],
     "family": "dodge_survive",
     "summary": "A storm closes in; dash between shelters to wait out each wave.",
-    "core_loop": "dash → hide → wait out the wave → dash again",
+    "core_loop": "A storm comes in waves; dash between shelters during the calm and hide before each wave hits",
     "verbs": [
       "dash",
       "time"
@@ -731,7 +754,9 @@
       "daily storm"
     ],
     "difficulty_levers": [
-      "wave timing"
+      "wave timing",
+      "shelter spacing",
+      "wave length"
     ],
     "tools": [
       "waves",
@@ -757,7 +782,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Bump other players or bots off a shrinking platform while staying on.",
-    "core_loop": "move → bump others → avoid edges → last one on",
+    "core_loop": "Bump other players or bots off a shrinking platform while keeping yourself on; the last one standing wins",
     "verbs": [
       "push",
       "dodge"
@@ -783,7 +808,9 @@
       "party battles"
     ],
     "difficulty_levers": [
-      "platform size"
+      "platform size",
+      "shrink rate",
+      "players"
     ],
     "tools": [
       "physics_world",
@@ -808,7 +835,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Walk a corridor of swinging axes, saws and crushers by timing each step.",
-    "core_loop": "wait → step → time the hazard → next hazard",
+    "core_loop": "Walk a corridor of swinging axes, saws and crushers, waiting and timing each step to slip past each hazard",
     "verbs": [
       "time",
       "move"
@@ -834,7 +861,9 @@
       "ghost race"
     ],
     "difficulty_levers": [
-      "hazard speed"
+      "hazard speed",
+      "hazard count",
+      "checkpoints"
     ],
     "tools": [
       "collide",
@@ -859,7 +888,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Your trail stays behind you as a wall; trap opponents and don't hit any trail.",
-    "core_loop": "steer → leave a trail → box in rivals → survive",
+    "core_loop": "Your path leaves a wall behind you; steer to box in rivals while never crashing into any trail, including your own",
     "verbs": [
       "steer",
       "plan"
@@ -885,7 +914,9 @@
       "light cycle duels with a friend"
     ],
     "difficulty_levers": [
-      "speed"
+      "speed",
+      "rivals",
+      "arena size"
     ],
     "tools": [
       "grid_board",
@@ -910,7 +941,7 @@
     ],
     "family": "dodge_survive",
     "summary": "Water rises; move items and climb to stay above it as long as possible.",
-    "core_loop": "climb → stack → stay above water → survive",
+    "core_loop": "Water rises steadily; climb and stack items to stay above it for as long as possible",
     "verbs": [
       "climb",
       "stack"
@@ -937,7 +968,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "rise speed"
+      "rise speed",
+      "item supply",
+      "climb routes"
     ],
     "tools": [
       "physics_world",

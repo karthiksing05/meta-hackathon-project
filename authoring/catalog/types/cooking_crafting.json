@@ -65,7 +65,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Combine two elements to discover new ones until you've found them all.",
-    "core_loop": "drag two items together → a new item appears → combine more → fill the book",
+    "core_loop": "Drag two elements together to see if they make something new, then combine the results further until you've filled the whole discovery book",
     "verbs": [
       "combine",
       "discover"
@@ -91,7 +91,9 @@
       "compare discoveries with friends"
     ],
     "difficulty_levers": [
-      "element count"
+      "element count",
+      "hint rate",
+      "recipe depth"
     ],
     "tools": [
       "player_drag",
@@ -116,7 +118,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Grab ingredients, prep, cook and assemble orders before the ticket expires.",
-    "core_loop": "read the ticket → prep → cook → assemble → serve",
+    "core_loop": "Read each ticket, grab and prep ingredients, cook them and assemble the dish before the ticket expires",
     "verbs": [
       "prep",
       "assemble",
@@ -146,7 +148,9 @@
       "co-op kitchen with friends"
     ],
     "difficulty_levers": [
-      "ticket rate"
+      "ticket rate",
+      "prep steps",
+      "stations"
     ],
     "tools": [
       "timers",
@@ -171,7 +175,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Add ingredients and stir to steer a potion toward the effect you need.",
-    "core_loop": "add ingredients → stir → heat → bottle the right effect",
+    "core_loop": "Add ingredients that push the potion's effect in different directions, stir and heat it, and bottle it when it hits the target effect",
     "verbs": [
       "mix",
       "steer"
@@ -198,7 +202,9 @@
       "potion shop with friends"
     ],
     "difficulty_levers": [
-      "ingredient effects"
+      "ingredient effects",
+      "target size",
+      "heat control"
     ],
     "tools": [
       "player_drag",
@@ -222,7 +228,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Pipe frosting, place toppings and write a message to match an order or freestyle.",
-    "core_loop": "frost → pipe → add toppings → present",
+    "core_loop": "Pipe frosting, place toppings and write a message on a cake to match a customer's order or freestyle your own",
     "verbs": [
       "decorate",
       "draw"
@@ -249,7 +255,9 @@
       "decorate a birthday cake for a friend"
     ],
     "difficulty_levers": [
-      "order detail"
+      "order detail",
+      "tools available",
+      "time"
     ],
     "tools": [
       "drawing_canvas",
@@ -274,7 +282,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Add fruits to blend a smoothie that matches a target color and taste.",
-    "core_loop": "add fruits → blend → compare → serve",
+    "core_loop": "Add fruits to the blender, blend, and compare the color and taste to the target, adjusting until it matches",
     "verbs": [
       "mix",
       "compare"
@@ -300,7 +308,9 @@
       "daily blend"
     ],
     "difficulty_levers": [
-      "tolerance"
+      "tolerance",
+      "fruits available",
+      "blend count"
     ],
     "tools": [
       "reveal",
@@ -325,7 +335,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Place items in a grid pattern to craft tools and new materials.",
-    "core_loop": "gather → place in a pattern → craft → use",
+    "core_loop": "Gather materials, arrange them in a grid pattern to craft tools and new materials, and use those to craft more",
     "verbs": [
       "place",
       "craft"
@@ -351,7 +361,9 @@
       "share recipes"
     ],
     "difficulty_levers": [
-      "recipe complexity"
+      "recipe complexity",
+      "grid size",
+      "hint level"
     ],
     "tools": [
       "grid_board",
@@ -376,7 +388,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Shape spinning clay into a target vessel by pressing and lifting.",
-    "core_loop": "press → lift → shape → fire",
+    "core_loop": "Press and lift spinning clay to shape it into the target vessel, then fire it and compare the result",
     "verbs": [
       "shape"
     ],
@@ -401,7 +413,9 @@
       "share pots"
     ],
     "difficulty_levers": [
-      "target shape"
+      "target shape",
+      "wheel speed",
+      "clay wetness"
     ],
     "tools": [
       "physics_world",
@@ -425,7 +439,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Tap in rhythm to knit rows that follow a color pattern.",
-    "core_loop": "read the row → tap stitches → next row → finish the scarf",
+    "core_loop": "Read the color pattern for each row and tap stitches in rhythm to knit it, row by row, until the scarf is done",
     "verbs": [
       "follow",
       "tap"
@@ -450,7 +464,9 @@
       "knit a scarf for a friend"
     ],
     "difficulty_levers": [
-      "pattern size"
+      "pattern size",
+      "tempo",
+      "colors"
     ],
     "tools": [
       "grid_board",
@@ -474,7 +490,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Lay rice, fill, roll and slice sushi to order.",
-    "core_loop": "lay rice → add fillings → roll → slice evenly",
+    "core_loop": "Lay rice on the seaweed, add the ordered fillings, roll it tight and slice it into even pieces",
     "verbs": [
       "assemble",
       "slice"
@@ -501,7 +517,9 @@
       "sushi bar challenge"
     ],
     "difficulty_levers": [
-      "order complexity"
+      "order complexity",
+      "roll timing",
+      "slice count"
     ],
     "tools": [
       "timers",
@@ -525,7 +543,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Pour, shake and garnish drinks to exact recipes.",
-    "core_loop": "read the order → pour → shake → garnish → serve",
+    "core_loop": "Read the drink order, pour each ingredient in the right amount, shake and garnish it, then serve",
     "verbs": [
       "pour",
       "mix"
@@ -552,7 +570,9 @@
       "mocktail party challenge"
     ],
     "difficulty_levers": [
-      "recipe complexity"
+      "recipe complexity",
+      "pour precision",
+      "orders at once"
     ],
     "tools": [
       "timers",
@@ -576,7 +596,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "String beads in a pattern to make a bracelet.",
-    "core_loop": "pick beads → follow or invent a pattern → finish",
+    "core_loop": "Pick beads and string them to follow a pattern or invent your own, then finish the bracelet and share it",
     "verbs": [
       "arrange",
       "design"
@@ -602,7 +622,9 @@
       "make a friendship bracelet for a friend"
     ],
     "difficulty_levers": [
-      "pattern length"
+      "pattern length",
+      "bead colors",
+      "time"
     ],
     "tools": [
       "sequence_memory",
@@ -626,7 +648,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Heat, hammer on beats and quench metal into a weapon.",
-    "core_loop": "heat → hammer to the beat → quench at the right moment",
+    "core_loop": "Heat metal to the right glow, hammer it in time with the beat, and quench it at the right moment to forge a blade",
     "verbs": [
       "hammer",
       "time"
@@ -652,7 +674,9 @@
       "forge rivals"
     ],
     "difficulty_levers": [
-      "rhythm speed"
+      "rhythm speed",
+      "heat window",
+      "quench window"
     ],
     "tools": [
       "beat_target",
@@ -676,7 +700,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Mix notes to match a described scent profile.",
-    "core_loop": "read the profile → add notes → test → adjust",
+    "core_loop": "Read a described scent profile, add notes to the blend, test it, and adjust until it matches",
     "verbs": [
       "mix",
       "compare"
@@ -701,7 +725,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "notes"
+      "notes",
+      "profile complexity",
+      "tests allowed"
     ],
     "tools": [
       "reveal",
@@ -725,7 +751,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Watch each pancake brown and flip it at the perfect moment.",
-    "core_loop": "watch → flip on golden → stack",
+    "core_loop": "Watch several pancakes brown on the griddle and flip each at the perfect golden moment before stacking them",
     "verbs": [
       "time",
       "flip"
@@ -752,7 +778,9 @@
       "breakfast rush"
     ],
     "difficulty_levers": [
-      "heat"
+      "heat",
+      "pancakes at once",
+      "flip window"
     ],
     "tools": [
       "timers",
@@ -776,7 +804,7 @@
     ],
     "family": "cooking_crafting",
     "summary": "Mix, knead, proof and bake with timing for the perfect loaf.",
-    "core_loop": "mix → knead → wait → bake → judge",
+    "core_loop": "Mix and knead dough, let it proof, then bake it, timing each step to get the perfect loaf",
     "verbs": [
       "time",
       "knead"
@@ -802,7 +830,9 @@
       "baking club"
     ],
     "difficulty_levers": [
-      "windows"
+      "windows",
+      "steps",
+      "oven heat"
     ],
     "tools": [
       "timers",

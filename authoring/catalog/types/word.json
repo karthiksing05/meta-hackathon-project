@@ -1107,7 +1107,7 @@
     ],
     "family": "word",
     "summary": "Fill blanks in a word or phrase where some letters are hidden.",
-    "core_loop": "see the gapped word → type the full answer → next",
+    "core_loop": "See a word or phrase with some letters blanked out, type the whole answer, and reveal one more letter at a cost if you're stuck",
     "verbs": [
       "recall",
       "type"
@@ -1135,7 +1135,8 @@
     "difficulty_levers": [
       "letters hidden",
       "category",
-      "time"
+      "time",
+      "reveal cost"
     ],
     "tools": [
       "typed_answer",
@@ -1553,7 +1554,7 @@
     ],
     "family": "word",
     "summary": "Find words that rhyme with a prompt before time runs out.",
-    "core_loop": "see the prompt word → type rhymes → each rhyme scores",
+    "core_loop": "A prompt word appears; type as many real rhymes as you can before the timer ends, with longer or rarer rhymes scoring more",
     "verbs": [
       "rhyme",
       "type"
@@ -1581,7 +1582,9 @@
     ],
     "difficulty_levers": [
       "prompt difficulty",
-      "time"
+      "time",
+      "near rhymes allowed",
+      "minimum word length"
     ],
     "tools": [
       "typed_answer",
@@ -2374,7 +2377,7 @@
     ],
     "family": "word",
     "summary": "Answer a riddle by typing the answer.",
-    "core_loop": "read the riddle → type your answer → take a hint if stuck",
+    "core_loop": "Read a short riddle, type the answer, and spend a hint to reveal a letter or a nudge if you're stuck; fewer hints means more points",
     "verbs": [
       "think",
       "type"
@@ -2403,7 +2406,8 @@
     ],
     "difficulty_levers": [
       "hint count",
-      "difficulty"
+      "difficulty",
+      "answer length"
     ],
     "tools": [
       "typed_answer",
@@ -2430,7 +2434,7 @@
     ],
     "family": "word",
     "summary": "Pick or type the punchline that completes a pun.",
-    "core_loop": "read the setup → pick or type the punchline → group votes",
+    "core_loop": "Read a pun's setup, pick or type the punchline, then the group votes on the best wordplay among everyone's answers",
     "verbs": [
       "complete",
       "vote"
@@ -2459,7 +2463,8 @@
     ],
     "difficulty_levers": [
       "choices",
-      "time"
+      "time",
+      "open answers vs picks"
     ],
     "tools": [
       "quiz",
@@ -2593,7 +2598,7 @@
     ],
     "family": "word",
     "summary": "Find the misspelled word in each list or sentence.",
-    "core_loop": "read the list → tap the misspelled word → next, faster",
+    "core_loop": "Scan a list or sentence and tap the one misspelled word before the timer; each round gets longer and the typos subtler",
     "verbs": [
       "spot",
       "read"
@@ -2620,7 +2625,8 @@
     ],
     "difficulty_levers": [
       "subtlety",
-      "time"
+      "time",
+      "list length"
     ],
     "tools": [
       "quiz",
@@ -2647,7 +2653,7 @@
     ],
     "family": "word",
     "summary": "Spin letter dials on a lock to form the one valid word that opens it.",
-    "core_loop": "spin letter dials → line up a real word → the lock opens",
+    "core_loop": "Spin several letter dials until the letters across them spell the one valid word that opens the lock; fewer spins score more",
     "verbs": [
       "spin",
       "spell"
@@ -2676,7 +2682,8 @@
     ],
     "difficulty_levers": [
       "dial count",
-      "letters per dial"
+      "letters per dial",
+      "spin limit"
     ],
     "tools": [
       "tile_slide",

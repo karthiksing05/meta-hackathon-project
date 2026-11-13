@@ -62,7 +62,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "A small 4x4 or 6x6 number-place puzzle for quick sessions.",
-    "core_loop": "tap a cell → place a number → finish the small grid",
+    "core_loop": "Tap a cell in a small 4x4 or 6x6 grid and place a number so no row, column or box repeats, finishing in a few minutes",
     "verbs": [
       "deduce",
       "place"
@@ -89,7 +89,9 @@
       "quick daily race"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "givens shown",
+      "pencil marks"
     ],
     "tools": [
       "grid_board",
@@ -116,7 +118,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Place one queen per row, column and colored region with no two touching.",
-    "core_loop": "place a queen → mark impossible cells → satisfy all regions",
+    "core_loop": "Place one queen in each row, column and colored region so no two queens touch, marking impossible cells as you go",
     "verbs": [
       "deduce",
       "place"
@@ -145,7 +147,8 @@
     ],
     "difficulty_levers": [
       "grid size",
-      "region shapes"
+      "region shapes",
+      "auto-marking"
     ],
     "tools": [
       "grid_board",
@@ -173,7 +176,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Use row and column number clues to fill cells and reveal a hidden picture.",
-    "core_loop": "read clues → fill or cross cells → the picture forms",
+    "core_loop": "Read the number clues on each row and column, fill or cross out cells to match them, and watch a hidden picture appear",
     "verbs": [
       "deduce",
       "fill"
@@ -202,7 +205,8 @@
     ],
     "difficulty_levers": [
       "grid size",
-      "clue ambiguity"
+      "clue ambiguity",
+      "colors"
     ],
     "tools": [
       "grid_board",
@@ -280,7 +284,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Tapping a light toggles it and its neighbors; turn them all off.",
-    "core_loop": "tap a light → it and its neighbors flip → plan → all off",
+    "core_loop": "Tap a light to flip it and its neighbors; plan a sequence of taps that turns every light off in as few moves as possible",
     "verbs": [
       "toggle",
       "plan"
@@ -307,7 +311,8 @@
     ],
     "difficulty_levers": [
       "grid size",
-      "starting pattern"
+      "starting pattern",
+      "move limit"
     ],
     "tools": [
       "grid_board",
@@ -332,7 +337,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Slide numbered tiles into the empty space until they're in order.",
-    "core_loop": "slide a tile → work row by row → order every tile",
+    "core_loop": "Slide numbered tiles into the one empty space, working row by row until every tile is in order, in as few moves as you can",
     "verbs": [
       "slide",
       "plan"
@@ -359,7 +364,9 @@
       "turn a friend's photo into the puzzle"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "move limit",
+      "picture tiles"
     ],
     "tools": [
       "tile_slide",
@@ -384,7 +391,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Ferry characters across a river without leaving a forbidden pair alone.",
-    "core_loop": "pick who rides → cross → check pairs → finish",
+    "core_loop": "Pick who rides the boat, cross the river, and check that no forbidden pair is left alone on either bank until everyone is across",
     "verbs": [
       "plan",
       "deduce"
@@ -412,7 +419,8 @@
     ],
     "difficulty_levers": [
       "riders",
-      "rules"
+      "rules",
+      "boat capacity"
     ],
     "tools": [
       "turns",
@@ -436,7 +444,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Move a stack of disks to another peg, never putting a bigger disk on a smaller one.",
-    "core_loop": "pick a disk → move it → never bigger on smaller → move the whole tower",
+    "core_loop": "Move disks one at a time between pegs, never putting a bigger disk on a smaller one, until the whole tower is on the target peg",
     "verbs": [
       "plan",
       "move"
@@ -464,7 +472,9 @@
       "beat the minimum moves"
     ],
     "difficulty_levers": [
-      "disk count"
+      "disk count",
+      "peg count",
+      "move limit"
     ],
     "tools": [
       "player_drag",
@@ -489,7 +499,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Connect numbered islands with bridges so each has its number of bridges and all connect.",
-    "core_loop": "draw a bridge → islands count up → no crossings → everything connects",
+    "core_loop": "Draw single or double bridges between numbered islands so each island has its number of bridges, none cross, and all connect",
     "verbs": [
       "connect",
       "deduce"
@@ -516,7 +526,9 @@
       "daily puzzle times"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "island count",
+      "hint level"
     ],
     "tools": [
       "grid_board",
@@ -541,7 +553,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Draw one loop along grid edges; numbers say how many sides of each cell it uses.",
-    "core_loop": "draw edges → match numbers → close one loop",
+    "core_loop": "Draw edges on a grid to make one closed loop, where each number says how many of that cell's four sides the loop uses",
     "verbs": [
       "deduce",
       "draw"
@@ -568,7 +580,9 @@
       "daily times"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "clue density",
+      "cell shape"
     ],
     "tools": [
       "grid_board",
@@ -594,7 +608,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Place bulbs so every cell is lit; numbered walls say how many bulbs touch them.",
-    "core_loop": "place a bulb → light spreads → no bulbs see each other → light every cell",
+    "core_loop": "Place bulbs in white cells so every cell is lit, no two bulbs see each other, and numbered walls touch their count of bulbs",
     "verbs": [
       "deduce",
       "place"
@@ -621,7 +635,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "clue density",
+      "wall count"
     ],
     "tools": [
       "grid_board",
@@ -645,7 +661,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Fill white cells with 1–9 so each run adds to its clue, with no repeats in a run.",
-    "core_loop": "pick a run → choose digits that sum → fill the grid",
+    "core_loop": "Fill each white run with digits 1 to 9 that add up to its clue with no repeated digit in a run, until the grid is full",
     "verbs": [
       "calculate",
       "deduce"
@@ -671,7 +687,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "run length",
+      "hints"
     ],
     "tools": [
       "grid_board",
@@ -749,7 +767,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Place one tent next to each tree; tents can't touch; row and column counts must match.",
-    "core_loop": "place a tent by a tree → match row counts → no touching tents",
+    "core_loop": "Place one tent next to each tree so no tents touch, even diagonally, and each row and column has its listed number of tents",
     "verbs": [
       "deduce",
       "place"
@@ -776,7 +794,9 @@
       "camping-themed group puzzle"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "tree density",
+      "hints"
     ],
     "tools": [
       "grid_board",
@@ -801,7 +821,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Deduce where a fleet of ships hides using row and column ship counts.",
-    "core_loop": "read counts → place ship parts → complete the fleet",
+    "core_loop": "Use row and column counts and a few revealed cells to deduce and place every ship in a hidden fleet",
     "verbs": [
       "deduce",
       "place"
@@ -829,7 +849,8 @@
     ],
     "difficulty_levers": [
       "grid size",
-      "fleet"
+      "fleet",
+      "revealed cells"
     ],
     "tools": [
       "grid_board",
@@ -855,7 +876,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Fill a grid with two colors so no three in a row match and rows and columns balance.",
-    "core_loop": "tap to color → avoid three in a row → balance counts → no duplicate rows",
+    "core_loop": "Fill a grid with two colors so no three in a row match, each row and column is balanced, and no two rows are identical",
     "verbs": [
       "deduce",
       "fill"
@@ -884,7 +905,9 @@
       "daily times"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "givens shown",
+      "mistake checks"
     ],
     "tools": [
       "grid_board",
@@ -911,7 +934,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Rotate pipe tiles so water flows from the source to every outlet.",
-    "core_loop": "tap to rotate a tile → connect the flow → no leaks",
+    "core_loop": "Tap pipe tiles to rotate them until water flows from the source to every outlet with no open ends leaking",
     "verbs": [
       "rotate",
       "connect"
@@ -938,7 +961,8 @@
     ],
     "difficulty_levers": [
       "grid size",
-      "leak rule"
+      "leak rule",
+      "wraparound edges"
     ],
     "tools": [
       "grid_board",
@@ -963,7 +987,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Connect pairs of matching dots with paths that fill the whole board and never cross.",
-    "core_loop": "drag from a dot → reach its pair → fill every cell",
+    "core_loop": "Drag a path from each colored dot to its matching pair so paths never cross and together fill every cell of the board",
     "verbs": [
       "connect",
       "plan"
@@ -992,7 +1016,8 @@
     ],
     "difficulty_levers": [
       "grid size",
-      "pairs"
+      "pairs",
+      "bridges"
     ],
     "tools": [
       "grid_board",
@@ -1017,7 +1042,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Place and rotate mirrors to guide a laser to its target.",
-    "core_loop": "place mirrors → rotate → fire → hit every target",
+    "core_loop": "Place and rotate mirrors on a grid, then fire the laser and adjust until the beam hits every target",
     "verbs": [
       "reflect",
       "plan"
@@ -1046,7 +1071,8 @@
     ],
     "difficulty_levers": [
       "grid size",
-      "targets"
+      "targets",
+      "mirrors available"
     ],
     "tools": [
       "grid_board",
@@ -1072,7 +1098,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Slide cars forward and back to clear a path for the red car.",
-    "core_loop": "slide a car → open a path → red car exits",
+    "core_loop": "Slide cars forward or backward along their lanes to open a path so the marked car can drive out, in as few moves as possible",
     "verbs": [
       "slide",
       "plan"
@@ -1098,7 +1124,9 @@
       "share move counts"
     ],
     "difficulty_levers": [
-      "traffic density"
+      "traffic density",
+      "move limit",
+      "truck count"
     ],
     "tools": [
       "tile_slide",
@@ -1123,7 +1151,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Push boxes onto goal squares; boxes can only be pushed, never pulled.",
-    "core_loop": "move → push a box → don't trap it → every box on a goal",
+    "core_loop": "Walk around a warehouse and push boxes onto goal squares, careful not to push a box into a corner where it gets stuck",
     "verbs": [
       "push",
       "plan"
@@ -1151,7 +1179,8 @@
     ],
     "difficulty_levers": [
       "level size",
-      "boxes"
+      "boxes",
+      "undo limit"
     ],
     "tools": [
       "grid_board",
@@ -1177,7 +1206,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Slide across ice until you hit a wall; plan stops to reach the exit.",
-    "core_loop": "pick a direction → slide until blocked → plan the route → exit",
+    "core_loop": "Pick a direction and slide across the ice until you hit a rock or wall; plan a chain of stops that reaches the exit",
     "verbs": [
       "slide",
       "plan"
@@ -1203,7 +1232,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "rocks placement"
+      "rocks placement",
+      "move limit",
+      "maze size"
     ],
     "tools": [
       "grid_board",
@@ -1228,7 +1259,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Draw a figure in one continuous line without lifting or retracing an edge.",
-    "core_loop": "start at a point → trace edges → use every edge once",
+    "core_loop": "Trace a figure in one continuous line, using every edge exactly once without lifting your finger or retracing",
     "verbs": [
       "trace",
       "plan"
@@ -1255,7 +1286,9 @@
       "share attempts"
     ],
     "difficulty_levers": [
-      "edges"
+      "edges",
+      "one-way edges",
+      "figure size"
     ],
     "tools": [
       "player_drag",
@@ -1280,7 +1313,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Draw one path from start that visits every cell exactly once.",
-    "core_loop": "draw from the start → cover every cell → end anywhere",
+    "core_loop": "Draw one path from the start cell that visits every open cell exactly once, routing around blocked cells",
     "verbs": [
       "plan",
       "trace"
@@ -1308,7 +1341,8 @@
     ],
     "difficulty_levers": [
       "grid size",
-      "blockers"
+      "blockers",
+      "fixed end"
     ],
     "tools": [
       "grid_board",
@@ -1333,7 +1367,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Place two stars in every row, column and region, never touching.",
-    "core_loop": "place stars → mark blanks → satisfy all regions",
+    "core_loop": "Place stars so every row, column and region has the right number, and no two stars touch, even diagonally",
     "verbs": [
       "deduce",
       "place"
@@ -1360,7 +1394,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "stars per region"
+      "stars per region",
+      "grid size",
+      "region shapes"
     ],
     "tools": [
       "grid_board",
@@ -1384,7 +1420,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Shade cells so no number repeats in a row or column, shaded cells don't touch, and unshaded cells connect.",
-    "core_loop": "shade a cell → check repeats → keep unshaded cells connected",
+    "core_loop": "Shade cells so no number repeats in any row or column, no two shaded cells touch, and all unshaded cells stay connected",
     "verbs": [
       "deduce",
       "shade"
@@ -1411,7 +1447,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "repeat density",
+      "hints"
     ],
     "tools": [
       "grid_board",
@@ -1435,7 +1473,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Shade the sea so each number makes an island of that size and the sea is one connected body.",
-    "core_loop": "grow islands → shade the sea → no 2x2 sea pools",
+    "core_loop": "Shade cells so each number grows an island of exactly that size, the shaded sea is one connected body, and no 2x2 block is sea",
     "verbs": [
       "deduce",
       "shade"
@@ -1462,7 +1500,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "island count",
+      "hints"
     ],
     "tools": [
       "grid_board",
@@ -1486,7 +1526,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Fit seven geometric pieces together to fill a silhouette.",
-    "core_loop": "drag a piece → rotate or flip → fill the outline",
+    "core_loop": "Drag, rotate and flip seven geometric pieces until together they exactly fill a silhouette with no overlaps",
     "verbs": [
       "arrange",
       "rotate"
@@ -1513,7 +1553,9 @@
       "make silhouettes for friends"
     ],
     "difficulty_levers": [
-      "silhouette complexity"
+      "silhouette complexity",
+      "outline hints",
+      "flips allowed"
     ],
     "tools": [
       "player_drag",
@@ -1538,7 +1580,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Fit a set of polyomino pieces into a box with no gaps.",
-    "core_loop": "pick a piece → rotate → place → fill the box",
+    "core_loop": "Pick polyomino pieces, rotate them, and place them until they fill the box with no gaps or overlaps",
     "verbs": [
       "fit",
       "rotate"
@@ -1567,7 +1609,8 @@
     ],
     "difficulty_levers": [
       "box size",
-      "pieces"
+      "pieces",
+      "rotation allowed"
     ],
     "tools": [
       "grid_board",
@@ -1592,7 +1635,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Move a set number of matchsticks to fix an equation or make a shape.",
-    "core_loop": "read the goal → move sticks → check",
+    "core_loop": "Read the goal, then move the allowed number of matchsticks to fix a wrong equation or turn one shape into another",
     "verbs": [
       "move",
       "reason"
@@ -1618,7 +1661,9 @@
       "share with friends"
     ],
     "difficulty_levers": [
-      "moves allowed"
+      "moves allowed",
+      "puzzle type",
+      "hints"
     ],
     "tools": [
       "player_drag",
@@ -1643,7 +1688,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Move a knight so it visits every square exactly once.",
-    "core_loop": "jump in an L → don't revisit → cover the board",
+    "core_loop": "Move a knight in L-shaped jumps so it lands on every square of the board exactly once",
     "verbs": [
       "plan",
       "move"
@@ -1670,7 +1715,9 @@
       "share boards completed"
     ],
     "difficulty_levers": [
-      "board size"
+      "board size",
+      "start square",
+      "blocked squares"
     ],
     "tools": [
       "grid_board",
@@ -1694,7 +1741,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Place gears so turning the first one turns the last in the right direction.",
-    "core_loop": "place a gear → mesh teeth → test spin",
+    "core_loop": "Place gears on pegs so their teeth mesh from the motor to the last gear, then spin to check it turns the right way",
     "verbs": [
       "connect",
       "plan"
@@ -1720,7 +1767,9 @@
       "fewest gears challenge"
     ],
     "difficulty_levers": [
-      "board size"
+      "board size",
+      "gear sizes",
+      "direction required"
     ],
     "tools": [
       "player_drag",
@@ -1745,7 +1794,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Place AND, OR and NOT gates so the outputs light up for the given inputs.",
-    "core_loop": "place gates → wire inputs → test → all outputs right",
+    "core_loop": "Place AND, OR and NOT gates and wire them so every output lights correctly for each set of test inputs",
     "verbs": [
       "wire",
       "reason"
@@ -1772,7 +1821,9 @@
       "CS class challenge"
     ],
     "difficulty_levers": [
-      "gates available"
+      "gates available",
+      "inputs",
+      "outputs"
     ],
     "tools": [
       "grid_board",
@@ -1797,7 +1848,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Flip switches in the right order; each one changes others by a hidden rule.",
-    "core_loop": "flip a switch → watch what changes → infer the rule → solve",
+    "core_loop": "Flip switches and watch which others change, work out the hidden rule, and find the order that sets every switch right",
     "verbs": [
       "experiment",
       "deduce"
@@ -1823,7 +1874,9 @@
       "escape-room style for friends"
     ],
     "difficulty_levers": [
-      "switch count"
+      "switch count",
+      "rule complexity",
+      "flips allowed"
     ],
     "tools": [
       "grid_board",
@@ -1848,7 +1901,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Use a balance scale a limited number of times to find the odd weight.",
-    "core_loop": "pick items → weigh → read tilt → narrow down",
+    "core_loop": "Choose items for each side of a balance scale, read which way it tips, and find the odd weight within the allowed weighings",
     "verbs": [
       "weigh",
       "deduce"
@@ -1876,7 +1929,8 @@
     ],
     "difficulty_levers": [
       "items",
-      "weighings"
+      "weighings",
+      "heavier or lighter unknown"
     ],
     "tools": [
       "sort_bins",
@@ -1901,7 +1955,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Some characters always lie, some always tell the truth; work out who is who.",
-    "core_loop": "read statements → test cases → assign roles",
+    "core_loop": "Read what each character says, test who could be lying, and assign every character as a truth-teller or a liar",
     "verbs": [
       "reason",
       "deduce"
@@ -1927,7 +1981,9 @@
       "make one starring your friends"
     ],
     "difficulty_levers": [
-      "characters"
+      "characters",
+      "statement types",
+      "random speakers"
     ],
     "tools": [
       "quiz",
@@ -1953,7 +2009,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Fill, empty and pour between jugs to measure an exact amount.",
-    "core_loop": "fill or empty → pour → reach the target",
+    "core_loop": "Fill, empty and pour between jugs of fixed sizes until one of them holds the exact target amount",
     "verbs": [
       "pour",
       "plan"
@@ -1980,7 +2036,9 @@
       "share steps"
     ],
     "difficulty_levers": [
-      "jug sizes"
+      "jug sizes",
+      "jug count",
+      "move limit"
     ],
     "tools": [
       "turns",
@@ -2004,7 +2062,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Change the color of the corner region to grow it until the whole board is one color within a move limit.",
-    "core_loop": "pick a color → the region grows → fill the board",
+    "core_loop": "Pick a color to recolor your corner region so it absorbs neighbors of that color, and flood the whole board within a move limit",
     "verbs": [
       "plan",
       "choose"
@@ -2058,7 +2116,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Fill a grid with consecutive numbers so each touches the next.",
-    "core_loop": "place the next number → keep the chain touching → fill the grid",
+    "core_loop": "Place consecutive numbers in a grid so each one touches the next, filling the gaps around the given numbers",
     "verbs": [
       "place",
       "deduce"
@@ -2085,7 +2143,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "givens shown",
+      "diagonal links"
     ],
     "tools": [
       "grid_board",
@@ -2109,7 +2169,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Rotate rings of tiles to line up a picture or colors.",
-    "core_loop": "rotate a ring → tiles shift → line up all rings",
+    "core_loop": "Rotate concentric rings of tiles so their pieces line up into a full picture or matching colored spokes",
     "verbs": [
       "rotate",
       "plan"
@@ -2137,7 +2197,8 @@
     ],
     "difficulty_levers": [
       "rings",
-      "tiles"
+      "tiles",
+      "linked rings"
     ],
     "tools": [
       "tile_slide",
@@ -2162,7 +2223,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Guess a hidden color or number code; feedback says right-place and right-color counts.",
-    "core_loop": "guess a code → read feedback → narrow → crack it",
+    "core_loop": "Guess a hidden code of colors or digits, read how many are right and in place or right but misplaced, and crack it",
     "verbs": [
       "deduce",
       "guess"
@@ -2190,7 +2251,8 @@
     ],
     "difficulty_levers": [
       "code length",
-      "colors"
+      "colors",
+      "repeats allowed"
     ],
     "tools": [
       "grid_board",
@@ -2215,7 +2277,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Reveal safe cells; numbers count adjacent mines; flag every mine.",
-    "core_loop": "reveal a cell → read numbers → flag mines → clear the board",
+    "core_loop": "Reveal a cell, read how many mines touch it, flag cells you're sure of, and clear every safe cell without hitting a mine",
     "verbs": [
       "deduce",
       "reveal"
@@ -2245,7 +2307,8 @@
     ],
     "difficulty_levers": [
       "board size",
-      "mine density"
+      "mine density",
+      "no-guess boards"
     ],
     "tools": [
       "grid_board",
@@ -2272,7 +2335,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Link cells so each arrow points to the next one in a single path.",
-    "core_loop": "follow an arrow → pick the next cell → finish the chain",
+    "core_loop": "Starting from the first cell, link cells into one path where each arrow points along the direction to the next cell",
     "verbs": [
       "deduce",
       "link"
@@ -2298,7 +2361,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "givens shown",
+      "arrow types"
     ],
     "tools": [
       "grid_board",
@@ -2322,7 +2387,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Fill cells to make the pattern symmetric across the given axis.",
-    "core_loop": "read the axis → mirror cells → finish",
+    "core_loop": "Read the mirror axis and fill cells so the pattern on one side exactly mirrors the other",
     "verbs": [
       "mirror",
       "fill"
@@ -2348,7 +2413,9 @@
       "kids and parents"
     ],
     "difficulty_levers": [
-      "axes"
+      "axes",
+      "pattern size",
+      "time"
     ],
     "tools": [
       "grid_board",
@@ -2373,7 +2440,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Find clues and combine items to open a sequence of locks.",
-    "core_loop": "search → find a clue → solve a lock → next lock → escape",
+    "core_loop": "Search a room for clues, combine items, and solve one lock after another until the final door opens",
     "verbs": [
       "search",
       "combine",
@@ -2402,7 +2469,8 @@
     ],
     "difficulty_levers": [
       "locks",
-      "hints"
+      "hints",
+      "red herrings"
     ],
     "tools": [
       "choice_story",
@@ -2428,7 +2496,7 @@
     ],
     "family": "logic_puzzle",
     "summary": "Read riddles to work out each digit of a combination lock.",
-    "core_loop": "read the riddle → work out a digit → set the lock → open",
+    "core_loop": "Read a riddle for each digit of a combination, work out the numbers, set the lock dials and try to open it",
     "verbs": [
       "reason",
       "deduce"
@@ -2455,7 +2523,9 @@
       "send a lock to a friend"
     ],
     "difficulty_levers": [
-      "digits"
+      "digits",
+      "riddle difficulty",
+      "tries"
     ],
     "tools": [
       "hint",

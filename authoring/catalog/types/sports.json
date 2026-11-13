@@ -67,7 +67,7 @@
     ],
     "family": "sports",
     "summary": "Flick the ball toward the hoop; arc and power decide the shot; the hoop may move.",
-    "core_loop": "flick → the ball arcs → swish or rim → next ball",
+    "core_loop": "Flick the ball toward the hoop; the swipe's angle and speed set the arc and power, and the hoop may start moving as your streak grows",
     "verbs": [
       "flick",
       "aim"
@@ -95,7 +95,8 @@
     ],
     "difficulty_levers": [
       "hoop movement",
-      "time"
+      "time",
+      "distance"
     ],
     "tools": [
       "physics_world",
@@ -122,7 +123,7 @@
     ],
     "family": "sports",
     "summary": "Drag back to set aim and power, then putt around obstacles in as few strokes as possible.",
-    "core_loop": "drag back → release → the ball rolls and bounces → sink it",
+    "core_loop": "Drag back to aim and set power, release to putt, and bank the ball around obstacles to sink it in as few strokes as possible",
     "verbs": [
       "aim",
       "putt"
@@ -152,7 +153,8 @@
     ],
     "difficulty_levers": [
       "slopes",
-      "obstacles"
+      "obstacles",
+      "hole layout"
     ],
     "tools": [
       "physics_world",
@@ -178,7 +180,7 @@
     ],
     "family": "sports",
     "summary": "Tap to start the swing, again for power, and again for accuracy on a sweeping meter.",
-    "core_loop": "tap start → tap power → tap accuracy → watch the ball fly",
+    "core_loop": "Tap to start the swing, tap again to set power, and tap a third time on the sweeping meter for accuracy, then watch the ball fly",
     "verbs": [
       "time",
       "aim"
@@ -205,7 +207,8 @@
     ],
     "difficulty_levers": [
       "wind",
-      "meter speed"
+      "meter speed",
+      "lie"
     ],
     "tools": [
       "timer_bar",
@@ -231,7 +234,7 @@
     ],
     "family": "sports",
     "summary": "Swipe to roll the ball with spin into the pins; strikes and spares score bonuses.",
-    "core_loop": "aim → swipe with spin → pins fall → second roll",
+    "core_loop": "Aim, then swipe to roll the ball with spin into the pins; strikes and spares carry bonus points into the next frame",
     "verbs": [
       "aim",
       "swipe"
@@ -261,7 +264,8 @@
     ],
     "difficulty_levers": [
       "lane oil",
-      "spin control"
+      "spin control",
+      "pin setups"
     ],
     "tools": [
       "physics_world",
@@ -339,7 +343,7 @@
     ],
     "family": "sports",
     "summary": "Aim pitches at the corners; the batter swings at the predictable ones.",
-    "core_loop": "pick a pitch → aim → throw → strike or hit",
+    "core_loop": "Pick a pitch type, aim it at a corner of the zone and throw; the batter swings at predictable pitches, so mix them up",
     "verbs": [
       "aim",
       "choose"
@@ -365,7 +369,9 @@
       "duel a friend as batter"
     ],
     "difficulty_levers": [
-      "batter skill"
+      "batter skill",
+      "pitch types",
+      "zone size"
     ],
     "tools": [
       "turns",
@@ -447,7 +453,7 @@
     ],
     "family": "sports",
     "summary": "Move your paddle to return the ball; miss and the other side scores.",
-    "core_loop": "move the paddle → return the ball → angle shots → first to 11",
+    "core_loop": "Slide your paddle to return the ball, angling shots off its edge, and score when the other side misses; first to 11 wins",
     "verbs": [
       "move",
       "react"
@@ -473,7 +479,9 @@
       "two-player on one phone"
     ],
     "difficulty_levers": [
-      "ball speed"
+      "ball speed",
+      "paddle size",
+      "spin"
     ],
     "tools": [
       "physics_world",
@@ -498,7 +506,7 @@
     ],
     "family": "sports",
     "summary": "Slide your mallet to smack the puck into the opponent's goal.",
-    "core_loop": "slide → hit the puck → defend → score",
+    "core_loop": "Slide your mallet to smack the puck off the walls into the opponent's goal while defending your own",
     "verbs": [
       "slide",
       "hit",
@@ -526,7 +534,9 @@
       "head-to-head on one phone"
     ],
     "difficulty_levers": [
-      "puck speed"
+      "puck speed",
+      "goal size",
+      "opponent skill"
     ],
     "tools": [
       "physics_world",
@@ -553,7 +563,7 @@
     ],
     "family": "sports",
     "summary": "Flick the ball past a wall of defenders into the net.",
-    "core_loop": "flick → curve around defenders → score",
+    "core_loop": "Flick the ball with curve past a wall of defenders and the keeper into the net",
     "verbs": [
       "flick",
       "aim"
@@ -579,7 +589,9 @@
       "free kick challenge"
     ],
     "difficulty_levers": [
-      "wall size"
+      "wall size",
+      "keeper skill",
+      "distance"
     ],
     "tools": [
       "physics_world",
@@ -604,7 +616,7 @@
     ],
     "family": "sports",
     "summary": "Tap the ball to keep it in the air; don't let it touch the ground.",
-    "core_loop": "tap under the ball → it bounces up → keep it going",
+    "core_loop": "Tap under the ball to bounce it up and keep it in the air; each touch scores, and one drop ends the run",
     "verbs": [
       "tap",
       "react"
@@ -632,7 +644,8 @@
     ],
     "difficulty_levers": [
       "gravity",
-      "ball size"
+      "ball size",
+      "wind"
     ],
     "tools": [
       "physics_world",
@@ -657,7 +670,7 @@
     ],
     "family": "sports",
     "summary": "Pull back, account for wind and release to hit the bullseye.",
-    "core_loop": "draw → adjust for wind → release → score rings",
+    "core_loop": "Pull back the bow, adjust for wind and distance, hold steady through the sway and release to score rings on the target",
     "verbs": [
       "aim",
       "steady"
@@ -686,7 +699,8 @@
     ],
     "difficulty_levers": [
       "wind",
-      "distance"
+      "distance",
+      "sway"
     ],
     "tools": [
       "physics_world",
@@ -712,7 +726,7 @@
     ],
     "family": "sports",
     "summary": "Flick darts at a board; play 501 down to zero, finishing on a double.",
-    "core_loop": "flick → the dart lands → subtract the score → finish exactly",
+    "core_loop": "Flick darts at a board to count down from 501 to exactly zero, finishing on a double",
     "verbs": [
       "aim",
       "flick",
@@ -739,7 +753,9 @@
       "pub darts with friends"
     ],
     "difficulty_levers": [
-      "wobble"
+      "wobble",
+      "starting score",
+      "finish rule"
     ],
     "tools": [
       "physics_world",
@@ -764,7 +780,7 @@
     ],
     "family": "sports",
     "summary": "Toss bags onto a board; in the hole scores most.",
-    "core_loop": "aim → toss → land on the board or in → alternate",
+    "core_loop": "Aim and toss bags at a slanted board; bags on the board score one and bags in the hole score three, alternating with an opponent",
     "verbs": [
       "aim",
       "toss"
@@ -790,7 +806,9 @@
       "tailgate game with friends"
     ],
     "difficulty_levers": [
-      "wind"
+      "wind",
+      "distance",
+      "board slickness"
     ],
     "tools": [
       "physics_world",
@@ -815,7 +833,7 @@
     ],
     "family": "sports",
     "summary": "Slide stones toward the target and sweep to steer; closest stones score.",
-    "core_loop": "aim → release → sweep → end scoring",
+    "core_loop": "Aim and release a stone toward the target, sweep to steer and carry it, and score the stones closest to the center each end",
     "verbs": [
       "slide",
       "sweep"
@@ -842,7 +860,9 @@
       "winter olympics with friends"
     ],
     "difficulty_levers": [
-      "ice speed"
+      "ice speed",
+      "ends",
+      "opponent stones"
     ],
     "tools": [
       "physics_world",
@@ -867,7 +887,7 @@
     ],
     "family": "sports",
     "summary": "Alternate taps to sprint; time the hurdle jumps.",
-    "core_loop": "tap left and right fast → jump hurdles → cross the line",
+    "core_loop": "Tap left and right as fast as you can to sprint, and time a jump at each hurdle, racing to the line",
     "verbs": [
       "tap",
       "time"
@@ -894,7 +914,9 @@
       "olympic sprint with friends"
     ],
     "difficulty_levers": [
-      "hurdles"
+      "hurdles",
+      "race length",
+      "rivals"
     ],
     "tools": [
       "timers",
@@ -919,7 +941,7 @@
     ],
     "family": "sports",
     "summary": "Tap in rhythm to stroke; breathe at the right time to keep stamina.",
-    "core_loop": "tap strokes in rhythm → breathe → flip at the wall → finish",
+    "core_loop": "Tap in rhythm to stroke, breathe at the right moments to keep stamina, and flip at the wall to finish first",
     "verbs": [
       "time",
       "tap"
@@ -946,7 +968,9 @@
       "race friends"
     ],
     "difficulty_levers": [
-      "lane length"
+      "lane length",
+      "stamina drain",
+      "rivals"
     ],
     "tools": [
       "beat_target",
@@ -971,7 +995,7 @@
     ],
     "family": "sports",
     "summary": "Swipe combos to do tricks off ramps and rails; land clean for points.",
-    "core_loop": "approach → swipe a trick → land → chain combos",
+    "core_loop": "Approach ramps and rails, swipe trick combos midair, and land clean to chain them into a big score",
     "verbs": [
       "swipe",
       "time"
@@ -997,7 +1021,9 @@
       "share trick runs"
     ],
     "difficulty_levers": [
-      "ramp layout"
+      "ramp layout",
+      "trick list",
+      "landing window"
     ],
     "tools": [
       "combo",
@@ -1022,7 +1048,7 @@
     ],
     "family": "sports",
     "summary": "Ride a wave, carving up and down the face to stay in the pocket and do tricks.",
-    "core_loop": "carve → stay ahead of the break → trick → ride out",
+    "core_loop": "Carve up and down the face of a wave to stay ahead of the break, launching tricks off the lip until the ride ends",
     "verbs": [
       "carve",
       "balance"
@@ -1049,7 +1075,9 @@
       "surf session sharing"
     ],
     "difficulty_levers": [
-      "wave size"
+      "wave size",
+      "break speed",
+      "trick difficulty"
     ],
     "tools": [
       "physics_world",
@@ -1076,7 +1104,7 @@
     ],
     "family": "sports",
     "summary": "Time the takeoff and hold your form for distance; land cleanly.",
-    "core_loop": "descend → tap at the lip → balance in the air → land",
+    "core_loop": "Speed down the ramp, tap at the lip to take off, balance your form in the air and land cleanly for distance",
     "verbs": [
       "time",
       "balance"
@@ -1104,7 +1132,9 @@
       "olympic duel"
     ],
     "difficulty_levers": [
-      "wind"
+      "wind",
+      "ramp speed",
+      "landing window"
     ],
     "tools": [
       "physics_world",
@@ -1132,7 +1162,7 @@
     ],
     "family": "sports",
     "summary": "Read the opponent's tells, dodge, then counterpunch.",
-    "core_loop": "watch tells → dodge → counter → knock out",
+    "core_loop": "Watch the opponent for tells, dodge or block their punches, and counterpunch while they're open to knock them out",
     "verbs": [
       "dodge",
       "punch",
@@ -1160,7 +1190,9 @@
       "fight a friend's character"
     ],
     "difficulty_levers": [
-      "opponent speed"
+      "opponent speed",
+      "tell visibility",
+      "stamina"
     ],
     "tools": [
       "turns",
@@ -1185,7 +1217,7 @@
     ],
     "family": "sports",
     "summary": "Swipe to return with topspin or slice; place it where the opponent isn't.",
-    "core_loop": "ball comes → swipe with spin → place it → win the rally",
+    "core_loop": "The ball comes to you; swipe to return it with topspin or slice and place it where the opponent isn't to win the rally",
     "verbs": [
       "swipe",
       "time"
@@ -1213,7 +1245,9 @@
       "ping pong with friends"
     ],
     "difficulty_levers": [
-      "ball speed"
+      "ball speed",
+      "spin",
+      "opponent skill"
     ],
     "tools": [
       "physics_world",
@@ -1238,7 +1272,7 @@
     ],
     "family": "sports",
     "summary": "Bump, set and spike; keep the ball off your side.",
-    "core_loop": "bump → set → spike → defend",
+    "core_loop": "Bump, set and spike the ball over the net in three touches, and dig the opponent's attacks to keep the ball off your side",
     "verbs": [
       "time",
       "hit"
@@ -1265,7 +1299,9 @@
       "beach volleyball with friends"
     ],
     "difficulty_levers": [
-      "ball speed"
+      "ball speed",
+      "opponent skill",
+      "timing window"
     ],
     "tools": [
       "physics_world",
@@ -1291,7 +1327,7 @@
     ],
     "family": "sports",
     "summary": "Pick game winners before they happen; score points when your picks come true.",
-    "core_loop": "see matchups → pick winners → results come in → leaderboard",
+    "core_loop": "See this week's matchups, pick the winners before they're played, and climb your friends' leaderboard as results come in",
     "verbs": [
       "predict",
       "choose"
@@ -1317,7 +1353,9 @@
       "bracket challenge for a Group"
     ],
     "difficulty_levers": [
-      "upset weighting"
+      "upset weighting",
+      "picks per week",
+      "confidence points"
     ],
     "tools": [
       "leaderboard",
@@ -1342,7 +1380,7 @@
     ],
     "family": "sports",
     "summary": "Deke the goalie and shoot; then play goalie for their shot.",
-    "core_loop": "skate in → deke → shoot → swap to goalie",
+    "core_loop": "Skate in on the goalie, deke and shoot to score, then swap and play goalie against your opponent's shot",
     "verbs": [
       "deke",
       "shoot",
@@ -1371,7 +1409,9 @@
       "shootout with a friend"
     ],
     "difficulty_levers": [
-      "goalie skill"
+      "goalie skill",
+      "shots",
+      "deke options"
     ],
     "tools": [
       "physics_world",
@@ -1397,7 +1437,7 @@
     ],
     "family": "sports",
     "summary": "Aim the cue, set power and spin, and pocket your balls before your opponent.",
-    "core_loop": "aim → set power → shoot → pocket balls → sink the 8",
+    "core_loop": "Aim the cue, set power and spin, and pocket your group of balls before sinking the 8 ball, ahead of your opponent",
     "verbs": [
       "aim",
       "plan"
@@ -1425,7 +1465,9 @@
       "8 ball with friends"
     ],
     "difficulty_levers": [
-      "aim guides"
+      "aim guides",
+      "table size",
+      "spin control"
     ],
     "tools": [
       "physics_world",
@@ -1451,7 +1493,7 @@
     ],
     "family": "sports",
     "summary": "Flick to kick field goals from farther out in wind.",
-    "core_loop": "set the angle → flick → wind curves it → make it",
+    "core_loop": "Set the kick angle and flick to kick field goals from farther and farther out as the wind curves the ball",
     "verbs": [
       "flick",
       "aim"
@@ -1479,7 +1521,8 @@
     ],
     "difficulty_levers": [
       "wind",
-      "distance"
+      "distance",
+      "hash position"
     ],
     "tools": [
       "physics_world",
@@ -1504,7 +1547,7 @@
     ],
     "family": "sports",
     "summary": "Lead your receivers with a throw before defenders close in.",
-    "core_loop": "snap → read routes → throw ahead → catch or pick",
+    "core_loop": "Take the snap, read the receivers' routes and throw ahead of an open one before defenders close in",
     "verbs": [
       "aim",
       "lead",
@@ -1531,7 +1574,9 @@
       "throwing challenge"
     ],
     "difficulty_levers": [
-      "coverage"
+      "coverage",
+      "pocket time",
+      "receivers"
     ],
     "tools": [
       "physics_world",
@@ -1556,7 +1601,7 @@
     ],
     "family": "sports",
     "summary": "Trace patterns and time jumps to music for a routine score.",
-    "core_loop": "trace → jump on cues → land → routine score",
+    "core_loop": "Trace patterns on the ice and time jumps to cues in the music for a routine score",
     "verbs": [
       "trace",
       "time"
@@ -1583,7 +1628,9 @@
       "share routines"
     ],
     "difficulty_levers": [
-      "difficulty"
+      "difficulty",
+      "music tempo",
+      "jump count"
     ],
     "tools": [
       "beat_target",

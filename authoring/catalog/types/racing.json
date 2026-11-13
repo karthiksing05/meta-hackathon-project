@@ -67,7 +67,7 @@
     ],
     "family": "racing",
     "summary": "Race tiny cars around a top-down track; stay on the road and take tight lines.",
-    "core_loop": "steer → stay on track → overtake → finish",
+    "core_loop": "Steer a tiny car around a top-down track, staying on the road and taking tight lines to overtake rivals before the finish",
     "verbs": [
       "steer"
     ],
@@ -94,7 +94,9 @@
       "track based on your street"
     ],
     "difficulty_levers": [
-      "track width"
+      "track width",
+      "rivals",
+      "laps"
     ],
     "tools": [
       "physics_world",
@@ -177,7 +179,7 @@
     ],
     "family": "racing",
     "summary": "Race a short track alone against the best ghost; shave tenths.",
-    "core_loop": "race → see your ghost → find a better line → beat it",
+    "core_loop": "Race a short track alone against your best ghost, finding a better line each run to shave off tenths",
     "verbs": [
       "steer",
       "optimize"
@@ -205,7 +207,9 @@
       "race friends' ghosts on the same track"
     ],
     "difficulty_levers": [
-      "track length"
+      "track length",
+      "ghost source",
+      "obstacles"
     ],
     "tools": [
       "ghost_score",
@@ -233,7 +237,7 @@
     ],
     "family": "racing",
     "summary": "Balance throttle and brake to drive over bumpy hills without flipping or running out of fuel.",
-    "core_loop": "gas → brake to balance → grab fuel → go farther",
+    "core_loop": "Balance gas and brake to drive over bumpy hills without flipping, grabbing fuel cans to go farther",
     "verbs": [
       "throttle",
       "balance"
@@ -262,7 +266,9 @@
       "compare distances"
     ],
     "difficulty_levers": [
-      "terrain roughness"
+      "terrain roughness",
+      "fuel rate",
+      "vehicle"
     ],
     "tools": [
       "physics_world",
@@ -290,7 +296,7 @@
     ],
     "family": "racing",
     "summary": "Weave through traffic at high speed; near misses score bonus.",
-    "core_loop": "steer → weave → near misses → keep going",
+    "core_loop": "Weave through traffic at high speed, scoring bonuses for near misses, until you crash",
     "verbs": [
       "steer",
       "dodge"
@@ -318,7 +324,9 @@
       "weekly board"
     ],
     "difficulty_levers": [
-      "traffic density"
+      "traffic density",
+      "speed",
+      "lanes"
     ],
     "tools": [
       "lanes",
@@ -346,7 +354,7 @@
     ],
     "family": "racing",
     "summary": "Race boats over waves, jumping off swells to gain speed.",
-    "core_loop": "steer → hit swells → jump → finish",
+    "core_loop": "Steer a boat over waves, hitting swells to jump and gain speed, and finish ahead of the other racers",
     "verbs": [
       "steer",
       "jump"
@@ -374,7 +382,9 @@
       "race with friends"
     ],
     "difficulty_levers": [
-      "wave height"
+      "wave height",
+      "rivals",
+      "course length"
     ],
     "tools": [
       "physics_world",
@@ -401,7 +411,7 @@
     ],
     "family": "racing",
     "summary": "Tap in rhythm to gallop; save stamina for the final stretch.",
-    "core_loop": "tap rhythmically → manage stamina → sprint at the end",
+    "core_loop": "Tap in a steady rhythm to gallop, manage your horse's stamina, and save enough to sprint in the final stretch",
     "verbs": [
       "tap",
       "pace"
@@ -428,7 +438,9 @@
       "derby day with friends"
     ],
     "difficulty_levers": [
-      "stamina"
+      "stamina",
+      "rivals",
+      "race length"
     ],
     "tools": [
       "beat_target",
@@ -453,7 +465,7 @@
     ],
     "family": "racing",
     "summary": "Pick and bet on racers with odds; watch the simulated race.",
-    "core_loop": "read odds → bet → watch → collect",
+    "core_loop": "Read the odds on each racer, place a bet, watch the simulated race and collect your winnings",
     "verbs": [
       "predict",
       "bet"
@@ -480,7 +492,9 @@
       "race night with a Group"
     ],
     "difficulty_levers": [
-      "upset frequency"
+      "upset frequency",
+      "racers",
+      "payout rules"
     ],
     "tools": [
       "reveal",
@@ -505,7 +519,7 @@
     ],
     "family": "racing",
     "summary": "Ride behind others to draft, then sprint at the right moment.",
-    "core_loop": "draft → save energy → attack → win the sprint",
+    "core_loop": "Ride behind other cyclists to draft and save energy, then attack at the right moment to win the sprint",
     "verbs": [
       "pace",
       "time"
@@ -532,7 +546,9 @@
       "sprint battle"
     ],
     "difficulty_levers": [
-      "energy"
+      "energy",
+      "rivals",
+      "sprint distance"
     ],
     "tools": [
       "timer_bar",
@@ -557,7 +573,7 @@
     ],
     "family": "racing",
     "summary": "Read pace notes and turn early for each corner on a rally stage.",
-    "core_loop": "read the note → set up the turn → stay on the road → finish",
+    "core_loop": "Read pace notes for each upcoming corner and turn early to set up, staying on the road through the whole stage",
     "verbs": [
       "steer",
       "read"
@@ -584,7 +600,9 @@
       "stage times among friends"
     ],
     "difficulty_levers": [
-      "stage length"
+      "stage length",
+      "note warning time",
+      "surface"
     ],
     "tools": [
       "checkpoint",
@@ -610,7 +628,7 @@
     ],
     "family": "racing",
     "summary": "Draw the line your car will follow around the track; then watch the race.",
-    "core_loop": "draw a line → the car follows → faster lines win",
+    "core_loop": "Draw the line your car will follow around the track, then watch the race; tighter, faster lines win",
     "verbs": [
       "draw",
       "plan"
@@ -636,7 +654,9 @@
       "share best lines"
     ],
     "difficulty_levers": [
-      "track complexity"
+      "track complexity",
+      "rivals",
+      "ink limit"
     ],
     "tools": [
       "drawing_canvas",
@@ -660,7 +680,7 @@
     ],
     "family": "racing",
     "summary": "Pick a marble and watch a physics race down a course; customize your marble's look.",
-    "core_loop": "pick a marble → watch the race → cheer → result",
+    "core_loop": "Pick and decorate a marble, watch it race the others down a physics course, and cheer it to the finish",
     "verbs": [
       "choose",
       "watch"
@@ -687,7 +707,9 @@
       "a Group marble race league"
     ],
     "difficulty_levers": [
-      "course"
+      "course",
+      "marbles",
+      "obstacle count"
     ],
     "tools": [
       "physics_world",
@@ -712,7 +734,7 @@
     ],
     "family": "racing",
     "summary": "Tap as fast as possible to move your racer down the track against others.",
-    "core_loop": "tap → your racer moves → finish first",
+    "core_loop": "Tap as fast as you can to move your snail down the track and finish ahead of the other players",
     "verbs": [
       "tap"
     ],
@@ -737,7 +759,9 @@
       "party race on one phone"
     ],
     "difficulty_levers": [
-      "track length"
+      "track length",
+      "players",
+      "boosts"
     ],
     "tools": [
       "timers",
@@ -761,7 +785,7 @@
     ],
     "family": "racing",
     "summary": "Steer a sled downhill through gates, leaning to carve and tucking for speed.",
-    "core_loop": "lean → tuck → pass gates → finish",
+    "core_loop": "Lean to carve and tuck for speed as you sled downhill, passing through every gate to finish fastest",
     "verbs": [
       "steer",
       "tuck"
@@ -788,7 +812,9 @@
       "winter race with friends"
     ],
     "difficulty_levers": [
-      "slope"
+      "slope",
+      "gates",
+      "missed-gate penalty"
     ],
     "tools": [
       "checkpoint",
@@ -815,7 +841,7 @@
     ],
     "family": "racing",
     "summary": "Pick when to spend limited boost on a track with jumps and straights.",
-    "core_loop": "race → choose boost moments → finish",
+    "core_loop": "Race a track with jumps and long straights, choosing when to spend a limited supply of boost",
     "verbs": [
       "steer",
       "plan"
@@ -842,7 +868,9 @@
       "ghost race"
     ],
     "difficulty_levers": [
-      "boost amount"
+      "boost amount",
+      "track length",
+      "rivals"
     ],
     "tools": [
       "ghost_score",
@@ -867,7 +895,7 @@
     ],
     "family": "racing",
     "summary": "Choose your pace each segment to finish fastest without hitting the wall.",
-    "core_loop": "set pace → manage stamina → kick at the end",
+    "core_loop": "Set your pace each segment of the race, manage stamina so you don't hit the wall, and kick at the end",
     "verbs": [
       "pace",
       "plan"
@@ -893,7 +921,9 @@
       "race friends' strategies"
     ],
     "difficulty_levers": [
-      "stamina"
+      "stamina",
+      "race length",
+      "rivals"
     ],
     "tools": [
       "timer_bar",
@@ -917,7 +947,7 @@
     ],
     "family": "racing",
     "summary": "Steer a paper boat down a stream; avoid rocks, catch currents.",
-    "core_loop": "steer → ride currents → avoid rocks → finish",
+    "core_loop": "Steer a paper boat down a stream, riding currents and avoiding rocks, to reach the finish",
     "verbs": [
       "steer"
     ],
@@ -943,7 +973,9 @@
       "calm race"
     ],
     "difficulty_levers": [
-      "current strength"
+      "current strength",
+      "rocks",
+      "stream length"
     ],
     "tools": [
       "physics_world",
@@ -970,7 +1002,7 @@
     ],
     "family": "racing",
     "summary": "Each friend runs one leg; your times add up against another team.",
-    "core_loop": "run your leg → pass on → team total",
+    "core_loop": "Each friend runs one leg of a relay; your times add up into a team total against another team",
     "verbs": [
       "race",
       "cooperate"
@@ -996,7 +1028,9 @@
       "a Group splits into teams"
     ],
     "difficulty_levers": [
-      "leg count"
+      "leg count",
+      "leg length",
+      "team size"
     ],
     "tools": [
       "async_turns",

@@ -69,7 +69,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Fly up a scrolling level, auto-firing, dodging bullets and grabbing power-ups to beat a boss.",
-    "core_loop": "fly → dodge bullets → collect power-ups → beat the boss",
+    "core_loop": "Fly up a scrolling stage while auto-firing, dodge enemy bullets, collect power-ups and beat the boss at the end",
     "verbs": [
       "fly",
       "dodge",
@@ -99,7 +99,8 @@
     ],
     "difficulty_levers": [
       "bullet density",
-      "enemy waves"
+      "enemy waves",
+      "power-up rate"
     ],
     "tools": [
       "waves",
@@ -127,7 +128,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Thread a tiny hitbox through dense bullet patterns while shooting a boss.",
-    "core_loop": "read the pattern → slip through gaps → keep firing → survive phases",
+    "core_loop": "Thread a tiny hitbox through dense bullet patterns while keeping your fire on the boss through each of its phases",
     "verbs": [
       "dodge",
       "focus",
@@ -154,7 +155,9 @@
       "share no-hit clears"
     ],
     "difficulty_levers": [
-      "pattern density"
+      "pattern density",
+      "bullet speed",
+      "phases"
     ],
     "tools": [
       "waves",
@@ -181,7 +184,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Move with one thumb and aim with the other in an arena while waves swarm in.",
-    "core_loop": "move → aim and fire → survive waves → grab upgrades",
+    "core_loop": "Move with one thumb and aim with the other in an arena as waves of enemies swarm in, grabbing upgrades between waves",
     "verbs": [
       "move",
       "aim",
@@ -210,7 +213,8 @@
     ],
     "difficulty_levers": [
       "wave size",
-      "enemy speed"
+      "enemy speed",
+      "arena size"
     ],
     "tools": [
       "waves",
@@ -239,7 +243,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "You only move; weapons fire automatically. Level up and pick upgrades as hordes grow.",
-    "core_loop": "move → weapons auto-fire → collect XP → pick an upgrade → survive",
+    "core_loop": "You only move; weapons fire on their own, and you collect experience to pick an upgrade each level as the horde grows",
     "verbs": [
       "move",
       "choose"
@@ -266,7 +270,9 @@
       "compare builds with friends"
     ],
     "difficulty_levers": [
-      "horde growth"
+      "horde growth",
+      "upgrade pool",
+      "run length"
     ],
     "tools": [
       "waves",
@@ -293,7 +299,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Rotate and thrust a ship that drifts; shoot rocks that split into smaller rocks.",
-    "core_loop": "rotate → thrust → shoot → rocks split → clear the field",
+    "core_loop": "Rotate and thrust a ship that keeps drifting, shoot rocks that split into smaller rocks, and clear the field",
     "verbs": [
       "rotate",
       "thrust",
@@ -322,7 +328,9 @@
       "arcade board"
     ],
     "difficulty_levers": [
-      "rock count"
+      "rock count",
+      "drift friction",
+      "enemy ships"
     ],
     "tools": [
       "physics_world",
@@ -458,7 +466,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Fly right through a scrolling level shooting enemies and gathering weapon upgrades.",
-    "core_loop": "fly → shoot → grab upgrades → beat the stage boss",
+    "core_loop": "Fly right through a scrolling stage, shoot enemies, collect weapon upgrades and beat the stage boss",
     "verbs": [
       "fly",
       "shoot",
@@ -485,7 +493,9 @@
       "share scores"
     ],
     "difficulty_levers": [
-      "enemy density"
+      "enemy density",
+      "bullet speed",
+      "upgrade rate"
     ],
     "tools": [
       "waves",
@@ -511,7 +521,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Your turret sits in the middle; rotate and fire as enemies close in from every side.",
-    "core_loop": "rotate → fire → enemies approach → survive",
+    "core_loop": "Your turret sits in the center; rotate and fire as enemies close in from every side, and survive as long as you can",
     "verbs": [
       "rotate",
       "shoot"
@@ -538,7 +548,9 @@
       "wave board"
     ],
     "difficulty_levers": [
-      "enemy speed"
+      "enemy speed",
+      "spawn rate",
+      "turn speed"
     ],
     "tools": [
       "waves",
@@ -564,7 +576,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Scope in, account for wind and distance, and take one perfect shot.",
-    "core_loop": "scope → adjust for wind → hold steady → shoot",
+    "core_loop": "Scope in on a target, adjust for wind and distance, hold steady through the sway, and take one clean shot",
     "verbs": [
       "aim",
       "steady"
@@ -593,7 +605,8 @@
     ],
     "difficulty_levers": [
       "wind",
-      "distance"
+      "distance",
+      "scope sway"
     ],
     "tools": [
       "physics_world",
@@ -619,7 +632,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "The camera moves for you; tap enemies as they appear and reload by tapping off-screen.",
-    "core_loop": "the path moves → enemies appear → tap to shoot → reload",
+    "core_loop": "The camera moves along a set path; tap enemies as they appear and tap off-screen to reload before they hit you",
     "verbs": [
       "aim",
       "shoot",
@@ -646,7 +659,9 @@
       "arcade co-op score"
     ],
     "difficulty_levers": [
-      "enemy speed"
+      "enemy speed",
+      "ammo",
+      "civilians"
     ],
     "tools": [
       "spawn_wave",
@@ -672,7 +687,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Keep a stream on a target to fill a balloon faster than others.",
-    "core_loop": "aim at the target → hold → keep it steady → fill first",
+    "core_loop": "Aim a water stream at a moving target and hold it steady to fill your balloon before the other players",
     "verbs": [
       "aim",
       "hold"
@@ -699,7 +714,9 @@
       "fair race with friends"
     ],
     "difficulty_levers": [
-      "target movement"
+      "target movement",
+      "players",
+      "stream width"
     ],
     "tools": [
       "player_drag",
@@ -724,7 +741,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Fly over targets and drop bombs, leading for speed and wind.",
-    "core_loop": "fly → time the drop → hit targets → avoid anti-air",
+    "core_loop": "Fly over targets and time each bomb drop, leading for your speed and the wind, while dodging fire from the ground",
     "verbs": [
       "aim",
       "time"
@@ -751,7 +768,8 @@
     ],
     "difficulty_levers": [
       "wind",
-      "speed"
+      "speed",
+      "anti-air"
     ],
     "tools": [
       "physics_world",
@@ -776,7 +794,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Turn and fire to shoot down enemy fighters circling around you.",
-    "core_loop": "turn → line up → fire → evade",
+    "core_loop": "Turn and fire to shoot down enemy fighters circling around you, evading their shots between passes",
     "verbs": [
       "turn",
       "aim",
@@ -805,7 +823,9 @@
       "dogfight with a friend"
     ],
     "difficulty_levers": [
-      "enemy skill"
+      "enemy skill",
+      "enemy count",
+      "ammo"
     ],
     "tools": [
       "physics_world",
@@ -889,7 +909,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Aim and launch a volley of balls; bricks take hits equal to their number and move down each turn.",
-    "core_loop": "aim → launch all balls → they bounce → bricks move down → collect more balls",
+    "core_loop": "Aim and launch a volley of balls; each brick takes hits equal to its number, and the rows move down every turn",
     "verbs": [
       "aim",
       "plan"
@@ -916,7 +936,9 @@
       "weekly score"
     ],
     "difficulty_levers": [
-      "brick numbers"
+      "brick numbers",
+      "ball pickups",
+      "row speed"
     ],
     "tools": [
       "physics_world",
@@ -998,7 +1020,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Enemies carry words; type the word to shoot that enemy.",
-    "core_loop": "enemies approach → type their word → they explode",
+    "core_loop": "Enemies approach carrying words; type an enemy's word to shoot it before it reaches you",
     "verbs": [
       "type",
       "react"
@@ -1025,7 +1047,8 @@
     ],
     "difficulty_levers": [
       "word length",
-      "speed"
+      "speed",
+      "enemy count"
     ],
     "tools": [
       "keyboard",
@@ -1051,7 +1074,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Pop-up targets appear and hide quickly; shoot hostiles, spare civilians.",
-    "core_loop": "a target pops → judge it → shoot or hold → next",
+    "core_loop": "Targets pop up and hide quickly; shoot the hostiles and spare the civilians before each one drops",
     "verbs": [
       "judge",
       "aim"
@@ -1077,7 +1100,9 @@
       "range challenge"
     ],
     "difficulty_levers": [
-      "pop speed"
+      "pop speed",
+      "civilian ratio",
+      "targets"
     ],
     "tools": [
       "spawn_wave",
@@ -1102,7 +1127,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Bank shots off walls and mirrors to hit enemies behind cover.",
-    "core_loop": "aim → see the bounce path → fire → hit everyone",
+    "core_loop": "Aim a shot, preview how it bounces off walls and mirrors, and fire to hit enemies hiding behind cover",
     "verbs": [
       "aim",
       "bounce"
@@ -1128,7 +1153,9 @@
       "share trick shots"
     ],
     "difficulty_levers": [
-      "bounces allowed"
+      "bounces allowed",
+      "enemy count",
+      "mirrors"
     ],
     "tools": [
       "physics_world",
@@ -1153,7 +1180,7 @@
     ],
     "family": "arcade_shooter",
     "summary": "Fire a cannon at structures to knock targets off, choosing angle and power.",
-    "core_loop": "aim → set power → fire → structures fall → hit every target",
+    "core_loop": "Pick the cannon's angle and power, fire at a structure, and knock every target off in as few shots as possible",
     "verbs": [
       "aim",
       "launch"
@@ -1179,7 +1206,9 @@
       "share star scores"
     ],
     "difficulty_levers": [
-      "structures"
+      "structures",
+      "shots allowed",
+      "wind"
     ],
     "tools": [
       "physics_world",

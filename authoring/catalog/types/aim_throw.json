@@ -62,7 +62,7 @@
     ],
     "family": "aim_throw",
     "summary": "Flick a crumpled paper into a bin while a fan blows sideways.",
-    "core_loop": "read the wind → flick → in or miss → wind changes",
+    "core_loop": "Read the fan's wind arrow, flick a crumpled paper ball into the bin, and adjust as the wind changes after every throw",
     "verbs": [
       "flick",
       "aim"
@@ -90,7 +90,8 @@
     ],
     "difficulty_levers": [
       "wind strength",
-      "distance"
+      "distance",
+      "bin size"
     ],
     "tools": [
       "physics_world",
@@ -115,7 +116,7 @@
     ],
     "family": "aim_throw",
     "summary": "Flick a bottle so it spins and lands upright on furniture.",
-    "core_loop": "flick → it spins → lands upright or falls → next spot",
+    "core_loop": "Flick a bottle so it spins once and lands upright on a table, shelf or chair, moving to harder spots after each success",
     "verbs": [
       "flick",
       "time"
@@ -142,7 +143,9 @@
       "flip streak challenge"
     ],
     "difficulty_levers": [
-      "surface height"
+      "surface height",
+      "surface size",
+      "fill level"
     ],
     "tools": [
       "physics_world",
@@ -220,7 +223,7 @@
     ],
     "family": "aim_throw",
     "summary": "Arc a ball into a rack of cups; sunk cups are removed.",
-    "core_loop": "aim → set arc → toss → sink cups → re-rack",
+    "core_loop": "Aim and set the arc to toss a ball into a rack of cups; each sunk cup is removed, and you re-rack as the rack thins",
     "verbs": [
       "aim",
       "toss"
@@ -248,7 +251,8 @@
     ],
     "difficulty_levers": [
       "rack size",
-      "distance"
+      "distance",
+      "re-racks allowed"
     ],
     "tools": [
       "physics_world",
@@ -273,7 +277,7 @@
     ],
     "family": "aim_throw",
     "summary": "Roll balls up a ramp into scoring rings; the small high ring is worth most.",
-    "core_loop": "swipe → the ball rolls up → lands in a ring",
+    "core_loop": "Swipe to roll balls up a ramp so they hop into scoring rings, aiming for the small top ring worth the most",
     "verbs": [
       "aim",
       "roll"
@@ -300,7 +304,9 @@
       "arcade night challenge"
     ],
     "difficulty_levers": [
-      "ramp speed"
+      "ramp speed",
+      "ring sizes",
+      "balls per round"
     ],
     "tools": [
       "physics_world",
@@ -377,7 +383,7 @@
     ],
     "family": "aim_throw",
     "summary": "A basket moves; time your throw to land in it.",
-    "core_loop": "watch the basket → time the throw → score → it speeds up",
+    "core_loop": "A basket slides back and forth; time each throw so it lands in the basket, which speeds up after each score",
     "verbs": [
       "time",
       "throw"
@@ -405,7 +411,9 @@
       "carnival challenge"
     ],
     "difficulty_levers": [
-      "speed"
+      "speed",
+      "basket size",
+      "distance"
     ],
     "tools": [
       "physics_world",
@@ -430,7 +438,7 @@
     ],
     "family": "aim_throw",
     "summary": "Flick rings onto bottle necks; tighter clusters score more.",
-    "core_loop": "aim → flick → ring lands or bounces off",
+    "core_loop": "Aim and flick rings toward a field of bottles; a ring that lands on a neck scores, with tighter clusters worth more",
     "verbs": [
       "aim",
       "flick"
@@ -457,7 +465,9 @@
       "carnival night"
     ],
     "difficulty_levers": [
-      "distance"
+      "distance",
+      "ring size",
+      "bottle spacing"
     ],
     "tools": [
       "physics_world",
@@ -481,7 +491,7 @@
     ],
     "family": "aim_throw",
     "summary": "Throw an axe end over end; release at the right rotation to stick it in the target.",
-    "core_loop": "swing → release on time → it sticks → score",
+    "core_loop": "Swing back and release the axe at the right moment in its rotation so the blade sticks in the target",
     "verbs": [
       "time",
       "throw"
@@ -510,7 +520,9 @@
       "axe night with friends"
     ],
     "difficulty_levers": [
-      "distance"
+      "distance",
+      "rotation speed",
+      "target size"
     ],
     "tools": [
       "physics_world",
@@ -535,7 +547,7 @@
     ],
     "family": "aim_throw",
     "summary": "Throw an egg to a partner; they must catch softly; the distance grows.",
-    "core_loop": "throw gently → partner catches → step back",
+    "core_loop": "Throw an egg gently to a partner, who has to catch it softly; after each catch, you both step farther apart",
     "verbs": [
       "throw",
       "catch"
@@ -562,7 +574,9 @@
       "partner game on one phone"
     ],
     "difficulty_levers": [
-      "distance step"
+      "distance step",
+      "throw arc",
+      "catch window"
     ],
     "tools": [
       "physics_world",
@@ -587,7 +601,7 @@
     ],
     "family": "aim_throw",
     "summary": "Throw darts at a board of balloons; popped balloons reveal prizes or points.",
-    "core_loop": "aim → throw → pop → reveal",
+    "core_loop": "Aim and throw darts at a board of balloons; each balloon you pop reveals points or a prize",
     "verbs": [
       "aim",
       "throw"
@@ -613,7 +627,9 @@
       "carnival prizes for friends"
     ],
     "difficulty_levers": [
-      "balloon size"
+      "balloon size",
+      "darts per round",
+      "wobble"
     ],
     "tools": [
       "physics_world",
@@ -638,7 +654,7 @@
     ],
     "family": "aim_throw",
     "summary": "Flick a stone low and fast across water to get the most skips.",
-    "core_loop": "set angle → flick → count skips",
+    "core_loop": "Set the angle, flick a stone low and fast across the water, and count how many times it skips",
     "verbs": [
       "flick",
       "angle"
@@ -665,7 +681,9 @@
       "lake day challenge"
     ],
     "difficulty_levers": [
-      "water calmness"
+      "water calmness",
+      "stone shape",
+      "angle window"
     ],
     "tools": [
       "physics_world",
@@ -690,7 +708,7 @@
     ],
     "family": "aim_throw",
     "summary": "Bounce a ball off walls and objects to land it in a cup.",
-    "core_loop": "aim → bounce off surfaces → land it",
+    "core_loop": "Aim a ball to bounce off walls and objects, then release it so it lands in the cup",
     "verbs": [
       "aim",
       "plan"
@@ -716,7 +734,9 @@
       "share trick shots"
     ],
     "difficulty_levers": [
-      "bounce count"
+      "bounce count",
+      "obstacles",
+      "cup size"
     ],
     "tools": [
       "physics_world",
@@ -740,7 +760,7 @@
     ],
     "family": "aim_throw",
     "summary": "Use a three-person launcher to arc water balloons at distant targets.",
-    "core_loop": "pull back → aim → release → splash",
+    "core_loop": "Pull back a big slingshot launcher, aim, and release to arc water balloons onto distant targets",
     "verbs": [
       "aim",
       "launch"
@@ -766,7 +786,9 @@
       "summer battle"
     ],
     "difficulty_levers": [
-      "wind"
+      "wind",
+      "distance",
+      "target size"
     ],
     "tools": [
       "physics_world",
@@ -790,7 +812,7 @@
     ],
     "family": "aim_throw",
     "summary": "Pop up from cover to throw snowballs; duck to avoid incoming ones.",
-    "core_loop": "duck → pop up → aim → throw → duck",
+    "core_loop": "Duck behind cover, pop up to aim and throw snowballs at opponents, then duck again before their throws hit you",
     "verbs": [
       "aim",
       "throw",
@@ -819,7 +841,9 @@
       "snowball fight with friends"
     ],
     "difficulty_levers": [
-      "enemy count"
+      "enemy count",
+      "enemy accuracy",
+      "snowball supply"
     ],
     "tools": [
       "collide",
@@ -845,7 +869,7 @@
     ],
     "family": "aim_throw",
     "summary": "Throw a disc with curve to reach a basket or catcher in few throws.",
-    "core_loop": "aim → set curve → throw → walk to it → repeat",
+    "core_loop": "Aim, set the curve and throw the disc, walk to where it lands, and reach the basket in as few throws as possible",
     "verbs": [
       "aim",
       "curve"
@@ -873,7 +897,9 @@
       "disc golf round with friends"
     ],
     "difficulty_levers": [
-      "wind"
+      "wind",
+      "distance",
+      "obstacles"
     ],
     "tools": [
       "physics_world",
@@ -897,7 +923,7 @@
     ],
     "family": "aim_throw",
     "summary": "Hit the small target to dunk a friend's avatar.",
-    "core_loop": "aim → throw → hit the lever → splash",
+    "core_loop": "Aim and throw at a small target to tip the seat and dunk a friend's avatar into the tank",
     "verbs": [
       "aim",
       "throw"
@@ -924,7 +950,9 @@
       "dunk your friend"
     ],
     "difficulty_levers": [
-      "target size"
+      "target size",
+      "distance",
+      "throws allowed"
     ],
     "tools": [
       "physics_world",

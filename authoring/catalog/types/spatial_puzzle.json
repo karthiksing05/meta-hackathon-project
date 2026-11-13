@@ -176,7 +176,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Each tile of a picture is turned; tap tiles to rotate until the picture is right.",
-    "core_loop": "tap a tile → it rotates 90° → fix every tile",
+    "core_loop": "Each tile of a picture is turned the wrong way; tap tiles to rotate them 90 degrees until the whole picture is upright",
     "verbs": [
       "rotate",
       "match"
@@ -202,7 +202,9 @@
       "send a scrambled photo"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "move limit",
+      "picture detail"
     ],
     "tools": [
       "grid_board",
@@ -227,7 +229,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Tiles of a picture are shuffled; swap two at a time to restore it.",
-    "core_loop": "tap two tiles → they swap → restore the image",
+    "core_loop": "A picture is cut into shuffled tiles; tap two at a time to swap them until the image is restored",
     "verbs": [
       "swap",
       "match"
@@ -255,7 +257,9 @@
       "photo puzzle for a friend"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "swap limit",
+      "picture detail"
     ],
     "tools": [
       "grid_board",
@@ -281,7 +285,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Fold paper along lines to match a target shape or pattern.",
-    "core_loop": "pick a fold line → fold → layers stack → match the target",
+    "core_loop": "Pick a fold line, fold the paper, watch layers stack, and repeat until the folded shape matches the target outline",
     "verbs": [
       "fold",
       "visualize"
@@ -309,7 +313,9 @@
       "daily fold"
     ],
     "difficulty_levers": [
-      "fold count"
+      "fold count",
+      "target complexity",
+      "undo limit"
     ],
     "tools": [
       "grid_board",
@@ -335,7 +341,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "See a flat net and pick which cube it folds into.",
-    "core_loop": "study the net → pick the folded cube → next",
+    "core_loop": "Study a flat net of six faces and pick which of several cubes it folds into, then see the fold animated",
     "verbs": [
       "visualize",
       "choose"
@@ -361,7 +367,9 @@
       "IQ challenge with friends"
     ],
     "difficulty_levers": [
-      "net complexity"
+      "net complexity",
+      "options",
+      "face markings"
     ],
     "tools": [
       "quiz",
@@ -385,7 +393,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Decide whether two rotated shapes are the same or mirror images.",
-    "core_loop": "compare shapes → tap same or mirror → next faster",
+    "core_loop": "Two shapes appear at different angles; tap same or mirror as fast as you can, with the pace speeding up",
     "verbs": [
       "rotate",
       "compare"
@@ -412,7 +420,8 @@
     ],
     "difficulty_levers": [
       "rotation angle",
-      "speed"
+      "speed",
+      "shape complexity"
     ],
     "tools": [
       "quiz",
@@ -437,7 +446,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Count the cubes in a 3D stack, including hidden ones.",
-    "core_loop": "look at the stack → count → type → reveal",
+    "core_loop": "Look at a stack of cubes drawn in 3D, count every cube including hidden ones, type the total and see it rotated",
     "verbs": [
       "count",
       "visualize"
@@ -463,7 +472,9 @@
       "brain teaser for friends"
     ],
     "difficulty_levers": [
-      "stack size"
+      "stack size",
+      "glance time",
+      "hidden cubes"
     ],
     "tools": [
       "keyboard",
@@ -488,7 +499,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Rotate an object until its shadow matches the target silhouette.",
-    "core_loop": "rotate the object → watch the shadow → match the outline",
+    "core_loop": "Drag to rotate an object in front of a light and watch its shadow until it matches the target silhouette",
     "verbs": [
       "rotate",
       "match"
@@ -514,7 +525,9 @@
       "calm puzzle to share"
     ],
     "difficulty_levers": [
-      "rotation axes"
+      "rotation axes",
+      "object complexity",
+      "tolerance"
     ],
     "tools": [
       "player_drag",
@@ -538,7 +551,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Draw the mirrored half of a picture across an axis.",
-    "core_loop": "see half → draw the mirror half → accuracy scores",
+    "core_loop": "See half of a picture and draw the mirrored half across the axis; accuracy is scored against the true reflection",
     "verbs": [
       "mirror",
       "draw"
@@ -566,7 +579,8 @@
     ],
     "difficulty_levers": [
       "axis",
-      "detail"
+      "detail",
+      "grid guides"
     ],
     "tools": [
       "drawing_canvas",
@@ -591,7 +605,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Find the way from start to exit through a maze.",
-    "core_loop": "trace a path → avoid dead ends → reach the exit",
+    "core_loop": "Trace a path from the start to the exit of a maze, avoiding dead ends, before the timer runs out",
     "verbs": [
       "navigate",
       "trace"
@@ -620,7 +634,8 @@
     ],
     "difficulty_levers": [
       "maze size",
-      "time"
+      "time",
+      "fog of view"
     ],
     "tools": [
       "grid_board",
@@ -647,7 +662,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Rotate the whole maze so a ball rolls toward the goal under gravity.",
-    "core_loop": "rotate the board → the ball rolls → steer it to the hole",
+    "core_loop": "Rotate the whole maze so gravity rolls a ball through its corridors, avoiding traps, until it drops into the goal",
     "verbs": [
       "rotate",
       "steer"
@@ -675,7 +690,8 @@
     ],
     "difficulty_levers": [
       "maze size",
-      "traps"
+      "traps",
+      "rotation speed"
     ],
     "tools": [
       "physics_world",
@@ -703,7 +719,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Fit odd-shaped items into a container with no overflow.",
-    "core_loop": "pick an item → rotate → place → fit everything",
+    "core_loop": "Pick odd-shaped items, rotate them, and place them in a container until everything fits with nothing sticking out",
     "verbs": [
       "fit",
       "rotate",
@@ -732,7 +748,9 @@
       "road-trip themed for friends"
     ],
     "difficulty_levers": [
-      "item count"
+      "item count",
+      "container size",
+      "rotation allowed"
     ],
     "tools": [
       "grid_board",
@@ -757,7 +775,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Draw straight cuts to split a shape into pieces that meet a rule (equal areas, one star each).",
-    "core_loop": "draw a cut → pieces form → satisfy the rule",
+    "core_loop": "Draw straight cuts across a shape so the pieces meet the rule, such as equal areas or one star in each piece",
     "verbs": [
       "cut",
       "plan"
@@ -785,7 +803,8 @@
     ],
     "difficulty_levers": [
       "cuts",
-      "rule"
+      "rule",
+      "shape complexity"
     ],
     "tools": [
       "player_drag",
@@ -810,7 +829,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Rotate and shift an isometric world so paths connect through optical illusions.",
-    "core_loop": "rotate a piece → paths line up → walk across",
+    "core_loop": "Rotate and slide parts of an isometric world until paths line up through optical illusions, then walk a character across",
     "verbs": [
       "rotate",
       "visualize"
@@ -837,7 +856,9 @@
       "calm puzzle to share"
     ],
     "difficulty_levers": [
-      "illusion count"
+      "illusion count",
+      "moving parts",
+      "level size"
     ],
     "tools": [
       "rotate",
@@ -863,7 +884,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Find all the differences between two near-identical pictures.",
-    "core_loop": "compare both pictures → tap a difference → find them all",
+    "core_loop": "Compare two near-identical pictures and tap each difference you find before time runs out, without wrong taps",
     "verbs": [
       "compare",
       "find"
@@ -891,7 +912,8 @@
     ],
     "difficulty_levers": [
       "difference count",
-      "subtlety"
+      "subtlety",
+      "time"
     ],
     "tools": [
       "image_assets",
@@ -918,7 +940,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Find a list of objects hidden in a busy scene.",
-    "core_loop": "read the list → search the scene → tap each object",
+    "core_loop": "Read a list of objects, search a busy scene, and tap each one as you find it; hints cost time",
     "verbs": [
       "search",
       "find"
@@ -946,7 +968,8 @@
     ],
     "difficulty_levers": [
       "object count",
-      "clutter"
+      "clutter",
+      "hints"
     ],
     "tools": [
       "image_assets",
@@ -971,7 +994,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Identify an object or animal from its silhouette.",
-    "core_loop": "see the silhouette → pick or type the name → next",
+    "core_loop": "See a solid black silhouette of an object or animal, pick or type what it is, and see the full picture",
     "verbs": [
       "recognize"
     ],
@@ -997,7 +1020,9 @@
       "kids challenge"
     ],
     "difficulty_levers": [
-      "detail"
+      "detail",
+      "options vs typed",
+      "time"
     ],
     "tools": [
       "quiz",
@@ -1021,7 +1046,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Roll a ball that paints every cell it passes; cover the whole grid.",
-    "core_loop": "swipe a direction → the ball rolls to a wall, painting → cover everything",
+    "core_loop": "Swipe a direction and the ball rolls until it hits a wall, painting every cell it passes; cover the whole grid",
     "verbs": [
       "paint",
       "plan"
@@ -1047,7 +1072,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid shape"
+      "grid shape",
+      "move limit",
+      "walls"
     ],
     "tools": [
       "grid_board",
@@ -1071,7 +1098,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Cover a board with dominoes; some squares are blocked.",
-    "core_loop": "place a domino → cover two cells → cover everything",
+    "core_loop": "Place dominoes on a board with blocked squares so every open square is covered by exactly one domino",
     "verbs": [
       "place",
       "plan"
@@ -1098,7 +1125,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "board shape"
+      "board shape",
+      "blocked squares",
+      "piece types"
     ],
     "tools": [
       "grid_board",
@@ -1122,7 +1151,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Split the grid into rectangles, each containing one number equal to its area.",
-    "core_loop": "draw a rectangle around a number → match its area → cover the grid",
+    "core_loop": "Draw rectangles on the grid so each one contains exactly one number equal to its area, covering every cell",
     "verbs": [
       "divide",
       "calculate"
@@ -1148,7 +1177,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "number density",
+      "hints"
     ],
     "tools": [
       "grid_board",
@@ -1173,7 +1204,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Pick which top, front or side view matches a 3D object.",
-    "core_loop": "study the object → pick the view → next",
+    "core_loop": "Study a 3D object and pick which top, front or side view matches it from several options",
     "verbs": [
       "visualize",
       "choose"
@@ -1199,7 +1230,9 @@
       "engineering class challenge"
     ],
     "difficulty_levers": [
-      "object complexity"
+      "object complexity",
+      "options",
+      "time"
     ],
     "tools": [
       "quiz",
@@ -1223,7 +1256,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Stack blocks to exactly fill a target outline.",
-    "core_loop": "pick a block → stack it → match the outline",
+    "core_loop": "Pick blocks of different shapes and stack them to exactly fill a target outline with no gaps or overhang",
     "verbs": [
       "build",
       "fit"
@@ -1249,7 +1282,9 @@
       "build challenges for friends"
     ],
     "difficulty_levers": [
-      "outline complexity"
+      "outline complexity",
+      "block set",
+      "rotation allowed"
     ],
     "tools": [
       "physics_world",
@@ -1274,7 +1309,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Move and turn prisms to route colored light into matching receivers.",
-    "core_loop": "place prisms → split and bend light → match colors to receivers",
+    "core_loop": "Place and turn prisms and mirrors to split and bend colored light so each receiver gets its matching color",
     "verbs": [
       "route",
       "plan"
@@ -1301,7 +1336,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "receivers"
+      "receivers",
+      "prisms available",
+      "colors"
     ],
     "tools": [
       "grid_board",
@@ -1327,7 +1364,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Move nodes so no lines cross.",
-    "core_loop": "drag a node → lines move with it → no crossings",
+    "core_loop": "Drag the nodes of a tangled network so the connecting lines no longer cross anywhere",
     "verbs": [
       "drag",
       "visualize"
@@ -1353,7 +1390,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "node count"
+      "node count",
+      "line count",
+      "time"
     ],
     "tools": [
       "player_drag",
@@ -1377,7 +1416,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Turn faces of a scrambled cube until each face is one color.",
-    "core_loop": "turn a face → plan sequences → solve every face",
+    "core_loop": "Turn faces of a scrambled cube, planning move sequences, until every face is a single color",
     "verbs": [
       "rotate",
       "plan"
@@ -1404,7 +1443,9 @@
       "speedcubing with friends"
     ],
     "difficulty_levers": [
-      "cube size"
+      "cube size",
+      "scramble depth",
+      "move limit"
     ],
     "tools": [
       "three_d",
@@ -1430,7 +1471,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Jump pegs over each other into holes, removing the jumped peg, to leave one.",
-    "core_loop": "jump a peg → remove the jumped peg → plan ahead → leave one",
+    "core_loop": "Jump a peg over a neighbor into an empty hole, removing the jumped peg, and plan until only one peg is left",
     "verbs": [
       "jump",
       "plan"
@@ -1457,7 +1498,9 @@
       "compare pegs left"
     ],
     "difficulty_levers": [
-      "board shape"
+      "board shape",
+      "start hole",
+      "target end hole"
     ],
     "tools": [
       "grid_board",
@@ -1481,7 +1524,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Slide pipe tiles in a sliding puzzle so water flows from start to end.",
-    "core_loop": "slide tiles → connect the path → water flows",
+    "core_loop": "Slide pipe tiles around a sliding puzzle with one gap until a connected path runs from the start to the end",
     "verbs": [
       "slide",
       "connect"
@@ -1507,7 +1550,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "move limit",
+      "locked tiles"
     ],
     "tools": [
       "tile_slide",
@@ -1532,7 +1577,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Move the camera until scattered fragments line up into one picture.",
-    "core_loop": "drag to move the view → fragments align → the image completes",
+    "core_loop": "Drag to move the camera around scattered fragments until they line up from one angle into a single picture",
     "verbs": [
       "align",
       "visualize"
@@ -1558,7 +1603,9 @@
       "calm share"
     ],
     "difficulty_levers": [
-      "fragment count"
+      "fragment count",
+      "view freedom",
+      "time"
     ],
     "tools": [
       "three_d",
@@ -1583,7 +1630,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Mix primary paints to match a target color.",
-    "core_loop": "add paint → the mix updates → match the target",
+    "core_loop": "Add drops of primary paint to a mix and watch the color update until it matches the target swatch",
     "verbs": [
       "mix",
       "compare"
@@ -1610,7 +1657,9 @@
       "daily color with friends"
     ],
     "difficulty_levers": [
-      "tolerance"
+      "tolerance",
+      "paint count",
+      "drops allowed"
     ],
     "tools": [
       "reveal",
@@ -1635,7 +1684,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Drop shapes into matching holes before time runs out.",
-    "core_loop": "pick a shape → find its hole → drop it",
+    "core_loop": "Shapes fall one at a time; drag each into its matching hole on the board before time runs out",
     "verbs": [
       "match",
       "react"
@@ -1661,7 +1710,9 @@
       "toddler and parent game"
     ],
     "difficulty_levers": [
-      "shape count"
+      "shape count",
+      "speed",
+      "similar shapes"
     ],
     "tools": [
       "sort_bins",
@@ -1686,7 +1737,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Flip gravity to move all loose pieces at once to their targets.",
-    "core_loop": "pick a direction → everything slides → reach targets",
+    "core_loop": "Pick a direction to flip gravity and every loose piece slides until it hits a wall; get each piece onto its target",
     "verbs": [
       "flip",
       "plan"
@@ -1713,7 +1764,8 @@
     ],
     "difficulty_levers": [
       "pieces",
-      "walls"
+      "walls",
+      "move limit"
     ],
     "tools": [
       "grid_board",
@@ -1738,7 +1790,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Draw a line that becomes a solid bridge for a vehicle to cross.",
-    "core_loop": "draw a line → it becomes solid → the car drives → reach the goal",
+    "core_loop": "Draw a line that turns into a solid bridge, then watch the vehicle drive across it and reach the goal",
     "verbs": [
       "draw",
       "plan"
@@ -1764,7 +1816,9 @@
       "share clever solutions"
     ],
     "difficulty_levers": [
-      "ink limit"
+      "ink limit",
+      "gap size",
+      "vehicle weight"
     ],
     "tools": [
       "drawing_canvas",
@@ -1788,7 +1842,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Place colored tiles to recreate a target image with limited tiles.",
-    "core_loop": "pick a color → place tiles → match the image",
+    "core_loop": "Pick colors from a small palette and place tiles on a grid to recreate a target image using a limited number of tiles",
     "verbs": [
       "place",
       "match"
@@ -1815,7 +1869,8 @@
     ],
     "difficulty_levers": [
       "grid size",
-      "palette"
+      "palette",
+      "tile limit"
     ],
     "tools": [
       "grid_board",
@@ -1839,7 +1894,7 @@
     ],
     "family": "spatial_puzzle",
     "summary": "Draw fences so each pen holds the right animals.",
-    "core_loop": "draw fence lines → enclose pens → satisfy every rule",
+    "core_loop": "Draw fence lines on a grid so each pen encloses exactly the right animals and satisfies every rule",
     "verbs": [
       "divide",
       "plan"
@@ -1866,7 +1921,9 @@
       "farm-themed daily"
     ],
     "difficulty_levers": [
-      "rules"
+      "rules",
+      "animals",
+      "fence length"
     ],
     "tools": [
       "grid_board",

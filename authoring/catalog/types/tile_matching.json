@@ -123,7 +123,7 @@
     ],
     "family": "tile_matching",
     "summary": "Remove matching pairs of tiles that are free on at least one side until the stack is gone.",
-    "core_loop": "find a free pair → tap both → they clear → uncover more",
+    "core_loop": "Find two matching tiles that are free on at least one side, tap both to clear them, and uncover more until the stack is gone",
     "verbs": [
       "match",
       "find"
@@ -151,7 +151,8 @@
     ],
     "difficulty_levers": [
       "layout",
-      "tile set"
+      "tile set",
+      "shuffles allowed"
     ],
     "tools": [
       "grid_board",
@@ -235,7 +236,7 @@
     ],
     "family": "tile_matching",
     "summary": "Flip two face-down cards per turn; matching pairs stay up.",
-    "core_loop": "flip two → remember them → match pairs → clear the board",
+    "core_loop": "Flip two face-down cards per turn; matching pairs stay up, others flip back, and you clear the board in as few turns as possible",
     "verbs": [
       "flip",
       "remember",
@@ -265,7 +266,8 @@
     ],
     "difficulty_levers": [
       "pairs",
-      "time"
+      "time",
+      "shuffle on miss"
     ],
     "tools": [
       "match_pairs",
@@ -291,7 +293,7 @@
     ],
     "family": "tile_matching",
     "summary": "Connect two matching tiles with a path of at most two turns through empty space to remove them.",
-    "core_loop": "find a pair → check the path → remove → clear the board",
+    "core_loop": "Tap two matching tiles that can be joined by a path with at most two turns through empty space, and clear the board",
     "verbs": [
       "match",
       "connect"
@@ -318,7 +320,8 @@
     ],
     "difficulty_levers": [
       "tile types",
-      "time"
+      "time",
+      "gravity shifts"
     ],
     "tools": [
       "grid_board",
@@ -460,7 +463,7 @@
     ],
     "family": "tile_matching",
     "summary": "Drag two identical items together to merge them into the next item in a chain.",
-    "core_loop": "drag an item onto its twin → it upgrades → fill orders",
+    "core_loop": "Drag an item onto its identical twin to merge it into the next item in the chain, and fill orders with the upgraded items",
     "verbs": [
       "merge",
       "plan"
@@ -488,7 +491,8 @@
     ],
     "difficulty_levers": [
       "board size",
-      "chain length"
+      "chain length",
+      "order difficulty"
     ],
     "tools": [
       "grid_board",
@@ -570,7 +574,7 @@
     ],
     "family": "tile_matching",
     "summary": "Pour or move colored balls between tubes until each tube holds one color.",
-    "core_loop": "pick a tube → move its top → stack colors → sort every tube",
+    "core_loop": "Pick a tube and pour its top color onto a matching color or empty tube, until each tube holds only one color",
     "verbs": [
       "sort",
       "plan"
@@ -598,7 +602,8 @@
     ],
     "difficulty_levers": [
       "tubes",
-      "colors"
+      "colors",
+      "empty tubes"
     ],
     "tools": [
       "sort_bins",
@@ -834,7 +839,7 @@
     ],
     "family": "tile_matching",
     "summary": "Flip tiles so the board matches a target pattern.",
-    "core_loop": "flip a tile → neighbors change → match the target",
+    "core_loop": "Tap a tile to flip it and its neighbors between two colors, and make the board match the target pattern",
     "verbs": [
       "flip",
       "plan"
@@ -860,7 +865,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "rules"
+      "rules",
+      "grid size",
+      "move limit"
     ],
     "tools": [
       "grid_board"
@@ -883,7 +890,7 @@
     ],
     "family": "tile_matching",
     "summary": "Rotate clusters of three tiles to make lines of the same color.",
-    "core_loop": "pick a cluster → rotate it → matches clear",
+    "core_loop": "Pick a cluster of three tiles and rotate it so same-colored tiles line up; lines of three or more clear",
     "verbs": [
       "rotate",
       "match"
@@ -909,7 +916,9 @@
       "weekly board"
     ],
     "difficulty_levers": [
-      "colors"
+      "colors",
+      "board size",
+      "move limit"
     ],
     "tools": [
       "grid_board",
@@ -934,7 +943,7 @@
     ],
     "family": "tile_matching",
     "summary": "Shoot a tile up a column; three of a kind vertically clear.",
-    "core_loop": "pick a column → shoot → three in a column clear → stop the stack falling",
+    "core_loop": "Pick a column and shoot a tile up into it; three of a kind in a column clear, and you stop the stack reaching you",
     "verbs": [
       "aim",
       "match"
@@ -960,7 +969,9 @@
       "weekly"
     ],
     "difficulty_levers": [
-      "speed"
+      "speed",
+      "colors",
+      "columns"
     ],
     "tools": [
       "grid_board",
@@ -1044,7 +1055,7 @@
     ],
     "family": "tile_matching",
     "summary": "Drag a line through identical adjacent tiles to clear a chain of them.",
-    "core_loop": "drag through matches → release → the chain clears → refill",
+    "core_loop": "Drag a line through touching identical tiles, release to clear the chain, and refill the board for longer combos",
     "verbs": [
       "link",
       "match"
@@ -1070,7 +1081,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "tile types"
+      "tile types",
+      "time",
+      "minimum chain"
     ],
     "tools": [
       "grid_board",
@@ -1095,7 +1108,7 @@
     ],
     "family": "tile_matching",
     "summary": "Slide whole rows or columns to line up three of a kind.",
-    "core_loop": "slide a row → matches line up → they clear",
+    "core_loop": "Slide whole rows or columns to line up three or more of a kind, which clear and refill from the edge",
     "verbs": [
       "slide",
       "match"
@@ -1122,7 +1135,8 @@
     ],
     "difficulty_levers": [
       "grid",
-      "moves"
+      "moves",
+      "colors"
     ],
     "tools": [
       "tile_slide",
@@ -1147,7 +1161,7 @@
     ],
     "family": "tile_matching",
     "summary": "Tap groups of colored people to send them into matching areas.",
-    "core_loop": "tap a group → it walks to its area → fill every area",
+    "core_loop": "Tap a group of colored people to send them walking into the matching area until every area is filled",
     "verbs": [
       "sort",
       "match"
@@ -1173,7 +1187,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "colors"
+      "colors",
+      "area size",
+      "crowd size"
     ],
     "tools": [
       "sort_bins",
@@ -1197,7 +1213,7 @@
     ],
     "family": "tile_matching",
     "summary": "Match tiles that form a pair (words and pictures, opposites).",
-    "core_loop": "pick two tiles → if they pair, they clear → clear all",
+    "core_loop": "Pick two tiles that form a pair, such as a word and its picture or two opposites; matched pairs clear until the board is empty",
     "verbs": [
       "match",
       "recall"
@@ -1223,7 +1239,9 @@
       "language practice with friends"
     ],
     "difficulty_levers": [
-      "pairs"
+      "pairs",
+      "time",
+      "pair type"
     ],
     "tools": [
       "match_pairs",
@@ -1247,7 +1265,7 @@
     ],
     "family": "tile_matching",
     "summary": "Tap the target kind as fast as possible among many mixed tiles.",
-    "core_loop": "see the target → tap all of that kind → next target",
+    "core_loop": "A target symbol is shown; tap every tile of that kind in a mixed board as fast as you can, then a new target appears",
     "verbs": [
       "find",
       "react"
@@ -1273,7 +1291,9 @@
       "race"
     ],
     "difficulty_levers": [
-      "density"
+      "density",
+      "time",
+      "similar decoys"
     ],
     "tools": [
       "grid_board",
@@ -1298,7 +1318,7 @@
     ],
     "family": "tile_matching",
     "summary": "Drop items onto stacks; three of the same on top clear.",
-    "core_loop": "pick a stack → drop → three on top clear → keep stacks low",
+    "core_loop": "Pick a stack and drop the next item onto it; three of the same on top clear, and you keep every stack under the limit",
     "verbs": [
       "drop",
       "match"
@@ -1325,7 +1345,8 @@
     ],
     "difficulty_levers": [
       "stacks",
-      "items"
+      "items",
+      "stack limit"
     ],
     "tools": [
       "sort_bins",
@@ -1350,7 +1371,7 @@
     ],
     "family": "tile_matching",
     "summary": "Tap a group of the same numbers to merge them into one higher number.",
-    "core_loop": "tap a group → it merges up by one → reach the target",
+    "core_loop": "Tap a group of touching equal numbers to merge them into one number one higher, and reach the target number",
     "verbs": [
       "merge",
       "plan"
@@ -1376,7 +1397,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "target",
+      "spawn values"
     ],
     "tools": [
       "grid_board",
@@ -1401,7 +1424,7 @@
     ],
     "family": "tile_matching",
     "summary": "Two cards share exactly one symbol; spot it first.",
-    "core_loop": "look at two cards → find the shared symbol → tap it first",
+    "core_loop": "Two cards each show several symbols and share exactly one; spot the shared symbol and tap it before your opponent",
     "verbs": [
       "spot",
       "react"
@@ -1427,7 +1450,9 @@
       "head-to-head with a friend"
     ],
     "difficulty_levers": [
-      "symbols per card"
+      "symbols per card",
+      "time",
+      "players"
     ],
     "tools": [
       "reveal",
@@ -1452,7 +1477,7 @@
     ],
     "family": "tile_matching",
     "summary": "Tap a tile; tiles above fall and may create matches; plan cascades.",
-    "core_loop": "tap to remove → tiles fall → matches cascade",
+    "core_loop": "Tap a tile to remove it; tiles above fall and may line up into matches that cascade, so plan for chain reactions",
     "verbs": [
       "plan",
       "match"
@@ -1478,7 +1503,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "colors"
+      "colors",
+      "board size",
+      "move limit"
     ],
     "tools": [
       "grid_board",
@@ -1503,7 +1530,7 @@
     ],
     "family": "tile_matching",
     "summary": "Place colored ring pieces so full circles of one color clear.",
-    "core_loop": "place a ring piece → full circles clear → keep space",
+    "core_loop": "Place colored ring pieces on the board; a full circle of one color clears, and you keep space open for more",
     "verbs": [
       "place",
       "match"
@@ -1529,7 +1556,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "colors"
+      "colors",
+      "board size",
+      "piece variety"
     ],
     "tools": [
       "grid_board",
@@ -1554,7 +1583,7 @@
     ],
     "family": "tile_matching",
     "summary": "Drag through equal or doubling numbers to merge them into a larger number.",
-    "core_loop": "drag a chain → numbers sum → merge",
+    "core_loop": "Drag through a chain of equal numbers, or each double of the last, and release to merge them into one larger number",
     "verbs": [
       "link",
       "merge"
@@ -1580,7 +1609,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "chain rule",
+      "target"
     ],
     "tools": [
       "grid_board",

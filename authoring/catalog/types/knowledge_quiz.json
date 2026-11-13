@@ -178,7 +178,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Match each country to its capital as fast as possible.",
-    "core_loop": "see a country → pick or type its capital → next",
+    "core_loop": "A country appears; pick or type its capital as fast as you can, building a streak until one miss ends the round",
     "verbs": [
       "recall",
       "match"
@@ -206,7 +206,8 @@
     ],
     "difficulty_levers": [
       "region",
-      "options vs typed"
+      "options vs typed",
+      "time per question"
     ],
     "tools": [
       "quiz",
@@ -290,7 +291,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Translate short phrases between two languages by tapping word tiles in order.",
-    "core_loop": "read the phrase → tap word tiles in order → check → next",
+    "core_loop": "Read a short phrase in one language and tap word tiles in the right order to build its translation, then check and move on",
     "verbs": [
       "translate",
       "order"
@@ -320,7 +321,8 @@
     ],
     "difficulty_levers": [
       "phrase length",
-      "decoy tiles"
+      "decoy tiles",
+      "language pair"
     ],
     "tools": [
       "sort_bins",
@@ -347,7 +349,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Hear a sound (a word, a bird call, an instrument) and pick what it is.",
-    "core_loop": "play the sound → pick an answer → next",
+    "core_loop": "Play a short sound such as a spoken word, bird call or instrument, then pick what it is from a few options; replays cost points",
     "verbs": [
       "listen",
       "recognize"
@@ -374,7 +376,8 @@
     ],
     "difficulty_levers": [
       "options",
-      "replays"
+      "replays",
+      "clip length"
     ],
     "tools": [
       "audio_clip",
@@ -400,7 +403,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Adjust coefficients until both sides of a chemical equation balance.",
-    "core_loop": "see the equation → tap coefficients up or down → check → next",
+    "core_loop": "See an unbalanced chemical equation and tap each coefficient up or down until atoms match on both sides, then check",
     "verbs": [
       "balance",
       "calculate"
@@ -426,7 +429,9 @@
       "class leaderboard"
     ],
     "difficulty_levers": [
-      "equation size"
+      "equation size",
+      "coefficient limit",
+      "hints"
     ],
     "tools": [
       "grid_board",
@@ -451,7 +456,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Slide a year marker to when an event happened; closer is better.",
-    "core_loop": "read the event → slide to a year → see the real date → next",
+    "core_loop": "Read a historical event, slide a marker along a timeline to the year you think it happened, and score by how close you are",
     "verbs": [
       "estimate",
       "recall"
@@ -479,7 +484,8 @@
     ],
     "difficulty_levers": [
       "era range",
-      "tolerance"
+      "tolerance",
+      "timeline zoom"
     ],
     "tools": [
       "player_drag",
@@ -506,7 +512,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "See an artwork and pick the artist or movement.",
-    "core_loop": "see the artwork → pick the artist → reveal facts → next",
+    "core_loop": "See an original artwork in a style, pick the movement or era it belongs to, then read a short fact before the next one",
     "verbs": [
       "recognize",
       "recall"
@@ -534,7 +540,8 @@
     ],
     "difficulty_levers": [
       "options",
-      "era"
+      "era",
+      "style closeness"
     ],
     "tools": [
       "quiz",
@@ -560,7 +567,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Draw lines between stars to form the named constellation.",
-    "core_loop": "read the name → connect stars in order → check → next",
+    "core_loop": "Read a constellation's name and draw lines between stars in order to trace it on the sky map, then check the shape",
     "verbs": [
       "connect",
       "recall"
@@ -587,7 +594,8 @@
     ],
     "difficulty_levers": [
       "stars shown",
-      "guides"
+      "guides",
+      "decoy stars"
     ],
     "tools": [
       "player_drag",
@@ -612,7 +620,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "See an outline or flag; type the name with fuzzy spelling.",
-    "core_loop": "see the outline → type the name → reveal → next",
+    "core_loop": "See a country's outline or flag and type its name; near-miss spellings count, and a hint reveals the first letter",
     "verbs": [
       "recognize",
       "type"
@@ -640,7 +648,8 @@
     ],
     "difficulty_levers": [
       "region",
-      "hints"
+      "hints",
+      "spelling strictness"
     ],
     "tools": [
       "typed_answer",
@@ -719,7 +728,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Sort items into the right category (mammal vs reptile, metal vs nonmetal).",
-    "core_loop": "an item appears → drag it to a bin → right or wrong → next",
+    "core_loop": "An item appears, such as a whale or a metal; drag it into the correct category bin and keep going until time runs out",
     "verbs": [
       "classify",
       "sort"
@@ -747,7 +756,8 @@
     ],
     "difficulty_levers": [
       "bins",
-      "ambiguity"
+      "ambiguity",
+      "time"
     ],
     "tools": [
       "sort_bins",
@@ -772,7 +782,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Read a sentence from a lesson and fill the missing key term.",
-    "core_loop": "read the sentence → type the missing term → next",
+    "core_loop": "Read a sentence from a lesson with a key term removed, type or pick the missing term, and see the full sentence after",
     "verbs": [
       "recall",
       "type"
@@ -799,7 +809,8 @@
     ],
     "difficulty_levers": [
       "blanks per sentence",
-      "word bank"
+      "word bank",
+      "topic depth"
     ],
     "tools": [
       "typed_answer",
@@ -825,7 +836,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Each right answer makes the next question harder; wrong answers ease off; ends with a level.",
-    "core_loop": "answer → difficulty adjusts → repeat → see your level",
+    "core_loop": "Answer questions one at a time; each right answer raises the difficulty and each miss lowers it, ending with your level",
     "verbs": [
       "answer",
       "learn"
@@ -852,7 +863,8 @@
     ],
     "difficulty_levers": [
       "step size",
-      "question pool"
+      "question pool",
+      "length"
     ],
     "tools": [
       "quiz",
@@ -877,7 +889,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "A part is named; tap it on the body diagram.",
-    "core_loop": "read the part → tap the diagram → feedback → next",
+    "core_loop": "A body part is named; tap where it is on a labeled-free diagram, get feedback on how close you were, then the next part",
     "verbs": [
       "locate",
       "recall"
@@ -903,7 +915,9 @@
       "nursing class practice together"
     ],
     "difficulty_levers": [
-      "detail level"
+      "detail level",
+      "tap tolerance",
+      "time"
     ],
     "tools": [
       "grid_board",
@@ -929,7 +943,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "See or hear a note, interval or chord and name it.",
-    "core_loop": "play or show it → pick the name → next",
+    "core_loop": "See or hear a note, interval or chord, pick its name from the options, and build a streak across a short set",
     "verbs": [
       "listen",
       "recognize"
@@ -956,7 +970,8 @@
     ],
     "difficulty_levers": [
       "intervals vs chords",
-      "tempo"
+      "tempo",
+      "options"
     ],
     "tools": [
       "audio_clip",
@@ -981,7 +996,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Read a short code snippet and pick what it outputs.",
-    "core_loop": "read the code → pick the output → see why → next",
+    "core_loop": "Read a short code snippet, pick what it prints from four options, then see a line-by-line explanation of why",
     "verbs": [
       "read",
       "reason"
@@ -1008,7 +1023,8 @@
     ],
     "difficulty_levers": [
       "language",
-      "snippet length"
+      "snippet length",
+      "options"
     ],
     "tools": [
       "quiz",
@@ -1033,7 +1049,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Convert a measurement into another unit within a tolerance.",
-    "core_loop": "read the value → type the conversion → check → next",
+    "core_loop": "Read a measurement and type its value in another unit; answers within the tolerance score, closer answers score more",
     "verbs": [
       "calculate",
       "type"
@@ -1060,7 +1076,8 @@
     ],
     "difficulty_levers": [
       "unit types",
-      "tolerance"
+      "tolerance",
+      "time"
     ],
     "tools": [
       "typed_answer",
@@ -1086,7 +1103,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Tap the error in a sentence and choose the fix.",
-    "core_loop": "read the sentence → tap the mistake → pick the fix → next",
+    "core_loop": "Read a sentence, tap the word or phrase that's wrong, then pick the correct fix from a few choices before moving on",
     "verbs": [
       "spot",
       "correct"
@@ -1112,7 +1129,9 @@
       "teacher shares a set with the class"
     ],
     "difficulty_levers": [
-      "error subtlety"
+      "error subtlety",
+      "sentence length",
+      "options"
     ],
     "tools": [
       "quiz",
@@ -1137,7 +1156,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Decide if a science claim is true; see the explanation.",
-    "core_loop": "read the claim → true or false → read why → next",
+    "core_loop": "Read a science claim, swipe or tap true or false, then read a one-line explanation of the real answer",
     "verbs": [
       "judge",
       "learn"
@@ -1165,7 +1184,9 @@
       "share surprising facts with friends"
     ],
     "difficulty_levers": [
-      "claim subtlety"
+      "claim subtlety",
+      "time",
+      "streak bonus"
     ],
     "tools": [
       "quiz",
@@ -1190,7 +1211,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "See a picture; type or pick its word in the language you're learning.",
-    "core_loop": "see the picture → answer the word → next",
+    "core_loop": "See a picture and type or pick its word in the language you're learning; misses come back later in the set",
     "verbs": [
       "recall",
       "translate"
@@ -1217,7 +1238,9 @@
       "family language practice"
     ],
     "difficulty_levers": [
-      "options vs typed"
+      "options vs typed",
+      "vocabulary level",
+      "review spacing"
     ],
     "tools": [
       "quiz",
@@ -1295,7 +1318,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Assemble a flag from colors and shapes to match a country.",
-    "core_loop": "read the country → pick colors and layout → check → next",
+    "core_loop": "Read a country's name, then pick colors, stripes and symbols to assemble its flag, and check it against the real layout",
     "verbs": [
       "build",
       "recall"
@@ -1322,7 +1345,9 @@
       "geography club challenges"
     ],
     "difficulty_levers": [
-      "pieces offered"
+      "pieces offered",
+      "decoy colors",
+      "layout options"
     ],
     "tools": [
       "player_drag",
@@ -1346,7 +1371,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Hear a word with its sentence, then type its spelling.",
-    "core_loop": "hear the word → type it → check → next",
+    "core_loop": "Hear a word read aloud with an example sentence, type its spelling, and replay if needed; misses end the round",
     "verbs": [
       "listen",
       "spell"
@@ -1372,7 +1397,9 @@
       "class bee practice"
     ],
     "difficulty_levers": [
-      "word level"
+      "word level",
+      "replays",
+      "time"
     ],
     "tools": [
       "audio_clip",
@@ -1398,7 +1425,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Combine element tiles with subscripts to build a named compound.",
-    "core_loop": "read the compound → place elements and counts → check",
+    "core_loop": "Read a compound's name and place element tiles with the right subscripts to build its formula, then check it",
     "verbs": [
       "build",
       "calculate"
@@ -1425,7 +1452,9 @@
       "chem class duel"
     ],
     "difficulty_levers": [
-      "compound complexity"
+      "compound complexity",
+      "element tiles offered",
+      "hints"
     ],
     "tools": [
       "player_drag",
@@ -1451,7 +1480,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Answer arithmetic facts as fast as you can.",
-    "core_loop": "see a fact → type the answer → next, faster",
+    "core_loop": "Arithmetic facts appear one after another; type each answer as fast as you can while the pace speeds up",
     "verbs": [
       "calculate",
       "react"
@@ -1479,7 +1508,8 @@
     ],
     "difficulty_levers": [
       "operation",
-      "number range"
+      "number range",
+      "pace"
     ],
     "tools": [
       "keyboard",
@@ -1505,7 +1535,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "See a landmark photo and name it or its city.",
-    "core_loop": "see the landmark → name it → reveal → next",
+    "core_loop": "See an original illustration of a landmark, name it or its city, then see where it is on a map before the next",
     "verbs": [
       "recognize",
       "recall"
@@ -1533,7 +1563,9 @@
       "travel friends compare scores"
     ],
     "difficulty_levers": [
-      "obscurity"
+      "obscurity",
+      "options vs typed",
+      "region"
     ],
     "tools": [
       "typed_answer",
@@ -1611,7 +1643,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Read a short scenario and pick the best next step; see the reasoning.",
-    "core_loop": "read the scenario → choose an action → see the outcome → next",
+    "core_loop": "Read a short scenario, choose the best next action from a few options, then see what happens and why it was right or wrong",
     "verbs": [
       "decide",
       "reason"
@@ -1637,7 +1669,9 @@
       "study group discussions"
     ],
     "difficulty_levers": [
-      "scenario length"
+      "scenario length",
+      "option closeness",
+      "topic"
     ],
     "tools": [
       "choice_story",
@@ -1663,7 +1697,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Drag the steps of a process (mitosis, the water cycle) into order.",
-    "core_loop": "read the process → order the steps → check",
+    "core_loop": "Read a process name like the water cycle, drag its steps into the right order, then check and see any steps out of place",
     "verbs": [
       "order",
       "recall"
@@ -1690,7 +1724,8 @@
     ],
     "difficulty_levers": [
       "steps",
-      "distractors"
+      "distractors",
+      "time"
     ],
     "tools": [
       "sort_bins",
@@ -1714,7 +1749,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Read a short passage, then answer questions about it.",
-    "core_loop": "read the passage → answer questions → see score",
+    "core_loop": "Read a short passage, then answer three to five questions about it without scrolling back, and see your score",
     "verbs": [
       "read",
       "answer"
@@ -1740,7 +1775,9 @@
       "book club quizzes each other"
     ],
     "difficulty_levers": [
-      "passage length"
+      "passage length",
+      "question count",
+      "look-back allowed"
     ],
     "tools": [
       "quiz",
@@ -1764,7 +1801,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Guess the distance between two places; closer is better.",
-    "core_loop": "see two places → slide a distance → reveal → next",
+    "core_loop": "Two places are named; slide to guess the distance between them, then see the real distance on a map and score by closeness",
     "verbs": [
       "estimate"
     ],
@@ -1791,7 +1828,8 @@
     ],
     "difficulty_levers": [
       "units",
-      "tolerance"
+      "tolerance",
+      "place familiarity"
     ],
     "tools": [
       "player_drag",
@@ -1816,7 +1854,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Pick which of two foods has more calories, sugar or protein.",
-    "core_loop": "see two foods → pick the higher one → reveal → next",
+    "core_loop": "Two foods appear; pick which has more calories, sugar or protein, then see both numbers and continue the streak",
     "verbs": [
       "compare"
     ],
@@ -1841,7 +1879,9 @@
       "friends compare streaks"
     ],
     "difficulty_levers": [
-      "closeness"
+      "closeness",
+      "nutrient",
+      "time"
     ],
     "tools": [
       "quiz",
@@ -1867,7 +1907,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "See a road sign or driving situation and pick what it means.",
-    "core_loop": "see the sign → pick its meaning → next",
+    "core_loop": "See a road sign or a driving situation and pick what it means or what to do, then read the rule before the next one",
     "verbs": [
       "recognize",
       "recall"
@@ -1893,7 +1933,9 @@
       "friends studying for the permit test"
     ],
     "difficulty_levers": [
-      "sign set"
+      "sign set",
+      "options",
+      "region rules"
     ],
     "tools": [
       "quiz",
@@ -1918,7 +1960,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "See a stock ticker or logo and name the company.",
-    "core_loop": "see the ticker → type or pick the company → next",
+    "core_loop": "See a ticker symbol and type or pick the company it belongs to, with a streak bonus for consecutive right answers",
     "verbs": [
       "recall"
     ],
@@ -1944,7 +1986,9 @@
       "finance club duel"
     ],
     "difficulty_levers": [
-      "obscurity"
+      "obscurity",
+      "options vs typed",
+      "sector"
     ],
     "tools": [
       "typed_answer",
@@ -1970,7 +2014,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "See a hand sign and pick the letter or word.",
-    "core_loop": "see the sign → pick its meaning → next",
+    "core_loop": "See a hand sign drawn or animated and pick the letter or word it means; misses come back later in the set",
     "verbs": [
       "recognize"
     ],
@@ -1995,7 +2039,9 @@
       "practice with a friend learning ASL"
     ],
     "difficulty_levers": [
-      "letters vs words"
+      "letters vs words",
+      "options",
+      "speed"
     ],
     "tools": [
       "quiz",
@@ -2019,7 +2065,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Hear or see Morse code and type the letters.",
-    "core_loop": "play the code → type the letters → check → next",
+    "core_loop": "Hear or see a Morse code message and type the letters it spells; replays are allowed but cost points",
     "verbs": [
       "decode",
       "listen"
@@ -2046,7 +2092,8 @@
     ],
     "difficulty_levers": [
       "speed",
-      "message length"
+      "message length",
+      "replays"
     ],
     "tools": [
       "audio_clip",
@@ -2072,7 +2119,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "See a plant or leaf and pick its name.",
-    "core_loop": "see the plant → pick the name → reveal → next",
+    "core_loop": "See an illustration of a plant or leaf, pick its name from the options, then read one fact about it",
     "verbs": [
       "recognize"
     ],
@@ -2098,7 +2145,8 @@
     ],
     "difficulty_levers": [
       "region",
-      "detail"
+      "detail",
+      "options"
     ],
     "tools": [
       "quiz",
@@ -2122,7 +2170,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Count the coins and bills shown and type the total.",
-    "core_loop": "see the coins → type the total → check → next",
+    "core_loop": "See a set of coins and bills, type the total amount, and check; harder rounds mix more denominations",
     "verbs": [
       "count",
       "calculate"
@@ -2149,7 +2197,8 @@
     ],
     "difficulty_levers": [
       "coin types",
-      "amount range"
+      "amount range",
+      "time"
     ],
     "tools": [
       "keyboard",
@@ -2174,7 +2223,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Read an analog clock and type or pick the time.",
-    "core_loop": "see the clock → enter the time → check → next",
+    "core_loop": "Read an analog clock face and type or pick the time it shows; later rounds need exact minutes",
     "verbs": [
       "read"
     ],
@@ -2200,7 +2249,9 @@
       "family practice"
     ],
     "difficulty_levers": [
-      "minute precision"
+      "minute precision",
+      "options vs typed",
+      "time"
     ],
     "tools": [
       "quiz",
@@ -2225,7 +2276,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Answer questions about this week's headlines.",
-    "core_loop": "read the question → pick the answer → next",
+    "core_loop": "Answer multiple-choice questions about this week's news, with a short source summary shown after each answer",
     "verbs": [
       "recall",
       "choose"
@@ -2252,7 +2303,9 @@
       "weekly quiz in a Group"
     ],
     "difficulty_levers": [
-      "recency"
+      "recency",
+      "options",
+      "topic"
     ],
     "tools": [
       "quiz",
@@ -2277,7 +2330,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Complete famous historical quotes or speeches.",
-    "core_loop": "read the start → type or pick the ending → next",
+    "core_loop": "Read the start of a famous public-domain quote or speech and type or pick how it ends",
     "verbs": [
       "recall"
     ],
@@ -2303,7 +2356,9 @@
       "history class challenge"
     ],
     "difficulty_levers": [
-      "quote obscurity"
+      "quote obscurity",
+      "options vs typed",
+      "era"
     ],
     "tools": [
       "typed_answer",
@@ -2328,7 +2383,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "See a dish and its ingredients with one missing; name it.",
-    "core_loop": "see the dish → name the missing ingredient → next",
+    "core_loop": "See a dish and its ingredient list with one missing, then type or pick the missing ingredient",
     "verbs": [
       "recall"
     ],
@@ -2354,7 +2409,9 @@
       "foodie friends duel"
     ],
     "difficulty_levers": [
-      "dish obscurity"
+      "dish obscurity",
+      "options vs typed",
+      "cuisine"
     ],
     "tools": [
       "typed_answer",
@@ -2379,7 +2436,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Read a game situation and pick the correct ruling.",
-    "core_loop": "read the play → pick the ruling → see the rule → next",
+    "core_loop": "Read a described play in a sport or game and pick the correct ruling, then read the rule that applies",
     "verbs": [
       "judge",
       "recall"
@@ -2406,7 +2463,8 @@
     ],
     "difficulty_levers": [
       "sport",
-      "edge-case rate"
+      "edge-case rate",
+      "options"
     ],
     "tools": [
       "quiz",
@@ -2430,7 +2488,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Sort creatures, inventions or artworks into the right era.",
-    "core_loop": "an item appears → drop it into its era → next",
+    "core_loop": "Creatures, inventions or artworks appear one at a time; drop each into the era it belongs to on a timeline",
     "verbs": [
       "classify"
     ],
@@ -2456,7 +2514,8 @@
     ],
     "difficulty_levers": [
       "eras",
-      "ambiguity"
+      "ambiguity",
+      "time"
     ],
     "tools": [
       "sort_bins",
@@ -2480,7 +2539,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Rank items by a fact (planets by size, countries by population).",
-    "core_loop": "drag items into rank order → check → fix",
+    "core_loop": "Drag a set of items into rank order by a fact such as planet size or population, check, and fix any out of place",
     "verbs": [
       "order",
       "compare"
@@ -2507,7 +2566,8 @@
     ],
     "difficulty_levers": [
       "items",
-      "value closeness"
+      "value closeness",
+      "checks allowed"
     ],
     "tools": [
       "sort_bins",
@@ -2532,7 +2592,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Tap the steps of a procedure (CPR, recovery position) in order under time.",
-    "core_loop": "read the situation → tap steps in order → feedback",
+    "core_loop": "Read an emergency situation and tap the steps of the right procedure in order before the timer, with feedback on each step",
     "verbs": [
       "order",
       "react"
@@ -2559,7 +2619,8 @@
     ],
     "difficulty_levers": [
       "steps",
-      "time"
+      "time",
+      "distractor steps"
     ],
     "tools": [
       "sequence_memory",
@@ -2583,7 +2644,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Match numbered items (amendments, commandments, laws) to what they say.",
-    "core_loop": "see a number → pick what it says → next",
+    "core_loop": "See a numbered item from a list such as amendments or laws, and pick what it says from several options",
     "verbs": [
       "recall",
       "match"
@@ -2609,7 +2670,9 @@
       "civics class review"
     ],
     "difficulty_levers": [
-      "list size"
+      "list size",
+      "options",
+      "order shuffled"
     ],
     "tools": [
       "quiz",
@@ -2633,7 +2696,7 @@
     ],
     "family": "knowledge_quiz",
     "summary": "Clues reveal one at a time (atomic number range, state at room temp); guess early.",
-    "core_loop": "read a clue → guess or ask for more → solve",
+    "core_loop": "Clues about an element appear one by one, such as its group or state at room temperature; guess early to score more",
     "verbs": [
       "infer",
       "recall"
@@ -2660,7 +2723,8 @@
     ],
     "difficulty_levers": [
       "clues",
-      "obscurity"
+      "obscurity",
+      "guess limit"
     ],
     "tools": [
       "reveal",

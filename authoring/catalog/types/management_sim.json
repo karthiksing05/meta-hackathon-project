@@ -8,7 +8,7 @@
     ],
     "family": "management_sim",
     "summary": "Seat customers, take orders, serve food and clear tables before patience runs out.",
-    "core_loop": "seat → take the order → serve → collect → clear",
+    "core_loop": "Seat customers, take their orders, serve the food, collect payment and clear tables before anyone's patience runs out",
     "verbs": [
       "serve",
       "prioritize"
@@ -37,7 +37,8 @@
     ],
     "difficulty_levers": [
       "customer rate",
-      "patience"
+      "patience",
+      "menu size"
     ],
     "tools": [
       "timers",
@@ -63,7 +64,7 @@
     ],
     "family": "management_sim",
     "summary": "Place rides and stalls, set prices and keep guests happy.",
-    "core_loop": "build → set prices → watch guests → fix complaints",
+    "core_loop": "Place rides and food stalls, set prices, watch guests' moods and fix complaints to grow the park",
     "verbs": [
       "build",
       "price",
@@ -91,7 +92,9 @@
       "visit friends' parks"
     ],
     "difficulty_levers": [
-      "budget"
+      "budget",
+      "guest count",
+      "ride costs"
     ],
     "tools": [
       "grid_board",
@@ -117,7 +120,7 @@
     ],
     "family": "management_sim",
     "summary": "Zone homes, shops and industry; add roads and services; grow the population.",
-    "core_loop": "zone → build roads → add services → grow",
+    "core_loop": "Zone homes, shops and industry, connect them with roads, add services, and grow the population without running out of money",
     "verbs": [
       "build",
       "plan"
@@ -144,7 +147,9 @@
       "visit friends' cities"
     ],
     "difficulty_levers": [
-      "budget"
+      "budget",
+      "service costs",
+      "disaster events"
     ],
     "tools": [
       "grid_board",
@@ -169,7 +174,7 @@
     ],
     "family": "management_sim",
     "summary": "Plant, water and harvest crops by season; sell produce and expand the farm.",
-    "core_loop": "plant → water → harvest → sell → expand",
+    "core_loop": "Plant, water and harvest crops by season, sell the produce, and spend profits to expand the farm",
     "verbs": [
       "plant",
       "harvest",
@@ -196,7 +201,9 @@
       "trade crops with friends"
     ],
     "difficulty_levers": [
-      "season length"
+      "season length",
+      "crop types",
+      "weather"
     ],
     "tools": [
       "grid_board",
@@ -222,7 +229,7 @@
     ],
     "family": "management_sim",
     "summary": "Stock shelves, set prices and haggle with customers to maximize profit.",
-    "core_loop": "stock → price → watch reactions → adjust",
+    "core_loop": "Stock shelves, set prices, haggle with customers who have different budgets, and adjust to make the most profit",
     "verbs": [
       "price",
       "haggle"
@@ -248,7 +255,9 @@
       "compare shops"
     ],
     "difficulty_levers": [
-      "customer budgets"
+      "customer budgets",
+      "stock costs",
+      "haggle rounds"
     ],
     "tools": [
       "timers",
@@ -272,7 +281,7 @@
     ],
     "family": "management_sim",
     "summary": "Check guests in, clean rooms and handle requests before they get angry.",
-    "core_loop": "check in → clean → handle requests → check out",
+    "core_loop": "Check guests in, send staff to clean rooms, handle requests, and check guests out before anyone gets angry",
     "verbs": [
       "prioritize",
       "serve"
@@ -298,7 +307,9 @@
       "hotel run by your friend group"
     ],
     "difficulty_levers": [
-      "guest rate"
+      "guest rate",
+      "staff count",
+      "request types"
     ],
     "tools": [
       "timers",
@@ -322,7 +333,7 @@
     ],
     "family": "management_sim",
     "summary": "Draw landing paths for incoming planes so none collide.",
-    "core_loop": "planes arrive → draw paths → land them → avoid collisions",
+    "core_loop": "Planes arrive from the edges; draw a landing path for each so they reach a runway without colliding",
     "verbs": [
       "draw",
       "route"
@@ -348,7 +359,9 @@
       "control tower duel"
     ],
     "difficulty_levers": [
-      "plane rate"
+      "plane rate",
+      "runways",
+      "plane speeds"
     ],
     "tools": [
       "drawing_canvas",
@@ -373,7 +386,7 @@
     ],
     "family": "management_sim",
     "summary": "Flip track switches so colored trains reach matching stations.",
-    "core_loop": "trains arrive → flip switches → right station",
+    "core_loop": "Colored trains enter the track; flip switches so each one reaches the station of its color",
     "verbs": [
       "switch",
       "route"
@@ -399,7 +412,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "train rate"
+      "train rate",
+      "switch count",
+      "train speed"
     ],
     "tools": [
       "grid_board",
@@ -423,7 +438,7 @@
     ],
     "family": "management_sim",
     "summary": "Send patients to the right rooms by symptoms; build rooms as needed.",
-    "core_loop": "read symptoms → assign a room → treat → next",
+    "core_loop": "Read each patient's symptoms, send them to the right room, and build new rooms as demand grows",
     "verbs": [
       "diagnose",
       "assign"
@@ -450,7 +465,9 @@
       "run a hospital with friends"
     ],
     "difficulty_levers": [
-      "patient rate"
+      "patient rate",
+      "room types",
+      "budget"
     ],
     "tools": [
       "sort_bins",
@@ -474,7 +491,7 @@
     ],
     "family": "management_sim",
     "summary": "Build habitats, keep animals happy and attract visitors.",
-    "core_loop": "build habitats → care → visitors → expand",
+    "core_loop": "Build habitats, keep each animal fed and happy, and attract visitors whose tickets fund new animals",
     "verbs": [
       "build",
       "care"
@@ -501,7 +518,9 @@
       "visit friends' zoos"
     ],
     "difficulty_levers": [
-      "budget"
+      "budget",
+      "animal needs",
+      "visitor rate"
     ],
     "tools": [
       "grid_board",
@@ -525,7 +544,7 @@
     ],
     "family": "management_sim",
     "summary": "Plan a route to make every delivery within time windows.",
-    "core_loop": "see orders → draw a route → drive → deliver",
+    "core_loop": "See today's orders and their time windows, draw a route, then drive it and make every delivery on time",
     "verbs": [
       "route",
       "plan"
@@ -552,7 +571,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "windows"
+      "windows",
+      "stops",
+      "traffic"
     ],
     "tools": [
       "drawing_canvas",
@@ -576,7 +597,7 @@
     ],
     "family": "management_sim",
     "summary": "Make drinks to exact orders: shots, milk, syrup, size.",
-    "core_loop": "read the order → assemble → serve → next",
+    "core_loop": "Read each order, assemble the drink with the right shots, milk, syrup and size, and serve it before the next customer leaves",
     "verbs": [
       "assemble",
       "remember"
@@ -602,7 +623,9 @@
       "cafe with friends' orders"
     ],
     "difficulty_levers": [
-      "order complexity"
+      "order complexity",
+      "customer rate",
+      "patience"
     ],
     "tools": [
       "timers",
@@ -626,7 +649,7 @@
     ],
     "family": "management_sim",
     "summary": "Decide price and recipe based on the weather forecast; sell for profit over days.",
-    "core_loop": "read the forecast → set price and recipe → sell → adjust",
+    "core_loop": "Read the forecast, set your price and recipe for the day, sell to passersby, and adjust over a run of days to make the most",
     "verbs": [
       "price",
       "plan"
@@ -652,7 +675,9 @@
       "compare profits"
     ],
     "difficulty_levers": [
-      "days"
+      "days",
+      "weather swings",
+      "ingredient costs"
     ],
     "tools": [
       "timers",
@@ -676,7 +701,7 @@
     ],
     "family": "management_sim",
     "summary": "Take orders, make pizzas to spec, bake and slice, then serve.",
-    "core_loop": "take order → make it → bake → slice → serve",
+    "core_loop": "Take an order, add toppings to spec, bake and slice the pizza, then serve it before the customer gives up",
     "verbs": [
       "make",
       "time"
@@ -703,7 +728,9 @@
       "compare scores"
     ],
     "difficulty_levers": [
-      "toppings"
+      "toppings",
+      "orders at once",
+      "bake time"
     ],
     "tools": [
       "timers",
@@ -727,7 +754,7 @@
     ],
     "family": "management_sim",
     "summary": "Assign classes, rooms and teachers so no conflicts happen.",
-    "core_loop": "assign → check conflicts → fix → finish",
+    "core_loop": "Assign classes to rooms, teachers and time slots, check for conflicts, and fix them until the timetable works",
     "verbs": [
       "schedule",
       "plan"
@@ -753,7 +780,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "constraints"
+      "constraints",
+      "classes",
+      "rooms"
     ],
     "tools": [
       "grid_board",
@@ -777,7 +806,7 @@
     ],
     "family": "management_sim",
     "summary": "Place stages, food and toilets; keep crowds flowing and happy.",
-    "core_loop": "place → watch crowds → fix jams",
+    "core_loop": "Place stages, food stands and toilets, watch crowds move, and fix jams to keep festival-goers happy",
     "verbs": [
       "build",
       "plan"
@@ -803,7 +832,9 @@
       "plan a group event"
     ],
     "difficulty_levers": [
-      "crowd size"
+      "crowd size",
+      "budget",
+      "event schedule"
     ],
     "tools": [
       "grid_board",
@@ -827,7 +858,7 @@
     ],
     "family": "management_sim",
     "summary": "Assign colonists to food, power and air; survive and grow.",
-    "core_loop": "assign → balance resources → handle events → grow",
+    "core_loop": "Assign colonists to food, power and air, balance the resources, and handle random events as the colony grows",
     "verbs": [
       "assign",
       "plan"
@@ -853,7 +884,9 @@
       "compare colonies"
     ],
     "difficulty_levers": [
-      "event rate"
+      "event rate",
+      "colonist count",
+      "resource drain"
     ],
     "tools": [
       "timers",
@@ -877,7 +910,7 @@
     ],
     "family": "management_sim",
     "summary": "Assign tasks to coworkers by skill; hit deadlines.",
-    "core_loop": "read tasks → assign → watch progress → ship",
+    "core_loop": "Read incoming tasks, assign each to the coworker with the right skill, watch progress and ship before deadlines",
     "verbs": [
       "assign",
       "prioritize"
@@ -903,7 +936,9 @@
       "your actual team as characters"
     ],
     "difficulty_levers": [
-      "task rate"
+      "task rate",
+      "team size",
+      "deadline length"
     ],
     "tools": [
       "sort_bins",

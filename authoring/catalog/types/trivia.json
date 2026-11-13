@@ -584,7 +584,7 @@
     ],
     "family": "trivia",
     "summary": "Name the country or state from its flag or outline.",
-    "core_loop": "see a flag or outline → pick or type the place → next",
+    "core_loop": "A flag or a country or state outline appears; pick or type the place it belongs to, with streaks for consecutive right answers",
     "verbs": [
       "recognize",
       "recall"
@@ -612,7 +612,8 @@
     ],
     "difficulty_levers": [
       "region",
-      "options vs typed"
+      "options vs typed",
+      "outline detail"
     ],
     "tools": [
       "quiz",
@@ -1135,7 +1136,7 @@
     ],
     "family": "trivia",
     "summary": "Name the brand or team from a cropped or altered logo.",
-    "core_loop": "see a cropped logo → type the brand → reveal more if stuck",
+    "core_loop": "See a tightly cropped or altered logo, type the brand or team, and reveal more of the logo if stuck at the cost of points",
     "verbs": [
       "recognize",
       "type"
@@ -1162,7 +1163,8 @@
     ],
     "difficulty_levers": [
       "crop amount",
-      "category"
+      "category",
+      "reveal cost"
     ],
     "tools": [
       "reveal",
@@ -1299,7 +1301,7 @@
     ],
     "family": "trivia",
     "summary": "Given three items in a sequence, name the fourth.",
-    "core_loop": "see three items → type what comes fourth → reveal the rule",
+    "core_loop": "Read three items that follow a hidden rule, type the fourth, then see the rule revealed; more clues cost points",
     "verbs": [
       "infer",
       "type"
@@ -1328,7 +1330,8 @@
     ],
     "difficulty_levers": [
       "clues shown",
-      "sequence type"
+      "sequence type",
+      "time"
     ],
     "tools": [
       "reveal",
@@ -1409,7 +1412,7 @@
     ],
     "family": "trivia",
     "summary": "Click every item in a grid that fits the category; avoid the wrong ones.",
-    "core_loop": "scan the grid → tap every item that fits → avoid decoys",
+    "core_loop": "Scan a grid of items and tap every one that fits the category while avoiding decoys, before the clock runs out",
     "verbs": [
       "scan",
       "recognize"
@@ -1436,7 +1439,8 @@
     ],
     "difficulty_levers": [
       "decoys",
-      "time"
+      "time",
+      "grid size"
     ],
     "tools": [
       "grid_board",
@@ -1624,7 +1628,7 @@
     ],
     "family": "trivia",
     "summary": "Answer riddles with a short typed answer; hints cost points.",
-    "core_loop": "read the riddle → type the answer → buy a hint if stuck",
+    "core_loop": "Read a trivia riddle, type a short answer, and buy hints that cost points if stuck; the fastest clean answer scores most",
     "verbs": [
       "think",
       "type"
@@ -1651,7 +1655,8 @@
     ],
     "difficulty_levers": [
       "hint cost",
-      "difficulty"
+      "difficulty",
+      "time"
     ],
     "tools": [
       "typed_answer",
@@ -1677,7 +1682,7 @@
     ],
     "family": "trivia",
     "summary": "Hear a sound effect and guess what made it.",
-    "core_loop": "play the sound → pick or type what it is → next",
+    "core_loop": "Play a short sound effect, pick or type what made it, and earn more for guessing from shorter clips",
     "verbs": [
       "listen",
       "recognize"
@@ -1706,7 +1711,8 @@
     ],
     "difficulty_levers": [
       "clip length",
-      "category"
+      "category",
+      "options vs typed"
     ],
     "tools": [
       "audio_clip",
@@ -1839,7 +1845,7 @@
     ],
     "family": "trivia",
     "summary": "Everyone answers the same open question; you score if you match the most common answer.",
-    "core_loop": "read the open question → type an answer → match the most common answer to score",
+    "core_loop": "Everyone answers the same open question; answers are grouped, and you score for matching the most common answer in your group",
     "verbs": [
       "predict",
       "type"
@@ -1865,7 +1871,8 @@
       "Group party game."
     ],
     "difficulty_levers": [
-      "matching strictness"
+      "matching strictness",
+      "question openness"
     ],
     "tools": [
       "typed_answer",
@@ -1891,7 +1898,7 @@
     ],
     "family": "trivia",
     "summary": "Read a lyric and name the artist or song.",
-    "core_loop": "read a lyric → type the song or artist → next",
+    "core_loop": "Read an original lyric-style line written in an artist's style, type the artist or song style it echoes, and move to the next",
     "verbs": [
       "recall",
       "type"
@@ -1919,7 +1926,8 @@
     ],
     "difficulty_levers": [
       "era",
-      "lyric length"
+      "lyric length",
+      "options vs typed"
     ],
     "tools": [
       "typed_answer",
@@ -1945,7 +1953,7 @@
     ],
     "family": "trivia",
     "summary": "See a photo, headline or song and guess the year it's from.",
-    "core_loop": "see the photo or headline → enter a year → closer is better",
+    "core_loop": "See a photo, headline or song description, enter the year you think it's from, and score more the closer you land",
     "verbs": [
       "estimate",
       "guess"
@@ -2000,7 +2008,7 @@
     ],
     "family": "trivia",
     "summary": "Read a word or brand that's blurred, scrambled or mirrored.",
-    "core_loop": "see a distorted word → type it → distortion clears over time → earlier is better",
+    "core_loop": "A word or name appears blurred, scrambled or mirrored; type it as soon as you can read it while the distortion slowly clears",
     "verbs": [
       "read",
       "type"
@@ -2026,7 +2034,8 @@
       "Speed race."
     ],
     "difficulty_levers": [
-      "blur level"
+      "blur level",
+      "clear speed"
     ],
     "tools": [
       "reveal",
@@ -2327,7 +2336,7 @@
     ],
     "family": "trivia",
     "summary": "Guess the movie, song or show from emojis.",
-    "core_loop": "read the emoji → type the title → take a hint if stuck",
+    "core_loop": "Read a string of emojis, type the movie, song or show title they describe, and take hint letters if stuck",
     "verbs": [
       "decode",
       "type"
@@ -2354,7 +2363,9 @@
       "Write emoji clues for friends."
     ],
     "difficulty_levers": [
-      "hint letters"
+      "hint letters",
+      "title length",
+      "category"
     ],
     "tools": [
       "typed_answer",

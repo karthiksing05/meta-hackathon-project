@@ -68,7 +68,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Black tiles scroll down four columns; tap each one in order and never a white tile.",
-    "core_loop": "tiles scroll → tap each black tile → speed rises",
+    "core_loop": "Black tiles scroll down four columns; tap each one in order as it arrives, never touching a white tile, as the speed rises",
     "verbs": [
       "tap",
       "time"
@@ -96,7 +96,8 @@
     ],
     "difficulty_levers": [
       "speed",
-      "columns"
+      "columns",
+      "held tiles"
     ],
     "tools": [
       "beat_target",
@@ -231,7 +232,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Arrows scroll up; swipe the matching direction as each reaches the target.",
-    "core_loop": "arrows scroll → swipe the direction on time → streak",
+    "core_loop": "Arrows scroll up toward a target row; swipe or tap the matching direction as each reaches it, building a streak",
     "verbs": [
       "swipe",
       "time"
@@ -259,7 +260,8 @@
     ],
     "difficulty_levers": [
       "speed",
-      "density"
+      "density",
+      "double arrows"
     ],
     "tools": [
       "beat_target",
@@ -339,7 +341,7 @@
     ],
     "family": "rhythm_music",
     "summary": "You can only move on the beat; movement off-beat fails. Navigate to the exit.",
-    "core_loop": "listen → move on beats → avoid enemies → reach the exit",
+    "core_loop": "Move one step per beat through a dungeon; moving off the beat fails, so time each step to dodge enemies and reach the exit",
     "verbs": [
       "move",
       "time"
@@ -366,7 +368,9 @@
       "daily dungeon"
     ],
     "difficulty_levers": [
-      "tempo"
+      "tempo",
+      "enemies",
+      "level size"
     ],
     "tools": [
       "beat_target",
@@ -391,7 +395,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Hear a rhythm pattern, then tap it back.",
-    "core_loop": "listen → tap the pattern back → longer patterns",
+    "core_loop": "Hear a clapped rhythm pattern, then tap it back with the right timing; each round the pattern gets longer",
     "verbs": [
       "listen",
       "repeat",
@@ -419,7 +423,8 @@
     ],
     "difficulty_levers": [
       "pattern length",
-      "tempo"
+      "tempo",
+      "timing window"
     ],
     "tools": [
       "beat_target",
@@ -444,7 +449,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Tap along to set a BPM; closest to the real tempo scores.",
-    "core_loop": "listen → tap the beat → see your BPM vs the real one",
+    "core_loop": "Listen to a song clip and tap along with the beat; the game estimates your tempo and scores how close it is to the real one",
     "verbs": [
       "listen",
       "time"
@@ -470,7 +475,9 @@
       "DJ friends challenge"
     ],
     "difficulty_levers": [
-      "genre"
+      "genre",
+      "clip length",
+      "tolerance"
     ],
     "tools": [
       "beat_target",
@@ -495,7 +502,7 @@
     ],
     "family": "rhythm_music",
     "summary": "A ball orbits; tap to launch it toward the next ring on the beat.",
-    "core_loop": "orbit → tap on the beat → land in the next orbit",
+    "core_loop": "A ball orbits a ring; tap on the beat to launch it to the next ring, and miss the timing to fall off",
     "verbs": [
       "time",
       "launch"
@@ -521,7 +528,9 @@
       "streaks"
     ],
     "difficulty_levers": [
-      "ring spacing"
+      "ring spacing",
+      "tempo",
+      "orbit speed"
     ],
     "tools": [
       "beat_target",
@@ -546,7 +555,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Blocks fly toward you; swipe through them in the arrow's direction, on the beat.",
-    "core_loop": "blocks approach → swipe the right direction → avoid walls",
+    "core_loop": "Blocks fly toward you in time with the music; swipe through each in its arrow's direction on the beat and dodge walls",
     "verbs": [
       "swipe",
       "time"
@@ -575,7 +584,8 @@
     ],
     "difficulty_levers": [
       "speed",
-      "density"
+      "density",
+      "walls"
     ],
     "tools": [
       "beat_target",
@@ -600,7 +610,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Swipe in time to keep the orchestra on tempo as the music speeds and slows.",
-    "core_loop": "follow the score → swipe the beat → keep the orchestra in sync",
+    "core_loop": "Swipe in time to conduct an orchestra, keeping them in sync as the music speeds up and slows down",
     "verbs": [
       "conduct",
       "time"
@@ -626,7 +636,9 @@
       "share performances"
     ],
     "difficulty_levers": [
-      "tempo changes"
+      "tempo changes",
+      "time signature",
+      "sections"
     ],
     "tools": [
       "beat_target",
@@ -651,7 +663,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Hear two notes and say if the second is higher or lower.",
-    "core_loop": "listen → pick higher or lower → closer notes",
+    "core_loop": "Hear two notes and tap whether the second is higher or lower; the notes get closer together as you improve",
     "verbs": [
       "listen",
       "compare"
@@ -677,7 +689,9 @@
       "ear duels"
     ],
     "difficulty_levers": [
-      "interval size"
+      "interval size",
+      "instrument",
+      "time"
     ],
     "tools": [
       "synth_sound",
@@ -702,7 +716,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Hear a melody played by an instrument; pick which one.",
-    "core_loop": "listen → pick → next",
+    "core_loop": "Hear a short melody played on one instrument and pick which instrument it is from several options",
     "verbs": [
       "listen",
       "recognize"
@@ -728,7 +742,9 @@
       "band friends"
     ],
     "difficulty_levers": [
-      "instrument similarity"
+      "instrument similarity",
+      "options",
+      "clip length"
     ],
     "tools": [
       "audio_clip",
@@ -753,7 +769,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Words appear on beats; type each word as its beat lands.",
-    "core_loop": "a word appears → type it on its beat → keep pace",
+    "core_loop": "Words appear on the beat of a track; type each word as its beat lands to keep the music going",
     "verbs": [
       "type",
       "time"
@@ -779,7 +795,9 @@
       "typing rhythm duels"
     ],
     "difficulty_levers": [
-      "tempo"
+      "tempo",
+      "word length",
+      "misses allowed"
     ],
     "tools": [
       "keyboard",
@@ -804,7 +822,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Add layers on the beat to build tension, then hit the drop at the right moment.",
-    "core_loop": "add layers → the build rises → hit the drop on time",
+    "core_loop": "Add musical layers on the beat to build tension, then hit the drop at exactly the right moment for a big score",
     "verbs": [
       "build",
       "time"
@@ -830,7 +848,9 @@
       "share your mix"
     ],
     "difficulty_levers": [
-      "layers"
+      "layers",
+      "timing window",
+      "tempo"
     ],
     "tools": [
       "synth_sound",
@@ -855,7 +875,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Hear a riff on a few pads and copy it; it grows each round.",
-    "core_loop": "listen → play it back → it grows",
+    "core_loop": "Hear a riff played on a few colored pads, then play it back; it grows by one note each round",
     "verbs": [
       "listen",
       "remember"
@@ -882,7 +902,8 @@
     ],
     "difficulty_levers": [
       "pads",
-      "tempo"
+      "tempo",
+      "start length"
     ],
     "tools": [
       "sequence_memory",
@@ -907,7 +928,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Beat-match two tracks and crossfade without a train wreck.",
-    "core_loop": "match tempos → line up beats → crossfade smoothly",
+    "core_loop": "Adjust two tracks' tempos to match, line up their beats, and crossfade between them without them clashing",
     "verbs": [
       "match",
       "time"
@@ -933,7 +954,9 @@
       "DJ battles"
     ],
     "difficulty_levers": [
-      "tempo gap"
+      "tempo gap",
+      "crossfade time",
+      "track count"
     ],
     "tools": [
       "synth_sound",
@@ -958,7 +981,7 @@
     ],
     "family": "rhythm_music",
     "summary": "Tap a word's Morse-like rhythm pattern with long and short presses.",
-    "core_loop": "see a word → tap its rhythm → next",
+    "core_loop": "See a word and tap its rhythm with long and short presses, matching the pattern before the next word comes",
     "verbs": [
       "tap",
       "hold",
@@ -986,7 +1009,9 @@
       "duels"
     ],
     "difficulty_levers": [
-      "speed"
+      "speed",
+      "word length",
+      "timing window"
     ],
     "tools": [
       "keyboard",
@@ -1065,7 +1090,7 @@
     ],
     "family": "rhythm_music",
     "summary": "The maze rotates on each beat; time your steps to the rotation.",
-    "core_loop": "listen → step between rotations → reach the center",
+    "core_loop": "A maze rotates on each beat; step between rotations to work your way to the center without hitting a wall",
     "verbs": [
       "time",
       "move"
@@ -1092,7 +1117,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "tempo"
+      "tempo",
+      "maze size",
+      "rotation angle"
     ],
     "tools": [
       "beat_target",
@@ -1117,7 +1144,7 @@
     ],
     "family": "rhythm_music",
     "summary": "The music stops; sing or type the next line.",
-    "core_loop": "listen → the track stops → sing or type the next words",
+    "core_loop": "An original song plays and stops mid-line; sing or type the next words, and score by how close you get",
     "verbs": [
       "recall",
       "sing"
@@ -1145,7 +1172,9 @@
       "party mode"
     ],
     "difficulty_levers": [
-      "era"
+      "era",
+      "options vs typed",
+      "line length"
     ],
     "tools": [
       "audio_clip",

@@ -8,7 +8,7 @@
     ],
     "family": "stack_balance",
     "summary": "A block swings above the tower; drop it so it lands centered; overhangs are cut off.",
-    "core_loop": "the block swings → tap to drop → it lands → overhang trims → next",
+    "core_loop": "A block swings above the tower; tap to drop it so it lands centered, and any overhang is cut off, leaving a smaller block for the next drop",
     "verbs": [
       "time",
       "drop"
@@ -36,7 +36,9 @@
       "tower height board with friends"
     ],
     "difficulty_levers": [
-      "swing speed"
+      "swing speed",
+      "block size",
+      "perfect-drop bonus"
     ],
     "tools": [
       "physics_world",
@@ -61,7 +63,7 @@
     ],
     "family": "stack_balance",
     "summary": "Pull a block from a tower and place it on top without knocking it over.",
-    "core_loop": "pick a block → pull gently → place on top → next player",
+    "core_loop": "Take turns picking a block, pulling it gently from the tower and placing it on top without knocking the tower over",
     "verbs": [
       "pull",
       "balance"
@@ -87,7 +89,9 @@
       "pass-and-play with friends"
     ],
     "difficulty_levers": [
-      "tower height"
+      "tower height",
+      "pull sensitivity",
+      "players"
     ],
     "tools": [
       "physics_world",
@@ -113,7 +117,7 @@
     ],
     "family": "stack_balance",
     "summary": "Stack oddly shaped pieces as high as possible; they wobble and slide.",
-    "core_loop": "drop a piece → it settles → stack higher → don't topple",
+    "core_loop": "Drop oddly shaped pieces one at a time; they wobble and slide as they settle, and you stack as high as you can without toppling",
     "verbs": [
       "drop",
       "balance"
@@ -142,7 +146,9 @@
       "race friends to the line"
     ],
     "difficulty_levers": [
-      "piece shapes"
+      "piece shapes",
+      "friction",
+      "settle time"
     ],
     "tools": [
       "physics_world",
@@ -167,7 +173,7 @@
     ],
     "family": "stack_balance",
     "summary": "Place weights on both sides of a beam so it stays level.",
-    "core_loop": "place a weight → the beam tips → place another → keep level",
+    "core_loop": "Place weights on either side of a beam one at a time, keeping it level as it tips with each new weight",
     "verbs": [
       "place",
       "balance"
@@ -193,7 +199,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "weight variety"
+      "weight variety",
+      "beam length",
+      "tip tolerance"
     ],
     "tools": [
       "physics_world",
@@ -217,7 +225,7 @@
     ],
     "family": "stack_balance",
     "summary": "Tap plates to keep them spinning; a slowing plate wobbles and falls.",
-    "core_loop": "watch plates → tap slow ones → keep all spinning",
+    "core_loop": "Several plates spin on poles; tap any that slow down to spin them up again before they wobble off",
     "verbs": [
       "tend",
       "react"
@@ -243,7 +251,9 @@
       "streak battles"
     ],
     "difficulty_levers": [
-      "plate count"
+      "plate count",
+      "slow-down rate",
+      "new plate rate"
     ],
     "tools": [
       "timers",
@@ -268,7 +278,7 @@
     ],
     "family": "stack_balance",
     "summary": "Tilt to balance a tray of drinks while walking to the table.",
-    "core_loop": "walk → tilt → keep the drinks steady → deliver",
+    "core_loop": "Walk a tray of drinks to the table, tilting to keep it level as the floor bumps and the load shifts",
     "verbs": [
       "balance",
       "walk"
@@ -295,7 +305,9 @@
       "restaurant rush with friends"
     ],
     "difficulty_levers": [
-      "tray load"
+      "tray load",
+      "floor bumps",
+      "walk speed"
     ],
     "tools": [
       "physics_world",
@@ -321,7 +333,7 @@
     ],
     "family": "stack_balance",
     "summary": "Keep a stick upright on your fingertip by moving under it.",
-    "core_loop": "the stick tips → move under it → keep it up",
+    "core_loop": "A stick stands on your fingertip and starts to tip; move your finger under it to keep it upright as long as you can",
     "verbs": [
       "balance",
       "react"
@@ -347,7 +359,9 @@
       "balance duels"
     ],
     "difficulty_levers": [
-      "stick length"
+      "stick length",
+      "tip speed",
+      "wind"
     ],
     "tools": [
       "physics_world",
@@ -371,7 +385,7 @@
     ],
     "family": "stack_balance",
     "summary": "Walk a tightrope, tapping left and right to correct your lean.",
-    "core_loop": "lean → correct → step → reach the end",
+    "core_loop": "Walk step by step along a tightrope, tapping left and right to correct your lean before you fall",
     "verbs": [
       "balance",
       "time"
@@ -398,7 +412,9 @@
       "daredevil challenge"
     ],
     "difficulty_levers": [
-      "wind"
+      "wind",
+      "rope length",
+      "lean speed"
     ],
     "tools": [
       "physics_world",
@@ -424,7 +440,7 @@
     ],
     "family": "stack_balance",
     "summary": "Place cards to build a tower that has to survive a breeze.",
-    "core_loop": "place cards → build levels → the breeze tests it",
+    "core_loop": "Place cards in leaning pairs and flat tops to build a tower, then a breeze tests whether it stands",
     "verbs": [
       "place",
       "balance"
@@ -450,7 +466,9 @@
       "share heights"
     ],
     "difficulty_levers": [
-      "wind"
+      "wind",
+      "levels",
+      "card stiffness"
     ],
     "tools": [
       "physics_world",
@@ -474,7 +492,7 @@
     ],
     "family": "stack_balance",
     "summary": "Build up a sandcastle tall enough before the tide washes in.",
-    "core_loop": "stack sand → shape → beat the tide",
+    "core_loop": "Stack and shape sand into a castle tall enough to survive before the tide comes in",
     "verbs": [
       "build",
       "race"
@@ -501,7 +519,9 @@
       "beach day challenge"
     ],
     "difficulty_levers": [
-      "tide speed"
+      "tide speed",
+      "height target",
+      "sand wetness"
     ],
     "tools": [
       "physics_world",
@@ -525,7 +545,7 @@
     ],
     "family": "stack_balance",
     "summary": "Catch falling ingredients in the right order to build the ordered burger.",
-    "core_loop": "read the order → catch pieces in order → finish",
+    "core_loop": "Read the order, then catch falling ingredients in the right sequence to build the burger it asks for",
     "verbs": [
       "catch",
       "order"
@@ -551,7 +571,9 @@
       "food truck rush"
     ],
     "difficulty_levers": [
-      "order length"
+      "order length",
+      "fall speed",
+      "decoy ingredients"
     ],
     "tools": [
       "physics_world",
@@ -576,7 +598,7 @@
     ],
     "family": "stack_balance",
     "summary": "Stack natural rocks into a balanced cairn by finding resting points.",
-    "core_loop": "pick a rock → rotate → find balance → stack",
+    "core_loop": "Pick a natural rock, rotate it, find a spot where it rests balanced, and stack a cairn as high as you can",
     "verbs": [
       "balance",
       "rotate"
@@ -601,7 +623,9 @@
       "calm share"
     ],
     "difficulty_levers": [
-      "rock shapes"
+      "rock shapes",
+      "balance tolerance",
+      "height target"
     ],
     "tools": [
       "physics_world",
@@ -625,7 +649,7 @@
     ],
     "family": "stack_balance",
     "summary": "Drop a weight on one end of a seesaw to launch a character to a target height.",
-    "core_loop": "choose weight → drop → launch → land",
+    "core_loop": "Pick a weight and drop it on one end of a seesaw to launch a character up to land on a target height",
     "verbs": [
       "choose",
       "time"
@@ -651,7 +675,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "weights"
+      "weights",
+      "target height",
+      "seesaw length"
     ],
     "tools": [
       "physics_world"
@@ -674,7 +700,7 @@
     ],
     "family": "stack_balance",
     "summary": "Stack acrobats into a pyramid; each needs support below.",
-    "core_loop": "place acrobats → keep weight centered → finish the pyramid",
+    "core_loop": "Place acrobats one by one into a human pyramid, keeping the weight centered so each level is supported",
     "verbs": [
       "place",
       "balance"
@@ -700,7 +726,9 @@
       "share"
     ],
     "difficulty_levers": [
-      "pyramid size"
+      "pyramid size",
+      "acrobat weights",
+      "wobble"
     ],
     "tools": [
       "physics_world",
@@ -724,7 +752,7 @@
     ],
     "family": "stack_balance",
     "summary": "Tilt a board to roll a ball through a maze past holes.",
-    "core_loop": "tilt → the ball rolls → avoid holes → reach the end",
+    "core_loop": "Tilt a board to roll a ball through a maze to the end, steering it past holes along the way",
     "verbs": [
       "tilt",
       "balance"
@@ -751,7 +779,9 @@
       "ghost race"
     ],
     "difficulty_levers": [
-      "holes"
+      "holes",
+      "maze size",
+      "tilt sensitivity"
     ],
     "tools": [
       "physics_world",
@@ -778,7 +808,7 @@
     ],
     "family": "stack_balance",
     "summary": "Stack and unstack cups in a pattern as fast as possible.",
-    "core_loop": "follow the pattern → stack → unstack → stop the clock",
+    "core_loop": "Follow a pattern to stack cups into pyramids and unstack them again as fast as possible, then stop the clock",
     "verbs": [
       "stack",
       "time"
@@ -805,7 +835,9 @@
       "speed stacking battles"
     ],
     "difficulty_levers": [
-      "pattern"
+      "pattern",
+      "cup count",
+      "fumble penalty"
     ],
     "tools": [
       "timers",

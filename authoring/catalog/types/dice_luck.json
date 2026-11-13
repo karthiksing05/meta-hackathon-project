@@ -7,7 +7,7 @@
     ],
     "family": "dice_luck",
     "summary": "Roll five dice up to three times to make combinations, then pick a box to score.",
-    "core_loop": "roll → keep some → reroll → score a box",
+    "core_loop": "Roll five dice up to three times, keep the ones you want between rolls, and choose a scoring box for the combination you end with",
     "verbs": [
       "roll",
       "choose",
@@ -36,7 +36,9 @@
       "yahtzee with family async"
     ],
     "difficulty_levers": [
-      "rerolls"
+      "rerolls",
+      "dice count",
+      "bonus rules"
     ],
     "tools": [
       "dice",
@@ -63,7 +65,7 @@
     ],
     "family": "dice_luck",
     "summary": "Keep rolling to build points; a bust loses everything this turn.",
-    "core_loop": "roll → bank or keep going → bust or bank",
+    "core_loop": "Roll to add points to this turn's total, then decide to bank or keep rolling; a bust loses everything from the turn",
     "verbs": [
       "risk",
       "decide"
@@ -90,7 +92,9 @@
       "farkle night with friends"
     ],
     "difficulty_levers": [
-      "target"
+      "target",
+      "bust faces",
+      "dice count"
     ],
     "tools": [
       "dice",
@@ -115,7 +119,7 @@
     ],
     "family": "dice_luck",
     "summary": "Call heads or tails; keep the streak going; bank whenever.",
-    "core_loop": "call → flip → right keeps the streak → bank",
+    "core_loop": "Call heads or tails before each flip; a right call keeps the streak and grows the payout, and you bank whenever you choose",
     "verbs": [
       "guess",
       "risk"
@@ -142,7 +146,9 @@
       "settle bets with friends"
     ],
     "difficulty_levers": [
-      "none"
+      "payout steps",
+      "streak cap",
+      "bank penalty"
     ],
     "tools": [
       "reveal",
@@ -166,7 +172,7 @@
     ],
     "family": "dice_luck",
     "summary": "Spin a prize wheel; segments give points, multipliers or bankrupt.",
-    "core_loop": "spin → land → collect or lose → spin again",
+    "core_loop": "Spin a prize wheel and land on points, a multiplier or bankrupt, then choose whether to spin again",
     "verbs": [
       "spin",
       "risk"
@@ -194,7 +200,9 @@
       "party prize wheel"
     ],
     "difficulty_levers": [
-      "segments"
+      "segments",
+      "bankrupt slices",
+      "spins allowed"
     ],
     "tools": [
       "reveal",
@@ -219,7 +227,7 @@
     ],
     "family": "dice_luck",
     "summary": "Drop a chip from the top and watch it bounce through pegs into a scoring slot.",
-    "core_loop": "pick a drop spot → drop → bounce → land",
+    "core_loop": "Pick where to drop a chip at the top, watch it bounce through the pegs, and score the slot it lands in",
     "verbs": [
       "drop",
       "watch"
@@ -246,7 +254,9 @@
       "carnival night"
     ],
     "difficulty_levers": [
-      "peg layout"
+      "peg layout",
+      "slot values",
+      "chips per round"
     ],
     "tools": [
       "physics_world",
@@ -271,7 +281,7 @@
     ],
     "family": "dice_luck",
     "summary": "Spin three reels; matching symbols score play-money points.",
-    "core_loop": "spin → reels stop → match → collect",
+    "core_loop": "Spin three reels of symbols; matching symbols in a line score play-money points",
     "verbs": [
       "spin"
     ],
@@ -295,7 +305,9 @@
       "none"
     ],
     "difficulty_levers": [
-      "symbols"
+      "symbols",
+      "reels",
+      "payout table"
     ],
     "tools": [
       "reveal",
@@ -319,7 +331,7 @@
     ],
     "family": "dice_luck",
     "summary": "Scratch off panels; three matching symbols win points.",
-    "core_loop": "scratch → reveal → match",
+    "core_loop": "Scratch off the panels one by one to reveal symbols; three matching symbols win points",
     "verbs": [
       "scratch",
       "reveal"
@@ -345,7 +357,9 @@
       "send a scratch card to a friend"
     ],
     "difficulty_levers": [
-      "panels"
+      "panels",
+      "symbol variety",
+      "win rate"
     ],
     "tools": [
       "reveal",
@@ -369,7 +383,7 @@
     ],
     "family": "dice_luck",
     "summary": "Place chips on numbers or colors; spin; payouts by odds.",
-    "core_loop": "bet → spin → payout",
+    "core_loop": "Place play-money chips on numbers, colors or groups, spin the wheel, and get paid by the odds of your bets",
     "verbs": [
       "bet",
       "risk"
@@ -395,7 +409,9 @@
       "none"
     ],
     "difficulty_levers": [
-      "table limits"
+      "table limits",
+      "bet types",
+      "starting chips"
     ],
     "tools": [
       "reveal",
@@ -420,7 +436,7 @@
     ],
     "family": "dice_luck",
     "summary": "Roll five dice twice to make the best poker hand against opponents.",
-    "core_loop": "roll → keep → reroll → compare hands",
+    "core_loop": "Roll five dice, keep some and reroll the rest once, and compare poker-style hands with your opponents",
     "verbs": [
       "roll",
       "choose"
@@ -446,7 +462,9 @@
       "duel"
     ],
     "difficulty_levers": [
-      "rerolls"
+      "rerolls",
+      "hand rankings",
+      "players"
     ],
     "tools": [
       "dice",
@@ -470,7 +488,7 @@
     ],
     "family": "dice_luck",
     "summary": "Roll for a 6, 5 and 4 in order; the remaining two dice are your cargo score.",
-    "core_loop": "roll → lock 6, then 5, then 4 → score the rest",
+    "core_loop": "Roll five dice up to three times, locking a 6, then a 5, then a 4 in order; the last two dice are your cargo score",
     "verbs": [
       "roll",
       "risk"
@@ -496,7 +514,9 @@
       "bar dice with friends"
     ],
     "difficulty_levers": [
-      "rolls"
+      "rolls",
+      "dice count",
+      "tie rules"
     ],
     "tools": [
       "dice",
@@ -520,7 +540,7 @@
     ],
     "family": "dice_luck",
     "summary": "Roll to set a point, then hit it again before rolling a seven.",
-    "core_loop": "come-out roll → set a point → roll until point or seven",
+    "core_loop": "Roll to set a point number, then keep rolling to hit it again before a seven comes up",
     "verbs": [
       "roll",
       "risk"
@@ -545,7 +565,9 @@
       "none"
     ],
     "difficulty_levers": [
-      "odds bets"
+      "odds bets",
+      "starting chips",
+      "bet types"
     ],
     "tools": [
       "dice",
@@ -569,7 +591,7 @@
     ],
     "family": "dice_luck",
     "summary": "Open cases to reveal values and decide whether to take the banker's offer.",
-    "core_loop": "open cases → the banker offers → deal or keep going",
+    "core_loop": "Open cases one at a time to reveal values, then decide after each round whether to take the banker's offer or keep going",
     "verbs": [
       "risk",
       "decide"
@@ -596,7 +618,9 @@
       "compare with friends"
     ],
     "difficulty_levers": [
-      "case count"
+      "case count",
+      "offer generosity",
+      "rounds"
     ],
     "tools": [
       "reveal",
@@ -620,7 +644,7 @@
     ],
     "family": "dice_luck",
     "summary": "Stop a flashing board on prizes; whammies wipe you out.",
-    "core_loop": "spin → stop → prize or whammy → pass or play",
+    "core_loop": "Stop a flashing board to land on a prize or a whammy that wipes your winnings, then choose to pass or keep playing",
     "verbs": [
       "time",
       "risk"
@@ -646,7 +670,9 @@
       "game show night"
     ],
     "difficulty_levers": [
-      "whammy count"
+      "whammy count",
+      "spins earned",
+      "prize sizes"
     ],
     "tools": [
       "reveal",
@@ -670,7 +696,7 @@
     ],
     "family": "dice_luck",
     "summary": "Roll dice and mark matching squares; first to complete a line wins.",
-    "core_loop": "roll → mark → complete a line",
+    "core_loop": "Roll dice and mark squares on your card that match the roll; first to complete a line wins",
     "verbs": [
       "roll",
       "mark"
@@ -697,7 +723,9 @@
       "family"
     ],
     "difficulty_levers": [
-      "card size"
+      "card size",
+      "dice count",
+      "line patterns"
     ],
     "tools": [
       "dice",
@@ -722,7 +750,7 @@
     ],
     "family": "dice_luck",
     "summary": "Open boxes one by one; each could be a prize or a trap that ends your run.",
-    "core_loop": "open → prize or trap → keep or walk",
+    "core_loop": "Open boxes one at a time; each holds a prize or a trap that ends your run, so decide when to keep your haul and walk away",
     "verbs": [
       "risk",
       "decide"
@@ -748,7 +776,9 @@
       "risk duels"
     ],
     "difficulty_levers": [
-      "trap ratio"
+      "trap ratio",
+      "box count",
+      "prize sizes"
     ],
     "tools": [
       "reveal",
@@ -772,7 +802,7 @@
     ],
     "family": "dice_luck",
     "summary": "Members join a draw; a winner is picked fairly and announced.",
-    "core_loop": "join → wait → draw → winner",
+    "core_loop": "Group members join a draw, wait for the timer, and a winner is picked fairly at random and announced to the Group",
     "verbs": [
       "join",
       "watch"
@@ -797,7 +827,9 @@
       "pick who does the dishes in a Group"
     ],
     "difficulty_levers": [
-      "entries"
+      "entries",
+      "entry cost",
+      "prize count"
     ],
     "tools": [
       "reveal",

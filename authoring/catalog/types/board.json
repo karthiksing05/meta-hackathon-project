@@ -7,7 +7,7 @@
     ],
     "family": "board",
     "summary": "Move pieces by their rules to checkmate the opponent's king.",
-    "core_loop": "move a piece → respond to threats → checkmate",
+    "core_loop": "Move pieces by their rules, defend against threats and set up attacks until you checkmate the opponent's king",
     "verbs": [
       "plan",
       "attack"
@@ -35,7 +35,9 @@
       "async chess with friends"
     ],
     "difficulty_levers": [
-      "time control"
+      "time control",
+      "opponent strength",
+      "move hints"
     ],
     "tools": [
       "grid_board",
@@ -115,7 +117,7 @@
     ],
     "family": "board",
     "summary": "Move diagonally and jump to capture; reach the far row to crown a king.",
-    "core_loop": "move diagonally → jump captures → crown kings → take all",
+    "core_loop": "Move pieces diagonally, jump to capture, crown pieces that reach the far row, and take all of your opponent's pieces",
     "verbs": [
       "plan",
       "capture"
@@ -142,7 +144,9 @@
       "checkers with grandpa"
     ],
     "difficulty_levers": [
-      "captures forced"
+      "captures forced",
+      "board size",
+      "opponent strength"
     ],
     "tools": [
       "grid_board",
@@ -167,7 +171,7 @@
     ],
     "family": "board",
     "summary": "Drop discs into columns; first to connect four wins.",
-    "core_loop": "pick a column → drop → block → connect four",
+    "core_loop": "Take turns dropping discs into columns, blocking your opponent, and be first to connect four in a row",
     "verbs": [
       "plan",
       "block"
@@ -194,7 +198,9 @@
       "connect four with a friend"
     ],
     "difficulty_levers": [
-      "board size"
+      "board size",
+      "line length",
+      "opponent strength"
     ],
     "tools": [
       "grid_board",
@@ -222,7 +228,7 @@
     ],
     "family": "board",
     "summary": "Place marks to get a line; bigger boards and nested boards add depth.",
-    "core_loop": "place a mark → block → make a line",
+    "core_loop": "Take turns placing marks, block your opponent, and make a line; bigger or nested boards add depth",
     "verbs": [
       "place",
       "block"
@@ -250,7 +256,8 @@
     ],
     "difficulty_levers": [
       "board size",
-      "line length"
+      "line length",
+      "nested boards"
     ],
     "tools": [
       "grid_board",
@@ -276,7 +283,7 @@
     ],
     "family": "board",
     "summary": "Place discs to sandwich and flip the opponent's discs; most discs wins.",
-    "core_loop": "place → flip sandwiched discs → hold corners → count",
+    "core_loop": "Place a disc to sandwich and flip your opponent's discs, fight for the corners, and have the most discs when the board fills",
     "verbs": [
       "place",
       "plan"
@@ -303,7 +310,9 @@
       "othello with friends"
     ],
     "difficulty_levers": [
-      "board size"
+      "board size",
+      "opponent strength",
+      "starting layout"
     ],
     "tools": [
       "grid_board",
@@ -330,7 +339,7 @@
     ],
     "family": "board",
     "summary": "Place stones to surround territory and capture groups with no liberties.",
-    "core_loop": "place a stone → capture surrounded groups → claim territory → count",
+    "core_loop": "Place stones to surround territory, capture groups with no liberties left, and claim the most area",
     "verbs": [
       "place",
       "surround"
@@ -357,7 +366,9 @@
       "async go with a friend"
     ],
     "difficulty_levers": [
-      "board size"
+      "board size",
+      "handicap stones",
+      "time control"
     ],
     "tools": [
       "grid_board",
@@ -384,7 +395,7 @@
     ],
     "family": "board",
     "summary": "Pick up stones from a pit and sow them around the board; capture by landing right.",
-    "core_loop": "pick a pit → sow → extra turn or capture → most stones",
+    "core_loop": "Pick up all stones from one of your pits and sow them one per pit around the board, earning extra turns and captures",
     "verbs": [
       "count",
       "plan"
@@ -411,7 +422,9 @@
       "mancala with my sister"
     ],
     "difficulty_levers": [
-      "stones per pit"
+      "stones per pit",
+      "capture rule",
+      "opponent strength"
     ],
     "tools": [
       "grid_board",
@@ -436,7 +449,7 @@
     ],
     "family": "board",
     "summary": "Roll dice to race your checkers home, hitting lone opponent checkers.",
-    "core_loop": "roll → move checkers → hit blots → bear off",
+    "core_loop": "Roll two dice to race your checkers around the board and home, hitting lone opponent checkers, then bear off first",
     "verbs": [
       "roll",
       "plan"
@@ -464,7 +477,9 @@
       "backgammon with dad"
     ],
     "difficulty_levers": [
-      "doubling cube"
+      "doubling cube",
+      "match length",
+      "opponent strength"
     ],
     "tools": [
       "dice",
@@ -491,7 +506,7 @@
     ],
     "family": "board",
     "summary": "Roll to move tokens around the board; land on others to send them home.",
-    "core_loop": "roll → move → capture → bring all tokens home",
+    "core_loop": "Roll a die to move your tokens around the board, land on others to send them home, and bring all of yours home first",
     "verbs": [
       "roll",
       "choose"
@@ -519,7 +534,9 @@
       "ludo with cousins"
     ],
     "difficulty_levers": [
-      "dice"
+      "dice",
+      "tokens per player",
+      "safe squares"
     ],
     "tools": [
       "dice",
@@ -544,7 +561,7 @@
     ],
     "family": "board",
     "summary": "Roll and move; ladders lift you, snakes drop you.",
-    "core_loop": "roll → move → climb or slide → reach 100",
+    "core_loop": "Roll and move along a numbered board; ladders lift you up, snakes drop you down, and the first to 100 wins",
     "verbs": [
       "roll"
     ],
@@ -569,7 +586,9 @@
       "play with kids"
     ],
     "difficulty_levers": [
-      "board layout"
+      "board layout",
+      "dice",
+      "exact-finish rule"
     ],
     "tools": [
       "dice",
@@ -595,7 +614,7 @@
     ],
     "family": "board",
     "summary": "Roll around a board buying properties, charging rent and building houses.",
-    "core_loop": "roll → buy → collect rent → build → bankrupt others",
+    "core_loop": "Roll around the board, buy properties, collect rent, build houses, and bankrupt the other players",
     "verbs": [
       "roll",
       "trade",
@@ -623,7 +642,9 @@
       "property game with friends' places"
     ],
     "difficulty_levers": [
-      "starting cash"
+      "starting cash",
+      "game length",
+      "trading rules"
     ],
     "tools": [
       "dice",
@@ -649,7 +670,7 @@
     ],
     "family": "board",
     "summary": "Roll for resources, trade with others, and build roads and settlements to reach 10 points.",
-    "core_loop": "roll → collect resources → trade → build → score",
+    "core_loop": "Roll for resources, trade with other players, and build roads and settlements to reach 10 points first",
     "verbs": [
       "trade",
       "build",
@@ -677,7 +698,9 @@
       "catan night with friends"
     ],
     "difficulty_levers": [
-      "map"
+      "map",
+      "points to win",
+      "trade rules"
     ],
     "tools": [
       "dice",
@@ -703,7 +726,7 @@
     ],
     "family": "board",
     "summary": "Place and move pieces to form mills of three, which remove an opponent's piece.",
-    "core_loop": "place → form mills → remove → move",
+    "core_loop": "Place and then move pieces to form lines of three, each of which removes one of your opponent's pieces",
     "verbs": [
       "place",
       "plan"
@@ -729,7 +752,9 @@
       "async duel"
     ],
     "difficulty_levers": [
-      "flying rule"
+      "flying rule",
+      "opponent strength",
+      "time"
     ],
     "tools": [
       "grid_board",
@@ -755,7 +780,7 @@
     ],
     "family": "board",
     "summary": "Hop marbles across a star board into the opposite corner.",
-    "core_loop": "move or chain hops → reach the far corner",
+    "core_loop": "Move marbles one step or chain hops over other marbles to bring all of yours across the star board into the opposite corner",
     "verbs": [
       "hop",
       "plan"
@@ -782,7 +807,9 @@
       "family game night"
     ],
     "difficulty_levers": [
-      "players"
+      "players",
+      "board size",
+      "opponent strength"
     ],
     "tools": [
       "grid_board",
@@ -807,7 +834,7 @@
     ],
     "family": "board",
     "summary": "Regional chess variants: captured pieces return to play in shogi; xiangqi has a palace and river.",
-    "core_loop": "move → capture → drop or cross the river → mate",
+    "core_loop": "Play a regional chess variant: in shogi captured pieces return to play on your side; in xiangqi the general stays in its palace",
     "verbs": [
       "plan",
       "attack"
@@ -834,7 +861,9 @@
       "play with friends"
     ],
     "difficulty_levers": [
-      "variant"
+      "variant",
+      "time control",
+      "opponent strength"
     ],
     "tools": [
       "grid_board",
@@ -859,7 +888,7 @@
     ],
     "family": "board",
     "summary": "Draw lines between dots; completing a box scores it and grants another turn.",
-    "core_loop": "draw a line → close boxes → avoid giving boxes → most boxes",
+    "core_loop": "Take turns drawing a line between two dots; completing a box scores it and gives you another turn, so avoid handing boxes over",
     "verbs": [
       "plan",
       "draw"
@@ -886,7 +915,9 @@
       "classic duel"
     ],
     "difficulty_levers": [
-      "grid size"
+      "grid size",
+      "players",
+      "opponent strength"
     ],
     "tools": [
       "grid_board",
@@ -911,7 +942,7 @@
     ],
     "family": "board",
     "summary": "Place stones to connect your two sides of a rhombus board; there are no draws.",
-    "core_loop": "place → block → connect",
+    "core_loop": "Place stones on a rhombus board to connect your two opposite sides while blocking your opponent; there are no draws",
     "verbs": [
       "plan",
       "block"
@@ -937,7 +968,9 @@
       "async duel"
     ],
     "difficulty_levers": [
-      "board size"
+      "board size",
+      "swap rule",
+      "opponent strength"
     ],
     "tools": [
       "grid_board",
@@ -962,7 +995,7 @@
     ],
     "family": "board",
     "summary": "Pieces have hidden ranks revealed only in combat; capture the flag.",
-    "core_loop": "move → attack → ranks revealed → capture the flag",
+    "core_loop": "Move pieces whose ranks stay hidden until they fight, attack to reveal and remove them, and capture the enemy flag",
     "verbs": [
       "plan",
       "bluff"
@@ -988,7 +1021,9 @@
       "duel"
     ],
     "difficulty_levers": [
-      "army"
+      "army",
+      "board size",
+      "opponent strength"
     ],
     "tools": [
       "grid_board",
@@ -1014,7 +1049,7 @@
     ],
     "family": "board",
     "summary": "Duel version of the tile board with a shared word bank.",
-    "core_loop": "play tiles → score → swap",
+    "core_loop": "Two players draw from a shared tile bank, play words onto the board crossword style, and score letter and square bonuses",
     "verbs": [
       "spell",
       "plan"
@@ -1040,7 +1075,9 @@
       "async with friends"
     ],
     "difficulty_levers": [
-      "rack size"
+      "rack size",
+      "board size",
+      "dictionary"
     ],
     "tools": [
       "grid_board",

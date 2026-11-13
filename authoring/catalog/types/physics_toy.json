@@ -8,7 +8,7 @@
     ],
     "family": "physics_toy",
     "summary": "Paint sand, water, fire and plants that fall, flow, burn and grow by their own rules.",
-    "core_loop": "pick an element → paint → watch it interact → experiment",
+    "core_loop": "Pick an element like sand, water, fire or seeds, paint it into the scene, and watch it fall, flow, burn or grow by its own rules",
     "verbs": [
       "paint",
       "experiment"
@@ -35,7 +35,9 @@
       "share a sand painting with a friend"
     ],
     "difficulty_levers": [
-      "elements available"
+      "elements available",
+      "canvas size",
+      "simulation speed"
     ],
     "tools": [
       "physics_world",
@@ -61,7 +63,7 @@
     ],
     "family": "physics_toy",
     "summary": "Launch a floppy ragdoll down stairs or off ramps; more damage scores more.",
-    "core_loop": "position → launch → it tumbles → score",
+    "core_loop": "Position a floppy ragdoll, launch it down stairs or off ramps, and score by how much it tumbles and bumps",
     "verbs": [
       "launch",
       "watch"
@@ -89,7 +91,9 @@
       "share best fails with friends"
     ],
     "difficulty_levers": [
-      "ramp height"
+      "ramp height",
+      "launch power",
+      "obstacles"
     ],
     "tools": [
       "physics_world",
@@ -115,7 +119,7 @@
     ],
     "family": "physics_toy",
     "summary": "Place dominoes and objects so one push sets off a chain that hits the goal.",
-    "core_loop": "place pieces → push the first → watch the chain → hit the goal",
+    "core_loop": "Place dominoes and objects within a budget, push the first one, and watch the chain reaction until it hits the goal",
     "verbs": [
       "place",
       "plan",
@@ -143,7 +147,9 @@
       "build a chain for friends to watch"
     ],
     "difficulty_levers": [
-      "piece budget"
+      "piece budget",
+      "goal distance",
+      "piece types"
     ],
     "tools": [
       "physics_world",
@@ -170,7 +176,7 @@
     ],
     "family": "physics_toy",
     "summary": "Build a machine from wheels, rods and motors to carry something to the goal.",
-    "core_loop": "build → test → watch it run → improve",
+    "core_loop": "Build a machine from wheels, rods and motors, run it, watch it carry the object, and improve it until it reaches the goal",
     "verbs": [
       "build",
       "test"
@@ -198,7 +204,8 @@
     ],
     "difficulty_levers": [
       "budget",
-      "parts"
+      "parts",
+      "terrain"
     ],
     "tools": [
       "physics_world",
@@ -224,7 +231,7 @@
     ],
     "family": "physics_toy",
     "summary": "Build a bridge from beams under budget that holds a vehicle crossing it.",
-    "core_loop": "place beams → test with the vehicle → see stress → fix",
+    "core_loop": "Place beams under a budget to build a bridge, test it with a vehicle, see where stress builds, and fix it until it holds",
     "verbs": [
       "build",
       "test"
@@ -251,7 +258,8 @@
     ],
     "difficulty_levers": [
       "budget",
-      "span"
+      "span",
+      "vehicle weight"
     ],
     "tools": [
       "physics_world",
@@ -329,7 +337,7 @@
     ],
     "family": "physics_toy",
     "summary": "Dig or tilt so water flows into a target, avoiding hazards.",
-    "core_loop": "dig or tilt → water flows → fill the target",
+    "core_loop": "Dig channels or tilt pieces so water flows into the target cups while avoiding hazards that waste it",
     "verbs": [
       "dig",
       "tilt"
@@ -356,7 +364,9 @@
       "share solves"
     ],
     "difficulty_levers": [
-      "obstacles"
+      "obstacles",
+      "water amount",
+      "cup count"
     ],
     "tools": [
       "physics_world",
@@ -382,7 +392,7 @@
     ],
     "family": "physics_toy",
     "summary": "Swing a wrecking ball to knock down a structure in as few swings as possible.",
-    "core_loop": "pull back → release → it swings → topple the tower",
+    "core_loop": "Pull back a wrecking ball, release it to swing into a structure, and topple it in as few swings as possible",
     "verbs": [
       "swing",
       "aim"
@@ -408,7 +418,9 @@
       "share demolitions"
     ],
     "difficulty_levers": [
-      "structure"
+      "structure",
+      "swings allowed",
+      "rope length"
     ],
     "tools": [
       "physics_world",
@@ -433,7 +445,7 @@
     ],
     "family": "physics_toy",
     "summary": "Add or pop balloons to lift an object to a target height without hitting spikes.",
-    "core_loop": "add balloons → it rises → pop to steer → reach the target",
+    "core_loop": "Add or pop balloons to lift an object to a target height, steering it around spikes on the way",
     "verbs": [
       "balance",
       "adjust"
@@ -459,7 +471,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "spikes"
+      "spikes",
+      "balloons available",
+      "target height"
     ],
     "tools": [
       "physics_world",
@@ -484,7 +498,7 @@
     ],
     "family": "physics_toy",
     "summary": "Place planets and stars and watch their gravity create orbits and collisions.",
-    "core_loop": "place bodies → set velocity → watch orbits → experiment",
+    "core_loop": "Place planets and stars, set their speed, and watch gravity pull them into orbits or collisions",
     "verbs": [
       "place",
       "experiment"
@@ -510,7 +524,9 @@
       "share a solar system"
     ],
     "difficulty_levers": [
-      "bodies"
+      "bodies",
+      "gravity strength",
+      "simulation speed"
     ],
     "tools": [
       "physics_world",
@@ -534,7 +550,7 @@
     ],
     "family": "physics_toy",
     "summary": "Launch a probe so it bends around planets' gravity into the goal.",
-    "core_loop": "aim → set power → it curves around planets → hit the goal",
+    "core_loop": "Aim and set power to launch a probe that curves around planets' gravity into the goal",
     "verbs": [
       "aim",
       "predict"
@@ -560,7 +576,9 @@
       "share trick shots"
     ],
     "difficulty_levers": [
-      "planets"
+      "planets",
+      "launch power range",
+      "goal size"
     ],
     "tools": [
       "physics_world",
@@ -585,7 +603,7 @@
     ],
     "family": "physics_toy",
     "summary": "Poke, stretch and squish a soft body for satisfying feedback.",
-    "core_loop": "touch → squish → stretch → let go",
+    "core_loop": "Poke, stretch and squish a soft jelly body with your finger and watch it wobble back when you let go",
     "verbs": [
       "squish",
       "play"
@@ -611,7 +629,9 @@
       "send a squishy to a friend"
     ],
     "difficulty_levers": [
-      "softness"
+      "softness",
+      "jelly size",
+      "spring strength"
     ],
     "tools": [
       "physics_world",
@@ -637,7 +657,7 @@
     ],
     "family": "physics_toy",
     "summary": "Tear and swing a cloth simulation with your finger.",
-    "core_loop": "grab → pull → tear → watch it fall",
+    "core_loop": "Grab and pull a hanging cloth, tear it with your finger, and watch the pieces swing and fall",
     "verbs": [
       "tear",
       "play"
@@ -662,7 +682,9 @@
       "share"
     ],
     "difficulty_levers": [
-      "cloth strength"
+      "cloth strength",
+      "cloth size",
+      "wind"
     ],
     "tools": [
       "physics_world",
@@ -686,7 +708,7 @@
     ],
     "family": "physics_toy",
     "summary": "Pour colored liquids and watch them swirl and mix.",
-    "core_loop": "pour → swirl → mix colors → relax",
+    "core_loop": "Pour colored liquids into a container and watch them swirl and mix into new colors",
     "verbs": [
       "pour",
       "stir"
@@ -712,7 +734,9 @@
       "share a swirl"
     ],
     "difficulty_levers": [
-      "viscosity"
+      "viscosity",
+      "colors",
+      "container shape"
     ],
     "tools": [
       "physics_world",
@@ -739,7 +763,7 @@
     ],
     "family": "physics_toy",
     "summary": "Spawn and fling bouncy balls in a room; tilt to slosh them.",
-    "core_loop": "spawn → fling → tilt → enjoy",
+    "core_loop": "Spawn bouncy balls in a room, fling them around, and tilt the room to slosh them",
     "verbs": [
       "fling",
       "tilt"
@@ -765,7 +789,9 @@
       "share"
     ],
     "difficulty_levers": [
-      "bounce"
+      "bounce",
+      "ball count",
+      "gravity"
     ],
     "tools": [
       "physics_world",
@@ -792,7 +818,7 @@
     ],
     "family": "physics_toy",
     "summary": "Place explosives or swing hammers to bring a structure down in style.",
-    "core_loop": "place charges → detonate → watch it fall → score",
+    "core_loop": "Place charges or swing hammers to bring a structure down, then score how completely it collapses",
     "verbs": [
       "place",
       "destroy"
@@ -820,7 +846,9 @@
       "share demolitions"
     ],
     "difficulty_levers": [
-      "charges"
+      "charges",
+      "structure strength",
+      "tools"
     ],
     "tools": [
       "physics_world",
@@ -845,7 +873,7 @@
     ],
     "family": "physics_toy",
     "summary": "Place track pieces so a marble reaches the cup; then watch it run.",
-    "core_loop": "place track → drop the marble → watch → fix",
+    "core_loop": "Place track pieces so a dropped marble reaches the cup, then watch it run and fix any spots where it falls off",
     "verbs": [
       "build",
       "test"
@@ -871,7 +899,9 @@
       "build runs for friends"
     ],
     "difficulty_levers": [
-      "pieces"
+      "pieces",
+      "distance",
+      "piece budget"
     ],
     "tools": [
       "physics_world",
@@ -896,7 +926,7 @@
     ],
     "family": "physics_toy",
     "summary": "Set up a car and a ramp or wall and watch it crumple.",
-    "core_loop": "set speed → choose obstacle → crash → watch slow-mo",
+    "core_loop": "Set a car's speed, pick a ramp or wall, crash it, and watch the crumple in slow motion",
     "verbs": [
       "set",
       "watch"
@@ -922,7 +952,9 @@
       "share crashes"
     ],
     "difficulty_levers": [
-      "speed"
+      "speed",
+      "obstacle type",
+      "car type"
     ],
     "tools": [
       "physics_world",
@@ -946,7 +978,7 @@
     ],
     "family": "physics_toy",
     "summary": "Compress springs to launch objects at targets.",
-    "core_loop": "pull → release → it flies → hit the target",
+    "core_loop": "Pull back on a spring, release it to launch an object, and land it on targets around the scene",
     "verbs": [
       "pull",
       "aim"
@@ -972,7 +1004,9 @@
       "trick-shot share"
     ],
     "difficulty_levers": [
-      "targets"
+      "targets",
+      "spring strength",
+      "obstacles"
     ],
     "tools": [
       "physics_world",
@@ -997,7 +1031,7 @@
     ],
     "family": "physics_toy",
     "summary": "Move magnets to attract or repel metal pieces into a goal.",
-    "core_loop": "move magnet → pieces follow or flee → reach the goal",
+    "core_loop": "Move magnets around the board to attract or repel metal pieces and guide them into the goal",
     "verbs": [
       "move",
       "attract"
@@ -1023,7 +1057,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "magnet strength"
+      "magnet strength",
+      "pieces",
+      "obstacles"
     ],
     "tools": [
       "physics_world",

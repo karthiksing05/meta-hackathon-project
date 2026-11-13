@@ -7,7 +7,7 @@
     ],
     "family": "reaction",
     "summary": "Targets pop up from holes; tap them before they hide, avoiding decoys.",
-    "core_loop": "a target pops up → tap it fast → avoid decoys → speed rises",
+    "core_loop": "Targets pop up from holes for a moment; tap them before they hide, avoid decoys, and keep up as the spawn rate rises",
     "verbs": [
       "tap",
       "react"
@@ -36,7 +36,8 @@
     ],
     "difficulty_levers": [
       "spawn rate",
-      "decoys"
+      "decoys",
+      "holes"
     ],
     "tools": [
       "spawn_wave",
@@ -63,7 +64,7 @@
     ],
     "family": "reaction",
     "summary": "Wait for the screen to change, then tap as fast as possible; tapping early fails.",
-    "core_loop": "wait → the signal appears → tap → see your milliseconds",
+    "core_loop": "Wait for the screen to change color, then tap as fast as you can; tapping early fails, and you see your time in milliseconds",
     "verbs": [
       "wait",
       "react"
@@ -90,7 +91,9 @@
       "compare reaction times in a Group"
     ],
     "difficulty_levers": [
-      "random delay range"
+      "random delay range",
+      "rounds",
+      "fake-out signals"
     ],
     "tools": [
       "timers",
@@ -115,7 +118,7 @@
     ],
     "family": "reaction",
     "summary": "Two players wait for the signal; the first to tap after it wins; early tap loses.",
-    "core_loop": "wait for draw → tap first → win the duel",
+    "core_loop": "Two players wait with fingers ready; the first to tap after the draw signal wins, and anyone tapping early loses",
     "verbs": [
       "wait",
       "react"
@@ -141,7 +144,9 @@
       "duel a friend on one phone"
     ],
     "difficulty_levers": [
-      "delay range"
+      "delay range",
+      "fake signals",
+      "rounds"
     ],
     "tools": [
       "timers",
@@ -166,7 +171,7 @@
     ],
     "family": "reaction",
     "summary": "Things fall from the top; tap the good ones, never the bad.",
-    "core_loop": "items fall → tap the good ones → skip bombs → speed rises",
+    "core_loop": "Items fall from the top of the screen; tap the good ones, skip the bombs, and keep up as they fall faster",
     "verbs": [
       "tap",
       "react"
@@ -194,7 +199,8 @@
     ],
     "difficulty_levers": [
       "fall speed",
-      "bomb ratio"
+      "bomb ratio",
+      "lives"
     ],
     "tools": [
       "spawn_wave",
@@ -220,7 +226,7 @@
     ],
     "family": "reaction",
     "summary": "Swipe to slice objects tossed into the air; slicing several at once scores combos; avoid bombs.",
-    "core_loop": "objects fly up → swipe through them → combos → avoid bombs",
+    "core_loop": "Objects are tossed into the air; swipe through them to slice, chain several in one swipe for combos, and avoid bombs",
     "verbs": [
       "swipe",
       "slice"
@@ -248,7 +254,8 @@
     ],
     "difficulty_levers": [
       "toss rate",
-      "bombs"
+      "bombs",
+      "combo window"
     ],
     "tools": [
       "spawn_wave",
@@ -380,7 +387,7 @@
     ],
     "family": "reaction",
     "summary": "Targets appear around the screen; tap each as fast and accurately as you can.",
-    "core_loop": "a target appears → tap it → next appears → time ends",
+    "core_loop": "Targets appear around the screen; tap each as fast and accurately as you can before the timer ends",
     "verbs": [
       "aim",
       "react"
@@ -408,7 +415,8 @@
     ],
     "difficulty_levers": [
       "target size",
-      "spawn rate"
+      "spawn rate",
+      "moving targets"
     ],
     "tools": [
       "spawn_wave",
@@ -433,7 +441,7 @@
     ],
     "family": "reaction",
     "summary": "Color words appear in a different ink color; tap the ink color, not the word.",
-    "core_loop": "read the word → tap its ink color → next faster",
+    "core_loop": "A color word appears in a different ink color; tap the ink color, not the word, as the pace speeds up",
     "verbs": [
       "react",
       "inhibit"
@@ -460,7 +468,8 @@
     ],
     "difficulty_levers": [
       "speed",
-      "colors"
+      "colors",
+      "mismatch ratio"
     ],
     "tools": [
       "quiz",
@@ -485,7 +494,7 @@
     ],
     "family": "reaction",
     "summary": "Tap when the go signal shows; don't tap on the no-go signal.",
-    "core_loop": "a signal shows → tap on go, hold off on no-go → faster",
+    "core_loop": "A signal appears; tap fast on the go signal and hold back on the no-go signal, with both getting faster",
     "verbs": [
       "react",
       "inhibit"
@@ -512,7 +521,8 @@
     ],
     "difficulty_levers": [
       "ratio",
-      "speed"
+      "speed",
+      "signal similarity"
     ],
     "tools": [
       "spawn_wave",
@@ -537,7 +547,7 @@
     ],
     "family": "reaction",
     "summary": "Arrows appear; swipe in their direction, or the opposite for red arrows.",
-    "core_loop": "see the arrow → swipe the right way → faster",
+    "core_loop": "An arrow appears; swipe in its direction, or the opposite way if it's red, as fast as you can",
     "verbs": [
       "react",
       "swipe"
@@ -564,7 +574,8 @@
     ],
     "difficulty_levers": [
       "speed",
-      "reverse ratio"
+      "reverse ratio",
+      "arrow count"
     ],
     "tools": [
       "speed_ramp",
@@ -588,7 +599,7 @@
     ],
     "family": "reaction",
     "summary": "Balloons float up; pop the right colors before they escape.",
-    "core_loop": "balloons rise → tap the right ones → don't let them escape",
+    "core_loop": "Balloons float up; pop only the asked colors before they escape off the top, as they rise faster",
     "verbs": [
       "tap",
       "react"
@@ -616,7 +627,8 @@
     ],
     "difficulty_levers": [
       "rise speed",
-      "colors"
+      "colors",
+      "lives"
     ],
     "tools": [
       "spawn_wave",
@@ -642,7 +654,7 @@
     ],
     "family": "reaction",
     "summary": "Tap as many times as possible in 10 seconds.",
-    "core_loop": "go → tap as fast as possible → time up → see the count",
+    "core_loop": "On go, tap as many times as you can before the timer ends, then compare your count with friends",
     "verbs": [
       "tap"
     ],
@@ -669,7 +681,9 @@
       "tap races in a Group"
     ],
     "difficulty_levers": [
-      "duration"
+      "duration",
+      "tap zone size",
+      "rounds"
     ],
     "tools": [
       "timers",
@@ -694,7 +708,7 @@
     ],
     "family": "reaction",
     "summary": "Something drops at a random moment; tap to catch it before it passes a line.",
-    "core_loop": "wait → it drops → tap to catch → closer is better",
+    "core_loop": "Wait for an object to drop at a random moment, then tap to catch it before it passes the line; closer catches score more",
     "verbs": [
       "wait",
       "react"
@@ -720,7 +734,9 @@
       "ruler drop test with friends"
     ],
     "difficulty_levers": [
-      "delay"
+      "delay",
+      "fall speed",
+      "line position"
     ],
     "tools": [
       "timers",
@@ -745,7 +761,7 @@
     ],
     "family": "reaction",
     "summary": "One cell lights at a time; tap it before it moves; it speeds up.",
-    "core_loop": "tap the lit cell → a new one lights → faster",
+    "core_loop": "One cell lights up at a time; tap it before the light moves on, as it speeds up each hit",
     "verbs": [
       "tap",
       "react"
@@ -772,7 +788,8 @@
     ],
     "difficulty_levers": [
       "speed",
-      "grid size"
+      "grid size",
+      "misses allowed"
     ],
     "tools": [
       "grid_board",
@@ -851,7 +868,7 @@
     ],
     "family": "reaction",
     "summary": "A falling stream of hazards; tap to swap between left and right sides.",
-    "core_loop": "hazards fall → tap to swap sides → avoid them",
+    "core_loop": "Hazards stream down both sides; tap to swap between the left and right lanes to dodge them",
     "verbs": [
       "dodge",
       "react"
@@ -877,7 +894,9 @@
       "quick duel"
     ],
     "difficulty_levers": [
-      "speed"
+      "speed",
+      "hazard density",
+      "lanes"
     ],
     "tools": [
       "lanes",
@@ -902,7 +921,7 @@
     ],
     "family": "reaction",
     "summary": "Shapes flash in different spots; tap them while lit.",
-    "core_loop": "a shape flashes → tap it while lit → faster",
+    "core_loop": "Shapes flash in different spots; tap each while it's lit, and the flashes get shorter as you go",
     "verbs": [
       "react",
       "tap"
@@ -928,7 +947,9 @@
       "duels"
     ],
     "difficulty_levers": [
-      "flash time"
+      "flash time",
+      "spots",
+      "simultaneous flashes"
     ],
     "tools": [
       "spawn_wave",
@@ -953,7 +974,7 @@
     ],
     "family": "reaction",
     "summary": "Cards flip one by one; slap when two in a row match before the other player.",
-    "core_loop": "cards flip → slap on a match → win the pile",
+    "core_loop": "Cards flip one at a time onto a pile; slap when two in a row match before the other player to win the pile",
     "verbs": [
       "watch",
       "react"
@@ -979,7 +1000,9 @@
       "head-to-head on one phone"
     ],
     "difficulty_levers": [
-      "flip speed"
+      "flip speed",
+      "match rules",
+      "players"
     ],
     "tools": [
       "turns",
@@ -1004,7 +1027,7 @@
     ],
     "family": "reaction",
     "summary": "Keep your finger inside a moving band; drift out and you fail.",
-    "core_loop": "hold your finger → follow the band → stay inside → survive",
+    "core_loop": "Hold your finger inside a band that drifts around the screen; stay inside as it speeds up, or you fall",
     "verbs": [
       "hold",
       "track"
@@ -1032,7 +1055,8 @@
     ],
     "difficulty_levers": [
       "band width",
-      "speed"
+      "speed",
+      "drift pattern"
     ],
     "tools": [
       "player_drag",
@@ -1057,7 +1081,7 @@
     ],
     "family": "reaction",
     "summary": "Clay targets launch across the sky; tap to shoot them before they fall.",
-    "core_loop": "targets fly → tap to shoot → leading shots score more",
+    "core_loop": "Clay targets launch across the sky; tap to shoot them before they fall, with bonus points for doubles",
     "verbs": [
       "aim",
       "time"
@@ -1083,7 +1107,9 @@
       "trap-shooting with friends"
     ],
     "difficulty_levers": [
-      "target speed"
+      "target speed",
+      "launch rate",
+      "targets per launch"
     ],
     "tools": [
       "spawn_wave",
@@ -1108,7 +1134,7 @@
     ],
     "family": "reaction",
     "summary": "A prize appears for a split second; grab it before it disappears.",
-    "core_loop": "wait → the prize flashes → grab it",
+    "core_loop": "Wait for a prize to flash for a split second, then grab it before it disappears; the window shrinks each round",
     "verbs": [
       "wait",
       "react"
@@ -1134,7 +1160,9 @@
       "streak"
     ],
     "difficulty_levers": [
-      "window size"
+      "window size",
+      "delay",
+      "fake prizes"
     ],
     "tools": [
       "timers",
@@ -1159,7 +1187,7 @@
     ],
     "family": "reaction",
     "summary": "Traffic passes in patterns; tap to cross during gaps.",
-    "core_loop": "watch traffic → tap to cross a lane in a gap → reach the other side",
+    "core_loop": "Traffic passes in lanes; tap to cross one lane at a time during gaps until you reach the other side",
     "verbs": [
       "time",
       "cross"
@@ -1185,7 +1213,9 @@
       "duels"
     ],
     "difficulty_levers": [
-      "traffic speed"
+      "traffic speed",
+      "lanes",
+      "gap size"
     ],
     "tools": [
       "lanes",

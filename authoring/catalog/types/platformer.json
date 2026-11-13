@@ -9,7 +9,7 @@
     ],
     "family": "platformer",
     "summary": "Run and jump across platforms, stomp enemies and reach the flag at the end of each level.",
-    "core_loop": "move → jump gaps and enemies → grab coins → reach the flag",
+    "core_loop": "Run and jump across platforms, stomp enemies, grab coins, and reach the flag at the end of each level",
     "verbs": [
       "run",
       "jump",
@@ -41,7 +41,8 @@
     ],
     "difficulty_levers": [
       "gap size",
-      "enemy count"
+      "enemy count",
+      "level length"
     ],
     "tools": [
       "gravity_jump",
@@ -128,7 +129,7 @@
     ],
     "family": "platformer",
     "summary": "Climb a single screen of ladders and platforms to the top while barrels roll down.",
-    "core_loop": "climb ladders → jump hazards → reach the top",
+    "core_loop": "Climb ladders and platforms on one screen toward the top while rolling barrels come down, jumping them for points",
     "verbs": [
       "climb",
       "jump",
@@ -156,7 +157,9 @@
       "arcade-score board"
     ],
     "difficulty_levers": [
-      "hazard rate"
+      "hazard rate",
+      "ladder count",
+      "hazard speed"
     ],
     "tools": [
       "gravity_jump",
@@ -182,7 +185,7 @@
     ],
     "family": "platformer",
     "summary": "Charge each jump; one bad jump can drop you far down the tower.",
-    "core_loop": "hold to charge → release to jump → land → climb higher",
+    "core_loop": "Hold to charge each jump and release to leap; one bad landing can drop you far down the tower",
     "verbs": [
       "charge",
       "jump"
@@ -209,7 +212,9 @@
       "rage together"
     ],
     "difficulty_levers": [
-      "platform spacing"
+      "platform spacing",
+      "tower height",
+      "wind gusts"
     ],
     "tools": [
       "gravity_jump",
@@ -234,7 +239,7 @@
     ],
     "family": "platformer",
     "summary": "Explore a level to collect every coin or star before the exit opens.",
-    "core_loop": "explore → collect items → the exit opens → leave",
+    "core_loop": "Explore a level to collect every coin or star; once you have them all, the exit opens",
     "verbs": [
       "explore",
       "collect",
@@ -263,7 +268,8 @@
     ],
     "difficulty_levers": [
       "items",
-      "hiding spots"
+      "hiding spots",
+      "time"
     ],
     "tools": [
       "gravity_jump",
@@ -288,7 +294,7 @@
     ],
     "family": "platformer",
     "summary": "Find keys to open colored doors in the right order to reach the exit.",
-    "core_loop": "explore → grab a key → open its door → reach the exit",
+    "core_loop": "Explore the level to find keys, open the matching colored doors in the right order, and reach the exit",
     "verbs": [
       "explore",
       "plan",
@@ -316,7 +322,9 @@
       "share fastest routes"
     ],
     "difficulty_levers": [
-      "keys"
+      "keys",
+      "door order",
+      "enemies"
     ],
     "tools": [
       "gravity_jump",
@@ -342,7 +350,7 @@
     ],
     "family": "platformer",
     "summary": "Explore a connected map; new abilities open paths you couldn't reach before.",
-    "core_loop": "explore → find an ability → return to blocked paths → go deeper",
+    "core_loop": "Explore a connected map, find new abilities, and return to paths you couldn't reach before to go deeper",
     "verbs": [
       "explore",
       "jump",
@@ -370,7 +378,9 @@
       "share map completion"
     ],
     "difficulty_levers": [
-      "map size"
+      "map size",
+      "ability count",
+      "backtracking"
     ],
     "tools": [
       "gravity_jump",
@@ -397,7 +407,7 @@
     ],
     "family": "platformer",
     "summary": "Press switches and move blocks to open the way through each room.",
-    "core_loop": "find switches → move blocks → open paths → exit",
+    "core_loop": "Press switches and push blocks to open doors and bridges, working out the order that lets you through each room",
     "verbs": [
       "jump",
       "push",
@@ -425,7 +435,9 @@
       "daily room"
     ],
     "difficulty_levers": [
-      "switch count"
+      "switch count",
+      "timed switches",
+      "rooms"
     ],
     "tools": [
       "gravity_jump",
@@ -451,7 +463,7 @@
     ],
     "family": "platformer",
     "summary": "Two characters with different abilities must help each other to the exit.",
-    "core_loop": "swap characters → each clears what only they can → both exit",
+    "core_loop": "Two characters with different abilities each clear what only they can, helping each other until both reach the exit",
     "verbs": [
       "cooperate",
       "jump"
@@ -478,7 +490,9 @@
       "play with a friend on one phone"
     ],
     "difficulty_levers": [
-      "character abilities"
+      "character abilities",
+      "level size",
+      "sync points"
     ],
     "tools": [
       "gravity_jump",
@@ -504,7 +518,7 @@
     ],
     "family": "platformer",
     "summary": "The character jumps automatically; you only steer left and right.",
-    "core_loop": "it jumps → steer onto platforms → avoid hazards",
+    "core_loop": "Your character jumps on its own over and over; steer left and right to land on platforms and avoid hazards",
     "verbs": [
       "steer"
     ],
@@ -530,7 +544,9 @@
       "share heights"
     ],
     "difficulty_levers": [
-      "platform spacing"
+      "platform spacing",
+      "jump height",
+      "moving platforms"
     ],
     "tools": [
       "gravity_jump",
@@ -556,7 +572,7 @@
     ],
     "family": "platformer",
     "summary": "Record a run; your recorded ghost repeats it while you play again to solve together.",
-    "core_loop": "record a run → replay with the ghost → use both to solve",
+    "core_loop": "Record a run; your ghost repeats it exactly while you play again, using both to press switches and solve the room",
     "verbs": [
       "plan",
       "record"
@@ -583,7 +599,9 @@
       "puzzle sharing"
     ],
     "difficulty_levers": [
-      "ghost count"
+      "ghost count",
+      "room size",
+      "timing"
     ],
     "tools": [
       "ghost_score",
@@ -608,7 +626,7 @@
     ],
     "family": "platformer",
     "summary": "Flip gravity to walk on ceilings and walls to reach the exit.",
-    "core_loop": "flip gravity → fall to a new surface → reach the exit",
+    "core_loop": "Tap to flip gravity and fall onto the ceiling or a wall, using each surface to reach the exit",
     "verbs": [
       "flip",
       "plan"
@@ -635,7 +653,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "flips"
+      "flips",
+      "hazard count",
+      "level size"
     ],
     "tools": [
       "gravity_jump",
@@ -660,7 +680,7 @@
     ],
     "family": "platformer",
     "summary": "Dash midair in eight directions; you recover the dash on landing or touching crystals.",
-    "core_loop": "jump → dash → refresh dash → cross gaps",
+    "core_loop": "Jump and dash once in midair in any of eight directions; landing or touching crystals restores the dash to cross gaps",
     "verbs": [
       "jump",
       "dash"
@@ -687,7 +707,9 @@
       "ghost race"
     ],
     "difficulty_levers": [
-      "dash refreshes"
+      "dash refreshes",
+      "gap size",
+      "hazards"
     ],
     "tools": [
       "gravity_jump",
@@ -712,7 +734,7 @@
     ],
     "family": "platformer",
     "summary": "Slide down and jump off walls to climb shafts and avoid traps.",
-    "core_loop": "slide down walls → wall-jump → climb → reach the top",
+    "core_loop": "Slide down walls and jump off them to climb narrow shafts while dodging traps on the way up",
     "verbs": [
       "wall_jump",
       "climb"
@@ -739,7 +761,9 @@
       "ghost race"
     ],
     "difficulty_levers": [
-      "shaft width"
+      "shaft width",
+      "trap count",
+      "slide speed"
     ],
     "tools": [
       "gravity_jump",
@@ -764,7 +788,7 @@
     ],
     "family": "platformer",
     "summary": "Shoot a grappling hook to swing across gaps and pull to ledges.",
-    "core_loop": "aim the hook → attach → swing → release onto a ledge",
+    "core_loop": "Aim and fire a grappling hook, attach to an anchor, swing across gaps, and release onto the next ledge",
     "verbs": [
       "aim",
       "swing"
@@ -791,7 +815,9 @@
       "ghost race"
     ],
     "difficulty_levers": [
-      "hook range"
+      "hook range",
+      "anchor spacing",
+      "hazards"
     ],
     "tools": [
       "gravity_jump",
@@ -817,7 +843,7 @@
     ],
     "family": "platformer",
     "summary": "Dodge a boss's attack patterns and hit its weak points while jumping between platforms.",
-    "core_loop": "learn patterns → dodge → hit the weak spot → next phase",
+    "core_loop": "Learn a boss's attack patterns, dodge them while jumping between platforms, and hit its weak point to move it to the next phase",
     "verbs": [
       "dodge",
       "jump",
@@ -846,7 +872,8 @@
     ],
     "difficulty_levers": [
       "boss speed",
-      "phases"
+      "phases",
+      "platforms"
     ],
     "tools": [
       "gravity_jump",
@@ -872,7 +899,7 @@
     ],
     "family": "platformer",
     "summary": "Build a platformer level from tiles, then send it for friends to try.",
-    "core_loop": "place tiles and enemies → test it → share → friends play",
+    "core_loop": "Place tiles, enemies and a flag to build a level, play it to prove it can be beaten, then share it for friends to try",
     "verbs": [
       "build",
       "design",
@@ -900,7 +927,9 @@
       "build levels for each other"
     ],
     "difficulty_levers": [
-      "tile set"
+      "tile set",
+      "level size",
+      "enemy types"
     ],
     "tools": [
       "grid_board",
@@ -926,7 +955,7 @@
     ],
     "family": "platformer",
     "summary": "Shrink to fit tunnels and grow to push heavy objects or jump higher.",
-    "core_loop": "switch size → solve the room → exit",
+    "core_loop": "Switch your size to shrink through tunnels or grow to push heavy objects and jump higher, solving each room",
     "verbs": [
       "resize",
       "jump",
@@ -954,7 +983,9 @@
       "daily"
     ],
     "difficulty_levers": [
-      "rooms"
+      "rooms",
+      "switch limit",
+      "objects"
     ],
     "tools": [
       "gravity_jump",
@@ -979,7 +1010,7 @@
     ],
     "family": "platformer",
     "summary": "Platforms of your current color are solid; switch colors to make paths appear.",
-    "core_loop": "switch color → platforms appear or vanish → jump through",
+    "core_loop": "Only platforms of your current color are solid; switch colors midjump to make the right path appear",
     "verbs": [
       "switch",
       "jump",
@@ -1006,7 +1037,9 @@
       "ghost race"
     ],
     "difficulty_levers": [
-      "switch timing"
+      "switch timing",
+      "colors",
+      "speed"
     ],
     "tools": [
       "gravity_jump",
@@ -1030,7 +1063,7 @@
     ],
     "family": "platformer",
     "summary": "Use springs, bumpers and trampolines to fling across levels.",
-    "core_loop": "land on pads → bounce → aim the landing",
+    "core_loop": "Land on springs, bumpers and trampolines to fling yourself across the level, aiming each bounce at the next pad",
     "verbs": [
       "bounce",
       "aim"
@@ -1057,7 +1090,9 @@
       "ghost race"
     ],
     "difficulty_levers": [
-      "pad layout"
+      "pad layout",
+      "pad strength",
+      "hazards"
     ],
     "tools": [
       "gravity_jump",
@@ -1082,7 +1117,7 @@
     ],
     "family": "platformer",
     "summary": "Everything is controlled with one button: tap to jump, hold to jump higher.",
-    "core_loop": "tap or hold → clear gaps → reach the end",
+    "core_loop": "The character runs on its own; tap to jump and hold to jump higher, clearing every gap to reach the end",
     "verbs": [
       "jump",
       "time"
@@ -1109,7 +1144,9 @@
       "quick share"
     ],
     "difficulty_levers": [
-      "gap sizes"
+      "gap sizes",
+      "speed",
+      "hold window"
     ],
     "tools": [
       "gravity_jump",
@@ -1135,7 +1172,7 @@
     ],
     "family": "platformer",
     "summary": "Rewind time after mistakes; some objects ignore the rewind and become puzzles.",
-    "core_loop": "play → make a mistake → rewind → use objects that don't rewind",
+    "core_loop": "Rewind time after a mistake; some objects ignore the rewind, and using them becomes the puzzle",
     "verbs": [
       "rewind",
       "plan"
@@ -1162,7 +1199,9 @@
       "puzzle share"
     ],
     "difficulty_levers": [
-      "rewind budget"
+      "rewind budget",
+      "non-rewinding objects",
+      "level size"
     ],
     "tools": [
       "gravity_jump",
@@ -1187,7 +1226,7 @@
     ],
     "family": "platformer",
     "summary": "Momentum carries you on ice; plan stops and jumps.",
-    "core_loop": "build speed → slide → time jumps → exit",
+    "core_loop": "Momentum carries you on slippery ice; plan where to start stopping and when to jump to reach the exit",
     "verbs": [
       "slide",
       "jump"
@@ -1214,7 +1253,9 @@
       "ghost race"
     ],
     "difficulty_levers": [
-      "slipperiness"
+      "slipperiness",
+      "gap size",
+      "hazards"
     ],
     "tools": [
       "gravity_jump",
@@ -1239,7 +1280,7 @@
     ],
     "family": "platformer",
     "summary": "You see only near your lantern; find fuel to keep the light alive.",
-    "core_loop": "explore → find fuel → light grows → exit",
+    "core_loop": "You only see what's near your lantern; explore to find fuel that keeps the light alive and find the exit",
     "verbs": [
       "explore",
       "jump"
@@ -1266,7 +1307,9 @@
       "spooky share"
     ],
     "difficulty_levers": [
-      "fuel rate"
+      "fuel rate",
+      "level size",
+      "hazards"
     ],
     "tools": [
       "gravity_jump",
@@ -1291,7 +1334,7 @@
     ],
     "family": "platformer",
     "summary": "Lava rises from below; climb fast and pick routes.",
-    "core_loop": "climb → lava rises → don't get caught",
+    "core_loop": "Lava rises steadily from below; climb fast and pick the quickest route up before it catches you",
     "verbs": [
       "climb",
       "jump"
@@ -1319,7 +1362,9 @@
       "race friends"
     ],
     "difficulty_levers": [
-      "lava speed"
+      "lava speed",
+      "route branches",
+      "platform gaps"
     ],
     "tools": [
       "gravity_jump",

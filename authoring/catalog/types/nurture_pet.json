@@ -8,7 +8,7 @@
     ],
     "family": "nurture_pet",
     "summary": "Feed, clean, play with and rest a pet whose needs drop over real time.",
-    "core_loop": "check meters → feed or play or clean → the pet grows → evolves",
+    "core_loop": "Check your pet's hunger, cleanliness, fun and energy meters, which drop in real time, and feed, clean, play or rest it so it grows and evolves",
     "verbs": [
       "care",
       "feed",
@@ -37,7 +37,9 @@
       "co-parent a pet with a friend"
     ],
     "difficulty_levers": [
-      "need decay rate"
+      "need decay rate",
+      "need count",
+      "growth stages"
     ],
     "tools": [
       "timers",
@@ -61,7 +63,7 @@
     ],
     "family": "nurture_pet",
     "summary": "Choose outfits and accessories for a pet and share the look.",
-    "core_loop": "pick items → style → photo → share",
+    "core_loop": "Pick outfits and accessories for your pet, style a look, take a photo and share it with friends",
     "verbs": [
       "style",
       "choose"
@@ -87,7 +89,9 @@
       "share outfits for friends to vote"
     ],
     "difficulty_levers": [
-      "item count"
+      "item count",
+      "unlock rate",
+      "theme challenges"
     ],
     "tools": [
       "image_assets",
@@ -111,7 +115,7 @@
     ],
     "family": "nurture_pet",
     "summary": "Teach a pet tricks by repeating commands and rewarding success.",
-    "core_loop": "give a command → the pet tries → reward → it learns",
+    "core_loop": "Give your pet a command, watch it try, reward it when it gets it right, and repeat until it learns the trick",
     "verbs": [
       "train",
       "repeat"
@@ -138,7 +142,9 @@
       "show off tricks to friends"
     ],
     "difficulty_levers": [
-      "learning rate"
+      "learning rate",
+      "trick count",
+      "distraction level"
     ],
     "tools": [
       "timers",
@@ -164,7 +170,7 @@
     ],
     "family": "nurture_pet",
     "summary": "Pair creatures to pass on colors and traits; aim for a rare combination.",
-    "core_loop": "pick parents → hatch → see traits → breed again",
+    "core_loop": "Pick two parent creatures, hatch their offspring, see which colors and traits passed on, and breed again toward a rare combination",
     "verbs": [
       "breed",
       "plan"
@@ -190,7 +196,9 @@
       "trade creatures with friends"
     ],
     "difficulty_levers": [
-      "trait count"
+      "trait count",
+      "rarity",
+      "hatch time"
     ],
     "tools": [
       "reveal",
@@ -215,7 +223,7 @@
     ],
     "family": "nurture_pet",
     "summary": "Water and give light to a plant over days; it grows and blooms.",
-    "core_loop": "water → adjust light → wait → bloom",
+    "core_loop": "Water your plant and adjust its light over several days so it grows, buds and finally blooms",
     "verbs": [
       "care",
       "wait"
@@ -241,7 +249,9 @@
       "gift a plant to a friend"
     ],
     "difficulty_levers": [
-      "needs"
+      "needs",
+      "growth time",
+      "weather"
     ],
     "tools": [
       "timers"
@@ -264,7 +274,7 @@
     ],
     "family": "nurture_pet",
     "summary": "Keep an egg warm and turned until it hatches into a surprise creature.",
-    "core_loop": "warm → turn → wait → hatch",
+    "core_loop": "Keep an egg in the right warmth range and turn it regularly until it hatches into a surprise creature",
     "verbs": [
       "care",
       "wait"
@@ -291,7 +301,9 @@
       "hatch together in a Group"
     ],
     "difficulty_levers": [
-      "range width"
+      "range width",
+      "turn interval",
+      "hatch time"
     ],
     "tools": [
       "timers",
@@ -315,7 +327,7 @@
     ],
     "family": "nurture_pet",
     "summary": "Feed fish, clean the tank and add decorations; fish grow and breed.",
-    "core_loop": "feed → clean → decorate → watch",
+    "core_loop": "Feed your fish, clean the tank as it gets dirty, and add decorations; happy fish grow and breed",
     "verbs": [
       "care",
       "decorate"
@@ -342,7 +354,9 @@
       "visit friends' tanks"
     ],
     "difficulty_levers": [
-      "dirt rate"
+      "dirt rate",
+      "fish count",
+      "feeding needs"
     ],
     "tools": [
       "timers",
@@ -366,7 +380,7 @@
     ],
     "family": "nurture_pet",
     "summary": "Take a pet on walks to find items and meet other pets.",
-    "core_loop": "walk → explore → find things → come home",
+    "core_loop": "Take your pet on a walk, explore the neighborhood, find items and meet other pets, then head home",
     "verbs": [
       "walk",
       "explore"
@@ -393,7 +407,9 @@
       "meet friends' pets on walks"
     ],
     "difficulty_levers": [
-      "walk length"
+      "walk length",
+      "areas",
+      "find rate"
     ],
     "tools": [
       "pickups",
@@ -417,7 +433,7 @@
     ],
     "family": "nurture_pet",
     "summary": "Wash, dry, brush and trim a pet to make it happy.",
-    "core_loop": "wash → dry → brush → trim → reveal",
+    "core_loop": "Wash, dry, brush and trim your pet step by step, then reveal how happy the finished look makes it",
     "verbs": [
       "groom"
     ],
@@ -443,7 +459,9 @@
       "pet salon for friends' pets"
     ],
     "difficulty_levers": [
-      "steps"
+      "steps",
+      "mess level",
+      "pet fussiness"
     ],
     "tools": [
       "sequence_memory",
@@ -467,7 +485,7 @@
     ],
     "family": "nurture_pet",
     "summary": "Care for rescued pets and match them with the right adopters.",
-    "core_loop": "care → read adopter profiles → match → home found",
+    "core_loop": "Care for rescued pets, read adopters' profiles, and match each pet with the home that suits it best",
     "verbs": [
       "care",
       "match"
@@ -494,7 +512,9 @@
       "shelter run by a Group"
     ],
     "difficulty_levers": [
-      "pet count"
+      "pet count",
+      "adopter count",
+      "match rules"
     ],
     "tools": [
       "sort_bins",
@@ -519,7 +539,7 @@
     ],
     "family": "nurture_pet",
     "summary": "How you care for a creature decides what it evolves into.",
-    "core_loop": "care in a style → it evolves → discover forms",
+    "core_loop": "The way you care for your creature, such as play, food or training, decides which of several forms it evolves into",
     "verbs": [
       "care",
       "discover"
@@ -545,7 +565,9 @@
       "compare evolutions"
     ],
     "difficulty_levers": [
-      "branches"
+      "branches",
+      "care actions",
+      "evolve time"
     ],
     "tools": [
       "timers",
@@ -569,7 +591,7 @@
     ],
     "family": "nurture_pet",
     "summary": "A pet the whole Group shares; each member's care adds up.",
-    "core_loop": "each member checks in → feeds or plays → the pet thrives",
+    "core_loop": "A pet shared by your whole Group; each member checks in to feed or play, and everyone's care adds up to keep it thriving",
     "verbs": [
       "care",
       "cooperate"
@@ -595,7 +617,9 @@
       "the whole Group raises one pet"
     ],
     "difficulty_levers": [
-      "decay rate"
+      "decay rate",
+      "group size",
+      "daily goals"
     ],
     "tools": [
       "shared_progress",
@@ -620,7 +644,7 @@
     ],
     "family": "nurture_pet",
     "summary": "Read a pet's body language and pick what it needs.",
-    "core_loop": "read the signals → pick the need → see the reaction",
+    "core_loop": "Read your pet's body language and sounds, pick what it needs right now, and see how it reacts",
     "verbs": [
       "read",
       "choose"
@@ -646,7 +670,9 @@
       "learn pet signals"
     ],
     "difficulty_levers": [
-      "subtlety"
+      "subtlety",
+      "options",
+      "time"
     ],
     "tools": [
       "quiz",
