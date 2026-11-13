@@ -39,6 +39,21 @@ final class FacebookLiveState {
     var messengerPoll: Task<Void, Never>?
     var isRefreshingThreads = false
     var isLoadingMessenger = false
+    /// The account whose identity `me` shows right now (nil: the demo identity).
+    var identityAccountID: String?
+    /// The demo identity's profile, kept so a guest (or a log out) gets it back unchanged.
+    var mockIdentity: MockIdentity?
+}
+
+/// The demo user's profile fields, saved before a real account replaces them.
+struct MockIdentity {
+    var firstName, lastName, bio, city, hometown, work, school, relationship: String
+    var website: String?
+    var avatarURL, coverURL: URL?
+    var avatarData, coverData: Data?
+    var coverColor: String?
+    var joinedDate: Date
+    var friendCount, followerCount: Int
 }
 
 // MARK: - Loading
@@ -53,6 +68,12 @@ extension AppStore {
             await self?.loadLiveContent()
             await self?.loadLiveMessenger()
             self?.startMessengerPolling()
+        }
+        NotificationCenter.default.addObserver(forName: .gamesAccountChanged, object: nil, queue: .main) { [weak self] _ in
+            Task { @MainActor in
+                self?.applyAccountIdentity()
+                await self?.refreshLiveThreads()
+            }
         }
     }
 
@@ -107,26 +128,90 @@ extension AppStore {
         }
     }
 
-    /// The signed-in account becomes "me" (name and cartoon avatar), unless it is this phone's guest
-    /// account, which keeps the demo identity. The account's server friends join `people` as friends.
-    /// Best effort: on any failure the mock identity and friends stay.
+    /// The signed-in account becomes "me" entirely, straight from the account the server returned
+    /// at sign-in: name, avatar, bio and cover color, with the demo user's city, work, school and
+    /// the rest cleared. This phone's guest account (or nobody) gets the demo identity back.
+    /// Runs on every sign-in, account switch and launch, so no earlier account's details stay.
+    @MainActor
+    func applyAccountIdentity() {
+        let account = GamesAccount.shared
+        let real = account.state == .signedIn && !account.isGuest ? account.user : nil
+        guard live.identityAccountID != real?.id else { return }
+        if live.mockIdentity == nil {
+            live.mockIdentity = MockIdentity(
+                firstName: me.firstName, lastName: me.lastName, bio: me.bio, city: me.city,
+                hometown: me.hometown, work: me.work, school: me.school, relationship: me.relationship,
+                website: me.website, avatarURL: me.avatarURL, coverURL: me.coverURL,
+                avatarData: me.avatarData, coverData: me.coverData, coverColor: me.coverColor,
+                joinedDate: me.joinedDate, friendCount: me.friendCount, followerCount: me.followerCount)
+        }
+        // The last account's friends and posts go first.
+        accountFriendIDs = real == nil ? nil : []
+        myServerPosts = nil
+        live.identityAccountID = real?.id
+        guard let real else {
+            // Back to the demo identity and its friends.
+            if let m = live.mockIdentity {
+                me.firstName = m.firstName; me.lastName = m.lastName; me.bio = m.bio
+                me.city = m.city; me.hometown = m.hometown; me.work = m.work; me.school = m.school
+                me.relationship = m.relationship; me.website = m.website
+                me.avatarURL = m.avatarURL; me.coverURL = m.coverURL
+                me.avatarData = m.avatarData; me.coverData = m.coverData; me.coverColor = m.coverColor; me.joinedDate = m.joinedDate
+                me.friendCount = m.friendCount; me.followerCount = m.followerCount
+            }
+            return
+        }
+        let name = real.displayName.trimmingCharacters(in: .whitespaces)
+        let parts = name.split(separator: " ", maxSplits: 1).map(String.init)
+        me.firstName = parts.first ?? real.username
+        me.lastName = parts.count > 1 ? parts[1] : ""
+        me.avatarURL = PersonAvatarURL.displayable(real.avatarURL)
+        me.avatarData = nil
+        me.coverURL = nil
+        me.coverData = nil
+        me.coverColor = real.coverColor
+        me.bio = real.bio ?? ""
+        me.city = ""; me.hometown = ""; me.work = ""; me.school = ""; me.relationship = ""
+        me.website = nil
+        me.followerCount = 0
+        me.friendCount = 0
+        me.joinedDate = real.createdAt
+        Task { @MainActor [weak self] in await self?.loadAccountPosts(accountID: real.id) }
+    }
+
+    /// The account's own server posts, for its profile (`GET /v1/fb/posts?authorId=`).
+    @MainActor
+    private func loadAccountPosts(accountID: String) async {
+        guard let page = try? await FacebookAPILive.shared.posts(authorID: accountID, limit: 50),
+              live.identityAccountID == accountID else { return }
+        myServerPosts = page.items.map(livePost)
+    }
+
+    /// Sets "me" from the signed-in account, then adds the account's server friends to `people`
+    /// as friends. Best effort: on any failure the identity from sign-in stays.
     @MainActor
     private func applyLiveIdentity() async {
-        guard let accountID = live.accountID else { return }
+        applyAccountIdentity()
+        guard let accountID = live.accountID, live.identityAccountID == accountID else { return }
         let friendProfiles = (try? await GamesAPILive.shared.friends()) ?? []
         let ids = [accountID] + friendProfiles.map(\.id)
-        guard let found = try? await FacebookAPILive.shared.people(ids: ids) else { return }
-        if let mine = found.first(where: { $0.id == accountID }), !GamesAccount.shared.isGuest {
-            me.firstName = mine.firstName
-            me.lastName = mine.lastName ?? ""
+        guard let found = try? await FacebookAPILive.shared.people(ids: ids),
+              live.identityAccountID == accountID else { return }
+        if let mine = found.first(where: { $0.id == accountID }) {
             if let avatar = PersonAvatarURL.displayable(mine.avatarUrl) { me.avatarURL = avatar }
             if let bio = mine.bio, !bio.isEmpty { me.bio = bio }
+            if let city = mine.city { me.city = city }
+            if let work = mine.work { me.work = work }
+            if let cover = mine.coverUrl.flatMap(URL.init(string:)) { me.coverURL = cover }
         }
         for person in found where person.id != accountID {
             let user = liveUser(person)
-            if !user.isPage { user.friendship = .friends }
+            if !user.isPage {
+                user.friendship = .friends
+                accountFriendIDs?.insert(user.id)
+            }
         }
-        me.friendCount = friends.count
+        me.friendCount = accountFriendIDs?.count ?? friends.count
     }
 
     @MainActor
@@ -142,7 +227,7 @@ extension AppStore {
     /// The app's `User` for a server person: the signed-in user, someone already in the store
     /// (refreshed with the server's details), or a new person added to `people` / `pages`.
     func liveUser(_ remote: RemoteFBPerson) -> User {
-        if remote.isMe == true || remote.id == live.accountID { return me }
+        if remote.isMe == true || remote.id == live.accountID || remote.id == live.identityAccountID { return me }
         live.serverPeople.insert(remote.id)
         let avatar = PersonAvatarURL.displayable(remote.avatarUrl)
         if let existing = user(id: remote.id) {

@@ -112,6 +112,12 @@ final class AppStore {
     var openConversationID: String? = nil
     /// Where the feed, Reels, Stories and Messenger come from (`AppStore+Live.swift`).
     var facebookSource: FacebookSource = .mock
+    /// The signed-in account's own server posts, shown on its profile instead of the demo
+    /// user's. Nil for the demo identity (a guest, mock mode) or until they load.
+    var myServerPosts: [Post]? = nil
+    /// The signed-in account's server friends: while set, they are the only friends (the demo
+    /// user's friends and the feed's Personas aren't this account's). Nil for the demo identity.
+    var accountFriendIDs: Set<String>? = nil
     @ObservationIgnored let live = FacebookLiveState()
 
     /// Set by the UI layer to warm the image cache for upcoming content.
@@ -174,7 +180,9 @@ final class AppStore {
         }
     }
 
-    var friends: [User] { people.filter { $0.friendship == .friends } }
+    var friends: [User] {
+        people.filter { $0.friendship == .friends && (accountFriendIDs?.contains($0.id) ?? true) }
+    }
 
     var friendRequests: [User] {
         people
@@ -278,6 +286,13 @@ final class AppStore {
 
     /// Timeline posts by (or written on the profile of) `user`, newest first.
     func posts(by user: User) -> [Post] {
+        if user.isMe, let mine = myServerPosts {
+            // A signed-in account: its server posts plus anything it posted since (server ids only).
+            let known = Set(mine.map(\.id))
+            let since = posts.filter { $0.author.id == me.id && $0.group == nil && !known.contains($0.id)
+                && (live.serverPostIDs.contains($0.id) || $0.isUploading) }
+            return (since + mine.filter { $0.group == nil }).sorted { $0.createdAt > $1.createdAt }
+        }
         let all = posts + feedBuffer + watchVideos + reels
         var seen = Set<String>()
         return all
