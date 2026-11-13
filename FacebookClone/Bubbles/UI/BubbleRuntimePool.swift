@@ -108,6 +108,14 @@ final class BubbleRuntimePool: NSObject, WKScriptMessageHandler {
     private var posterTasks: [String: Task<UIImage?, Never>] = [:]
     private var explicitPosterSize: CGSize?
 
+    /// The top inset posters are drawn with: the Bubbles tab's. The runtime keeps the HUD and the playfield clear of the
+    /// app's header by this much, so a still drawn with the same inset is the live game's first frame. It is part of the
+    /// cache key, so a still drawn before the inset was known, or at another one, is never reused.
+    var posterInsetTop: CGFloat = 0
+    /// Told the session key of a cached poster that was dropped for being drawn before its images loaded, so the surface
+    /// showing it can draw it again. The Bubbles feed sets it.
+    var onPosterStale: ((String) -> Void)?
+
     private override init() {
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
@@ -229,22 +237,41 @@ final class BubbleRuntimePool: NSObject, WKScriptMessageHandler {
         }
     }
 
+    /// Where a session's still is kept: its key and the inset it is drawn with.
+    private func posterCacheKey(_ key: String) -> String {
+        "\(key)@t\(Int(posterInsetTop.rounded()))"
+    }
+
     func cachedPoster(forKey key: String) -> UIImage? {
-        if let image = posterCache.object(forKey: key as NSString) {
+        let cacheKey = posterCacheKey(key)
+        if let image = posterCache.object(forKey: cacheKey as NSString) {
             return image
         }
-        guard let url = Self.posterFileURL(forKey: key),
+        guard let url = Self.posterFileURL(forKey: cacheKey),
               let data = try? Data(contentsOf: url),
               let image = UIImage(data: data, scale: Self.posterScale) else { return nil }
-        cache(image, forKey: key)
+        cache(image, forKey: cacheKey)
         return image
+    }
+
+    /// A still was drawn while some of its images were still loading, and they have loaded since (the runtime says so
+    /// with `poster_update`). The cached still is missing art the live game has, so forget it and tell whoever shows it
+    /// to draw it again. Without this the incomplete still stayed, on disk too, and the page jumped to the live game.
+    fileprivate func invalidatePoster(forKey key: String) {
+        let cacheKey = posterCacheKey(key)
+        posterCache.removeObject(forKey: cacheKey as NSString)
+        if let url = Self.posterFileURL(forKey: cacheKey) {
+            try? FileManager.default.removeItem(at: url)
+        }
+        onPosterStale?(key)
     }
 
     /// Keeps a poster rendered by a host (JPEG data) in memory and on disk.
     fileprivate func storePoster(_ data: Data, forKey key: String) -> UIImage? {
         guard let image = UIImage(data: data, scale: Self.posterScale) else { return nil }
-        cache(image, forKey: key)
-        if let url = Self.posterFileURL(forKey: key) {
+        let cacheKey = posterCacheKey(key)
+        cache(image, forKey: cacheKey)
+        if let url = Self.posterFileURL(forKey: cacheKey) {
             DispatchQueue.global(qos: .utility).async {
                 Self.writePoster(data, to: url)
             }
@@ -693,6 +720,11 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
             "scale": .number(Double(scale)),
             "type": "image/jpeg",
             "quality": 0.82,
+            // The same inset the live feed page runs with (the runtime lets this win over the session's own).
+            "insets": .object([
+                "top": .number(Double(BubbleRuntimePool.shared.posterInsetTop.rounded())),
+                "bottom": .number(0),
+            ]),
         ]
         let script = """
         const H = window.BubbleHost;
@@ -801,6 +833,8 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
             Self.playHaptic(style)
         case .perf(let perf):
             BubbleRuntimePerf.shared.record(perf, key: key ?? "", runtime: runtimeVersion)
+        case .unknown("poster_update"):
+            if let key { BubbleRuntimePool.shared.invalidatePoster(forKey: key) }
         default:
             break
         }

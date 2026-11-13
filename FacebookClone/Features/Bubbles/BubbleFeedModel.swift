@@ -50,7 +50,10 @@ final class BubbleFeedModel {
         didSet { BubbleRuntimePool.shared.posterSize = pageSize }
     }
     /// Space the runtime keeps clear at the top (status bar and header).
-    @ObservationIgnored var insetTop: CGFloat = 0
+    @ObservationIgnored var insetTop: CGFloat = 0 {
+        // Posters are drawn with the same inset, so a page's still matches the live game's first frame.
+        didSet { BubbleRuntimePool.shared.posterInsetTop = insetTop }
+    }
 
     @ObservationIgnored private weak var store: BubbleStore?
     @ObservationIgnored private var isVisible = false
@@ -83,6 +86,7 @@ final class BubbleFeedModel {
     func configure(store: BubbleStore) {
         guard self.store == nil else { return }
         self.store = store
+        BubbleRuntimePool.shared.onPosterStale = { [weak self] key in self?.redrawPoster(forKey: key) }
         if currentID == nil {
             currentID = store.feedItems.first?.id
         }
@@ -117,6 +121,21 @@ final class BubbleFeedModel {
     func poster(for bubble: Bubble) -> UIImage? {
         let key = BubbleRuntimeHost.sessionKey(for: bubble.manifest)
         return posters[key] ?? BubbleRuntimePool.shared.cachedPoster(forKey: key)
+    }
+
+    /// A still drawn while its images were loading was dropped (`BubbleRuntimePool.invalidatePoster`): draw it again now that
+    /// they have loaded. The old one stays on screen until the new one is ready.
+    private func redrawPoster(forKey key: String) {
+        guard let store, let host else { return }
+        let bubble = store.feedItems
+            .compactMap { store.bubble(id: $0.bubbleID) }
+            .first { BubbleRuntimeHost.sessionKey(for: $0.manifest) == key }
+        guard let bubble else { return }
+        Task { @MainActor [weak self] in
+            if let image = await BubbleRuntimePool.shared.poster(for: bubble.manifest, fallback: host) {
+                self?.posters[key] = image
+            }
+        }
     }
 
     func isLive(_ item: BubbleFeedItem) -> Bool {
