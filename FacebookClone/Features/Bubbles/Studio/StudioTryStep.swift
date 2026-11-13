@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Step 4: play what Muse made, right here. Edit the title and rule, tweak it with Muse (for
-/// microgames through `MicrogameComposer.revise`), customize it, or make the next level.
+/// Step 4: play what Muse made, right here. Edit the title and rule, tweak it with Muse, give it a
+/// new look, customize it, or make the next level. Changes are made on the server
+/// (`POST /v1/generate {baseGameId, ...}`), and each one is a new game.
 struct StudioTryStep: View {
     @Bindable var model: StudioModel
     @FocusState private var isTweakFocused: Bool
@@ -97,7 +98,7 @@ extension StudioTryStep {
     @ViewBuilder
     var soundSection: some View {
         if let draft = model.currentResult?.manifest, draft.formula == .microgame {
-            SoundCustomizeSection(manifest: draft) { newManifest in
+            SoundCustomizeSection(manifest: draft, onAsk: { model.askSoundChange($0) }) { newManifest in
                 model.replaceManifest(newManifest)
             }
         }
@@ -288,9 +289,8 @@ private struct StudioDetailsCard: View {
                         .padding(.top, 2)
                 }
             }
-            if result.manifest.formula != .microgame {
-                lookRow
-            }
+            // Muse redraws any game in a new look, microgames included (a change on the server).
+            lookRow
             if !result.sourcesUsed.isEmpty {
                 HStack(alignment: .firstTextBaseline, spacing: 6) {
                     Image(systemName: "lock.fill")

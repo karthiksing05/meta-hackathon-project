@@ -11,15 +11,39 @@ struct GameGeneratorLive: GameGenerator {
 
     func start(request: String, brief: BubbleBrief) async throws -> String {
         if await !api.isSignedIn { _ = try await api.signInAsDevice() }
-        var briefJSON: [String: Any] = [
+        let body = try JSONSerialization.data(withJSONObject: ["request": request, "brief": Self.json(brief)])
+        let data = try await api.generationStart(body: body)
+        return try decode(GenerationStarted.self, data).jobID
+    }
+
+    func start(revision: GameRevision) async throws -> String {
+        if await !api.isSignedIn { _ = try await api.signInAsDevice() }
+        // Studio's games carry the app's id; the map links it to the server's when the job finished.
+        guard let base = api.ids.serverID(for: revision.baseGameID) else {
+            throw GamesAPIError.unknownGame(revision.baseGameID)
+        }
+        var payload: [String: Any] = ["baseGameId": base]
+        if let change = revision.change?.trimmingCharacters(in: .whitespacesAndNewlines), !change.isEmpty {
+            payload["change"] = String(change.prefix(GameRevision.maxChangeCharacters))
+        }
+        if let look = revision.look?.trimmingCharacters(in: .whitespacesAndNewlines), !look.isEmpty {
+            payload["look"] = look
+        }
+        if revision.nextLevel { payload["nextLevel"] = true }
+        if let brief = revision.brief { payload["brief"] = Self.json(brief) }
+        let data = try await api.generationStart(body: try JSONSerialization.data(withJSONObject: payload))
+        return try decode(GenerationStarted.self, data).jobID
+    }
+
+    /// `BubbleBrief` as the server reads it (snake_case keys, like the app's manifest).
+    static func json(_ brief: BubbleBrief) -> [String: Any] {
+        var out: [String: Any] = [
             "intent": brief.intent, "audience": brief.audience, "mood": brief.mood,
             "energy": brief.energy, "competition": brief.competition,
         ]
-        if let occasion = brief.occasion { briefJSON["occasion"] = occasion }
-        if let notes = brief.notes { briefJSON["notes"] = notes }
-        let body = try JSONSerialization.data(withJSONObject: ["request": request, "brief": briefJSON])
-        let data = try await api.generationStart(body: body)
-        return try decode(GenerationStarted.self, data).jobID
+        if let occasion = brief.occasion { out["occasion"] = occasion }
+        if let notes = brief.notes { out["notes"] = notes }
+        return out
     }
 
     func job(id: String, after: Int?) async throws -> GenerationJob {

@@ -11,8 +11,8 @@ import Foundation
 /// Queue state goes to `onWait` (nil once the job runs). Failures come back as one `.failed` event
 /// whose detail is the copy for the server's `code`. Cancelling the stream cancels the job.
 ///
-/// Only new games go here; tweaks and next levels stay on-device (`StudioMicrogameBridge.revise`),
-/// which works on a server-made game because it carries `content.authoring_json`.
+/// Changes to a game (tweaks, a new look, the next level, remixes) come through `revise`: the same
+/// job stream from `POST /v1/generate {baseGameId, ...}`, so they show the same steps.
 @MainActor
 enum StudioGenerateBridge {
     /// Waiting for a free slot; `position` when the server says (1 = next).
@@ -27,6 +27,24 @@ enum StudioGenerateBridge {
         onReport: @escaping @MainActor (UUID, StudioPlaytest.Report) -> Void,
         onWait: @escaping @MainActor (Wait?) -> Void
     ) -> AsyncThrowingStream<StudioEvent, Error> {
+        events(from: generator.generate(request: request, brief: brief), onReport: onReport, onWait: onWait)
+    }
+
+    /// A change to a game the server has; the result is a new game (`remixOf` is the base).
+    static func revise(
+        with generator: any GameGenerator,
+        revision: GameRevision,
+        onReport: @escaping @MainActor (UUID, StudioPlaytest.Report) -> Void,
+        onWait: @escaping @MainActor (Wait?) -> Void
+    ) -> AsyncThrowingStream<StudioEvent, Error> {
+        events(from: generator.generate(revision: revision), onReport: onReport, onWait: onWait)
+    }
+
+    private static func events(
+        from updates: AsyncThrowingStream<GenerationUpdate, Error>,
+        onReport: @escaping @MainActor (UUID, StudioPlaytest.Report) -> Void,
+        onWait: @escaping @MainActor (Wait?) -> Void
+    ) -> AsyncThrowingStream<StudioEvent, Error> {
         AsyncThrowingStream { continuation in
             let task = Task { @MainActor in
                 let asked = Date()
@@ -38,7 +56,7 @@ enum StudioGenerateBridge {
                 func elapsed() -> TimeInterval { Date().timeIntervalSince(runStart ?? asked) }
 
                 do {
-                    for try await update in generator.generate(request: request, brief: brief) {
+                    for try await update in updates {
                         switch update {
                         case .waiting(let position):
                             onWait(Wait(position: position))
@@ -198,6 +216,10 @@ enum StudioGenerateBridge {
             switch error {
             case .network: return "Couldn't reach the game server. Check your connection and try again."
             case .signInRequired: return "Couldn't sign in to the game server. Try again in a moment."
+            case .notFound, .unknownGame: return "The game server doesn't have this \(product), so Muse can't change it."
+            // The server's own words: "Muse is not set up on this server yet", "only microgames can be changed this way".
+            case .server(_, let message) where !message.isEmpty && message.count <= 160:
+                return GameAnatomy.sentence(message) + (message.hasSuffix(".") ? "" : ".")
             default: break
             }
         }

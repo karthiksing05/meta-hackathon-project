@@ -3,6 +3,10 @@ import Foundation
 // Server-side game generation (Max's `POST /v1/generate`, posted 2026-11-12 16:01 PST).
 //
 //     POST /v1/generate               {"request", "brief": BubbleBrief}  -> 202 {"jobId"}
+//     POST /v1/generate               {"baseGameId", "change"?, "look"?, "nextLevel"?, "brief"?}
+//                                     -> 202 {"jobId"}: change a game (a tweak, a new look, the next
+//                                        level or a remix). The result is always a new game with
+//                                        `remixOf` set to the base; same job and polling as a new game.
 //     GET  /v1/generate/{jobId}       {"status": queued|running|done|failed, "events": [...], "game"?, "error"?}
 //     GET  /v1/generate               my jobs
 //     DELETE /v1/generate/{jobId}     (asked for; 404/405 are ignored)
@@ -16,6 +20,7 @@ import Foundation
 //
 //     let generator = GameGeneratorFactory.current          // always the server
 //     for try await update in generator.generate(request: "...", brief: brief) { ... }
+//     for try await update in generator.generate(revision: GameRevision(baseGameID: id, change: "slower")) { ... }
 //
 // Cancelling the consuming task ends the job (`DELETE`, best effort).
 
@@ -24,6 +29,8 @@ import Foundation
 protocol GameGenerator: Sendable {
     /// `POST /v1/generate`; returns the job id.
     func start(request: String, brief: BubbleBrief) async throws -> String
+    /// `POST /v1/generate` with `baseGameId`: a change to a game the server has. Returns the job id.
+    func start(revision: GameRevision) async throws -> String
     /// `GET /v1/generate/{id}`, with `after` = the last `seq` seen (nil on the first poll).
     func job(id: String, after: Int?) async throws -> GenerationJob
     /// `DELETE /v1/generate/{id}`. Best effort: never throws.
@@ -35,6 +42,24 @@ protocol GameGenerator: Sendable {
 }
 
 // MARK: - Wire models
+
+/// A change to a game the server already has. At least one of `change`, `look` and `nextLevel`
+/// must be set (the server says 400 otherwise). Only microgames can be changed (422 otherwise).
+struct GameRevision: Sendable {
+    /// The game to change: a server id, or an app id the client has linked to one.
+    var baseGameID: String
+    /// What to change, in the person's words.
+    var change: String?
+    /// A look to redraw it in ("paper cutout: crafty, warm and tactile").
+    var look: String?
+    /// Make the next level: the same idea, a little harder.
+    var nextLevel = false
+    /// The reviewed brief, for remixes; nil keeps the base game's own brief.
+    var brief: BubbleBrief?
+
+    /// The server's limit on the request text it builds from these fields.
+    static let maxChangeCharacters = 1_800
+}
 
 /// `GET /v1/generate/{jobId}`.
 struct GenerationJob: Decodable, Sendable {
@@ -108,7 +133,9 @@ struct GenerationEvent: Decodable, Hashable, Sendable {
         kind = Kind(rawValue: (try? c.decode(String.self, forKey: .kind))?.lowercased() ?? "") ?? .other
         summary = (try? c.decodeIfPresent(String.self, forKey: .summary)) ?? ""
         issues = (try? c.decodeIfPresent([String].self, forKey: .issues)) ?? nil
-        data = (try? c.decodeIfPresent(JSONValue.self, forKey: .data)) ?? nil
+        // The server puts each step's details (`round`, `passed`, `headline`, `bots`, ...) on the
+        // event itself rather than under `data`; read them from there when `data` is missing.
+        data = (try? c.decodeIfPresent(JSONValue.self, forKey: .data)) ?? (try? JSONValue(from: decoder))
     }
 }
 
@@ -188,13 +215,23 @@ enum GameGenerationError: LocalizedError, Equatable {
 extension GameGenerator {
     /// Starts a job and streams it to the end. Cancelling the consumer cancels the job.
     func generate(request: String, brief: BubbleBrief) -> AsyncThrowingStream<GenerationUpdate, Error> {
+        stream { try await start(request: request, brief: brief) }
+    }
+
+    /// Starts a change to an existing game and streams it to the end, exactly like a new game. A
+    /// change can take minutes on real Muse; the stream polls until the job ends.
+    func generate(revision: GameRevision) -> AsyncThrowingStream<GenerationUpdate, Error> {
+        stream { try await start(revision: revision) }
+    }
+
+    private func stream(_ begin: @escaping @Sendable () async throws -> String) -> AsyncThrowingStream<GenerationUpdate, Error> {
         AsyncThrowingStream { continuation in
             let task = Task {
                 var jobID: String?
                 do {
                     let id: String
                     do {
-                        id = try await start(request: request, brief: brief)
+                        id = try await begin()
                     } catch let error as GamesAPIError {
                         throw GameGenerationError.from(error) ?? error
                     }

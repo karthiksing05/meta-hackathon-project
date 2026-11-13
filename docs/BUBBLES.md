@@ -256,10 +256,19 @@ Swift types: `BubbleBridgeMessage`, `BubbleRunResult`, `BubbleInputLog` in
   (`GameGeneratorFactory.current`, `POST /v1/generate`, 7.12). `StudioGenerateBridge` turns the job
   into `StudioEvent`s (`compose, validate, repair, playtest, polish, done`); the `done` event carries
   the manifest.
-- **Not available yet.** Tweaks, a new look, next levels and remixes need a server revise endpoint,
-  so they fail with `LiveDataCopy.revise`. The game anatomy is not drafted (7.13).
+- **Changes.** Tweaks (`startCompose(.tweak)`, "Change the game", the Sound card's free text), a new
+  look (`changeLook(to:)`, `look`), the next level (`startCompose(.nextLevel)`, `nextLevel: true`) and
+  remix, next-level and edit launches go to `POST /v1/generate {baseGameId, change?, look?, nextLevel?,
+  brief?}` as a `GameRevision` (`StudioModel.runRevision`). It is the same job and polling as a new
+  game (`GameGenerator.generate(revision:)`, `StudioGenerateBridge.revise`), so Build shows the same
+  steps; a change can take minutes. The result is always a **new** server game with `remixOf` set to
+  the base: Studio keeps the server's manifest id (it links to the new server id), a tweaked level
+  replaces the one on Try, and saving an edit shares it as a new version. `baseGameId` is the Bubble's
+  `serverID`, or for a level made this session its app id (the client maps it). Only the person's
+  words go as `change` (at most 1,800 characters); the base game already follows its anatomy.
 - Modes: `create`, `edit` (change an existing Bubble), `remix` (fork), `next_level` (new linked
-  Bubble in the chain), `daily` (a Group's Daily Bubble). Only `create` and `daily` can build today.
+  Bubble in the chain), `daily` (a Group's Daily Bubble). `create` and `daily` make a new game; the
+  others change their base game.
 
 ### 4.5 App state
 
@@ -1699,7 +1708,11 @@ is the only implementation) polls `GET /v1/generate/{jobId}` every 1–2 s, dedu
 fetches the finished game's manifest from `manifestUrl` without re-encoding it. `StudioGenerateBridge`
 turns the server's events (`kind` + `summary`) into the same `StudioEvent`s as `StudioMicrogameBridge`,
 so Build, Try, Share and "How Muse made it" are unchanged. Optional fields (`data` on events, `position`,
-`code`) are used when present. The games API client is always the live server (`GamesAPIFactory.current`,
+`code`) are used when present; the server puts each step's details (`round`, `passed`, `headline`,
+`bots`) on the event itself, and `GenerationEvent.data` falls back to the whole event. Changes to a game
+(`{baseGameId, change?, look?, nextLevel?}`, 4.4) use the same job and polling. `request` may be at
+most 2,000 characters, so when the agreed anatomy would push a new game's request past that, it goes
+in the brief's `notes` instead. The games API client is always the live server (`GamesAPIFactory.current`,
 base URL `https://api.ol4ol.com`, `FB_API_URL` overrides it in DEBUG); the app signs in once at launch
 with a device account (`GamesAccount`). There is no mock client.
 
