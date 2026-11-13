@@ -1,0 +1,253 @@
+# Harness v2: open-ended game making
+
+Owner: Karthik (and Claude for Karthik). Branch: `harness-v2`, off `backend-api` `75d3a02` plus Artem's `typed-answers`.
+Status: plan, 2026-11-12 ~20:30 PST. Where the Go code sits is confirmed with Claude (for Max) before it merges.
+
+## The problem
+
+Today the harness knows one fixed menu: 34 fragments, 4 looks and 16 gold games, pasted into a ~91k-character
+prompt. Muse tends to force each request onto the closest item, so:
+
+- "make krillion" became a krill-catching game, and "a krillion style trivia game" became multiple choice
+  (Artem's handoff, 19:42). Muse didn't know the game, and the menu had no typed-answer piece.
+- New kinds of play (a rare-answer guess, a lane runner, a tilt game) don't arrive as new rules. They arrive as a
+  reskin of whatever is on the menu. Karthik's 16:30 note: the harness takes a person's style but not their function.
+
+The fix is to make the menu effectively open: a large catalog of **game types** and **game tools** the harness
+*searches*, a web lookup for whatever the catalog doesn't know, and a planner that composes from what it found.
+
+## What we checked first (2026-11-12, real Muse API)
+
+- Muse has **no embeddings endpoint** (`/v1/embeddings` returns 404 for every model name tried) and **no built-in web
+  search** (`tools: [{type: web_search}]` returns 400). Models: muse-wonder-1.0, muse-ember-1.0, muse-spark-1.1/1.2/1.3,
+  muse-image-1.0, sam-3.1, muse-voice-transcribe-1.0.
+- So semantic search and web lookup run on **our server**, with Muse as the reasoning step, not the index.
+- The Go API (`backend/`) already runs shared JS inside Go with goja (`internal/recs`). The generator that calls Muse
+  is Node today (`backend/generator`, running `MicrogameStudio.compose` from the shared Studio bundle).
+
+## Shape
+
+```
+request ──► 1 understand ──► 2 retrieve ──► (3 look up, only if needed) ──► 4 plan ──► 5 compose ──► 6 check
+            Muse Spark,       Go, catalog     Go: Wikipedia + the named       Muse Wonder:   existing     gate with
+            JSON: refs,       in Mongo:        site's own page; Muse          anatomy +      pipeline,    the type's
+            verbs, inputs,    BM25F +          Spark turns it into a          design that    prompt now   gate profile
+            family, theme     trigram +        catalog entry (cached,         cites type     holds only   + quality
+                              tag overlap,     marked "learned")              and tool ids   what was     + polish
+                              fused (RRF)                                                    retrieved
+```
+
+Steps 1–4 are new and live in Go (`backend/internal/harness/`). Steps 5–6 are today's pipeline. They take a smaller,
+targeted context pack instead of the whole menu, which also makes the prompt shorter and faster.
+
+### 1. Understand the request (Muse Spark, about 1–2 s)
+
+One JSON call turns free text into fields the index can match. It uses the catalog's own controlled vocabulary
+(families, verbs, inputs), so this is where "semantic" comes from without embeddings:
+
+```json
+{"named_refs": ["Krillion"], "verbs": ["type", "guess"], "inputs": ["type"], "families": ["trivia", "word"],
+ "theme": ["Harry Potter"], "keywords": ["rare answer", "obscure", "daily"], "players": "solo",
+ "unknown_refs": ["Krillion"]}
+```
+
+`unknown_refs` is Muse saying "I don't know this name". It is one of the triggers for step 3.
+
+### 2. Retrieve (Go, in-process, < 20 ms)
+
+- **Index:** every `game_types` and `game_tools` document, built into an in-memory index at start-up and on change.
+  A few thousand documents fit easily.
+- **Scorers**, fused with reciprocal-rank fusion:
+  - BM25F over fields: name and aliases ×3, example prompts ×2, summary, verbs, tags;
+  - character trigrams on names and aliases, so "krilion" and "wordel" still hit;
+  - exact overlap with the understood `verbs`, `inputs` and `families`.
+- **Output:** the top 6 types, every tool those types need, and the top 6 tools matched directly. Each comes with a
+  score and the reason it matched.
+- **Interface:** an `Embedder` interface is left in place. If we later add vectors (a small local model, or Muse adds
+  embeddings), they become a fourth scorer in the same fusion, with no other change.
+- **Eval:** `backend/internal/harness/testdata/retrieval_eval.json` holds 300+ requests with expected type ids, and the
+  Go test reports recall@5 and MRR. The target is recall@5 ≥ 0.9 before the planner uses it.
+
+### 3. Look it up (Go, only when needed, budget 8 s)
+
+Triggers: an `unknown_refs` name with no alias hit, or a top fused score below the threshold.
+
+- **Sources** (no new keys): the Wikipedia search and summary REST APIs, plus a direct fetch of a named site's home
+  page when the name looks like a domain or a product, with the text extracted.
+- **Optional:** a search API (Brave or similar) behind `HARNESS_SEARCH_KEY` in `generator.env`, only if Max agrees.
+  Off by default.
+- Muse Spark turns what came back into a **candidate `game_types` entry**. It records the mechanic only, never copied
+  prompts, art or levels, and cites its source URLs.
+  - The entry is used for this job right away.
+  - It is saved with `status: "learned"`, so the next person who asks for the same game gets an instant catalog hit.
+  - A learned entry is promoted to `reviewed` only after an eval pass or a teammate checks it.
+- **On failure:** if the lookup fails or runs out of time, the job continues with step 2's results. The Studio step
+  text says so honestly.
+
+### 4. Plan (Muse Wonder)
+
+The planner gets the request and compact cards for the retrieved types and tools, about 300–600 characters each, not
+whole manifests. It writes the existing `game-anatomy/0.1` and the design block, plus:
+
+- `type_ids`: which types it is using, and how it blends them ("rare-answer scoring from `rare_answer_trivia`, the
+  timer from `speed_round`");
+- `tool_ids`: the building blocks each rule uses;
+- `gaps`: tools with status `planned` or `gap` that the idea needs. Each gap gets the approximation it will use
+  instead (the existing familiarity field: `known`, `approximate` or `new to Muse`).
+
+### 5–6. Compose and check (today's pipeline, with a smaller prompt)
+
+- `prompts.system` takes the plan's types and tools in place of the full fragment catalog. Gold examples are still
+  picked, but by type id first and by words second.
+- **The gate profile** comes from the type (`gate_profile`), with these values:
+
+  | Profile | What the gate checks |
+  |---|---|
+  | `arcade` | today's checks |
+  | `puzzle` | solvable and not trivial |
+  | `calm` | no-fail is allowed |
+  | `trivia` | answers are reachable and scoring follows the tiers |
+  | `runner` | skill shows in the scores |
+
+  This is the genre-aware gate that blocked 4 of 11 anatomy-run games. That layer is Bayan's, in
+  `authoring/playtest/`; we agree the profile names with him.
+
+## The catalog
+
+Two Mongo collections, seeded from JSON in the repo (`authoring/catalog/`), loaded by `cmd/dbinit`, and editable later
+without a deploy.
+
+### `game_types`: target 2,000+ at launch
+
+```json
+{
+  "id": "rare_answer_trivia",
+  "name": "Rare-answer trivia",
+  "aliases": ["Krillion", "rarest answer", "obscure answer game", "Pointless-style"],
+  "family": "trivia",
+  "subfamily": "open answer",
+  "summary": "A category prompt; type one correct answer; rarer correct answers score more.",
+  "core_loop": "read prompt → type an answer before the timer → see its rarity tier and points → next prompt",
+  "verbs": ["type", "recall", "guess"],
+  "inputs": ["type"],
+  "pieces": ["prompt", "answer list with rarity tiers", "timer", "score"],
+  "rules": ["an answer counts if it fuzzy-matches an accepted answer", "points by tier: common 10 … rarest 100"],
+  "win": "highest total after N prompts", "lose": "none; score attack",
+  "scoring": "tiered points per answer",
+  "session_seconds": [60, 180],
+  "players": ["solo", "async_friends", "group_daily"],
+  "social_hooks": ["compare rarest answers with friends", "a Group's daily set"],
+  "content_needs": ["prompts", "accepted answers with tiers and aliases"],
+  "difficulty_levers": ["timer length", "prompt breadth", "tier thresholds"],
+  "tools": ["typed_answer", "keyboard", "fuzzy_match", "rarity_tiers", "timer_bar", "rounds", "score", "daily_seed"],
+  "engine_gaps": [],
+  "gate_profile": "trivia",
+  "example_prompts": ["a harry potter krillion", "trivia where obscure answers win", "name the rarest pokemon"],
+  "status": "reviewed",
+  "source": "seed",
+  "refs": ["https://krillion.io"]
+}
+```
+
+### `game_tools`: target 300+ at launch
+
+Each tool is a building block the composer can use, kind by kind:
+
+| Kind | What it is |
+|---|---|
+| `fragment` | the 34 today |
+| `builtin` | runtime functions |
+| `runtime_tool` | a new runtime capability, such as `fuzzy_match` or text input |
+| `content_tool` | a server-side content generator, such as an answer bank with tiers, a question bank with difficulty, or a level list |
+| `look` | a visual style |
+| `server_tool` | a step like the web lookup |
+
+```json
+{
+  "id": "fuzzy_match",
+  "kind": "runtime_tool",
+  "summary": "Does a typed answer match an accepted one? Tolerates case, accents, plurals, typos and word order, and knows aliases.",
+  "when_to_use": "any typed or open answer: trivia, naming, spelling with tolerance",
+  "api": "fuzzy.match(input, accepted[], {threshold}) -> {ok, best, score, tier}",
+  "events": [], "params": {"threshold": "0..1, default 0.82"},
+  "status": "building",
+  "gaps_it_closes": [],
+  "example_types": ["rare_answer_trivia", "name_all_x", "guess_the_character"]
+}
+```
+
+`status` is one of `shipped`, `building`, `planned` or `gap`. The planner can see a `gap` tool and plan around it
+honestly, so the catalog doubles as the engine roadmap.
+
+### How 2,000 types get written (brute force, with checks)
+
+1. **Families first.** We use about 40 families: the game-taxonomy canvas (`F0CGYLR71CN`) plus app-store, board-game
+   and party-game genres. Each family gets a packet: its definition, 3 reviewed example entries, and the schema.
+2. **Fan-out.**
+   - Claude (for Kevin) and our subagents each take families and write about 50 entries per family. Each entry is a
+     distinct mechanic, with the well-known games that use it as `aliases`.
+   - The aliases are what make "make krillion" or "like Subway Surfers" match. The entries describe mechanics; the
+     names are only for matching.
+3. **Checks** (`node authoring/catalog/check.mjs`):
+   - schema validation;
+   - every tool id exists;
+   - near-duplicate detection (trigram Jaccard on name, summary and core loop);
+   - at least 3 example prompts each;
+   - no copied text from any source.
+4. **Retrieval eval.** Each packet also adds 5 natural requests with expected type ids to the eval set, so coverage and
+   retrieval are measured together.
+
+### Families and who writes them (about 50 types each)
+
+File layout: one file per family, `authoring/catalog/types/<family>.json`, holding a JSON array of `game_types`
+entries. One writer per file, so nobody conflicts.
+
+| Writer | Families |
+|---|---|
+| **Claude for Kevin** (28) | `word`, `trivia`, `knowledge_quiz`, `logic_puzzle`, `number_math`, `spatial_puzzle`, `tile_matching`, `deduction`, `memory`, `reaction`, `rhythm_music`, `runner`, `platformer`, `arcade_shooter`, `dodge_survive`, `sports`, `racing`, `physics_toy`, `stack_balance`, `aim_throw`, `catch_collect`, `idle_incremental`, `management_sim`, `cooking_crafting`, `nurture_pet`, `card`, `board`, `dice_luck` |
+| **Claude for Karthik** (14) | `story_choice`, `mystery_narrative`, `adventure_rpg`, `strategy_tactics`, `tower_defense`, `duel_battle`, `party_social`, `guess_your_friends`, `drawing_creative`, `music_making`, `daily_puzzle`, `learning`, `calm_cozy`, `horror_tension` |
+
+Tools go in `authoring/catalog/tools/*.json`, written by Claude for Karthik. Any tool id a type needs that doesn't exist
+yet goes in that type's `tools` as written, and the checker lists it as *missing*. Those are the next tools to define.
+Use existing fragment ids where they fit (`ls authoring/fragments`).
+
+## Runtime tools to build now
+
+- **`fuzzy_match`** in the game runtime, so it runs on the phone and in the bots alike. It does these, in order:
+  1. normalizes the input: case, accents, punctuation and articles;
+  2. checks aliases;
+  3. takes a Damerau-Levenshtein ratio;
+  4. takes a token-set ratio, so word order doesn't matter;
+  5. folds plurals and simple stems;
+  6. optionally checks a phonetic key.
+
+  It is deterministic and needs no LLM, which keeps replays verifiable. "Near-semantic" comes from the answer bank,
+  which carries `aliases` and `also_accept` lists written by Muse at build time.
+- **`typed_answer`** (Artem, merged here) switches to `fuzzy_match`, with tiers from the answer bank.
+- **A native text field** in the runtime, `bubble-kit-microgame.js`, so typing has spaces, numbers and autocorrect, and
+  replays record the text.
+
+## Measure every change
+
+- **Retrieval:** recall@5 and MRR on the eval set (Go test).
+- **Generation:** `tools/harness-eval` `compare.mjs` before and after on the 12 starter requests, plus Kevin's and
+  Artem's ground truth.
+  - Two new requests are added: "make krillion" and "a harry potter krillion".
+  - The baseline is Artem's 3b4536a numbers: first draft valid 83%, gate pass 75%, must-haves 96%.
+
+## Who does what
+
+| Work | Who |
+|---|---|
+| Plan, catalog schema and checks, seed entries from fragments and gold, retrieval in Go, web lookup in Go, planner wiring, fuzzy match | Claude for Karthik (subagents) |
+| Bulk catalog entries by family | Claude for Kevin (with our subagents) |
+| Where the Go harness sits and how it calls the generator; `generator.env` keys; Mongo collections | Claude for Max (to confirm) |
+| Genre gate profiles; visuals (style kit, art direction) | Codex for Bayan: we agree the profile names and leave visuals to him |
+| Engine gaps the catalog surfaces (tilt, share grid) | Artem, once he's back on engine work |
+
+## Open questions
+
+- **Max:** can the Go API own steps 1–4 and send the generator a `context` pack (types, tools, plan) on the job? Or
+  would you rather move the whole Muse loop into Go, with the shared JS run in goja as recs does?
+- **Max:** may we add `HARNESS_SEARCH_KEY` (optional) and two collections, `game_types` and `game_tools`?
+- **Bayan:** which gate profile names do you already have?
