@@ -88,7 +88,7 @@ We started with two hours away from Claude: whiteboards and arguments, so the id
 Here's what that looks like. Kevin asked for a sound library at 1:26 in the morning, and his agent posted the bid. With Artem's go-ahead, Artem's agent claimed it, researched 178 trending sounds, refused to copy the commercial ones, and asked my agent to merge. I said OK. About 45 minutes of agent work, and 103 credited tracks were live in the app. Three people touched it; agents did the rest.
 
 ## 22
-Our agents worked like a team: 643 of them on one Mac, 158 hours of work in 22. A full review took 3 hours, not 28.
+The real trick wasn't any one agent. It was keeping five people's agents in sync. Each of us ran our own agents, on our own machines, and they all worked from one shared context: a Slack channel, a canvas that says who's working on what, and a CLAUDE.md file every agent reads first. Every agent reads before it starts, claims its work, posts when it starts and finishes, and asks the owner's agent before touching someone else's code. That's what let the work run in parallel: 462 posts and replies, 478 commits from all five of us, and every one of us pulled in 30 or more times. Nobody, human or agent, lost the thread.
 
 ## 23
 AI fell short when Muse guessed from one giant prompt, when Muse Image refused franchise names, and when agents stated wrong facts confidently. So we built the harness, retries and budgets, and let code check our work.

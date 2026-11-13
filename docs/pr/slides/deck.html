@@ -637,6 +637,27 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
 .art.cbub { height: fit-content !important; min-height: 0 !important; align-self: stretch; }
 .ovf { font-size: 24px !important; max-width: none !important; width: 220px; overflow: visible; white-space: nowrap; display: inline-block; }
 .ovf { width: 170px !important; }
+
+/* slide 22: shared context */
+.sync h2 { font-size: 62px; margin-top: 10px; line-height: 1.08; }
+.syg { display: grid; grid-template-columns: 760px 1fr; gap: 56px; margin-top: 22px; }
+.syhub { position: relative; width: 760px; height: 600px; }
+.sylines { position: absolute; inset: 0; width: 760px; height: 600px; z-index: 0; }
+.syn { position: absolute; z-index: 1; width: 196px; margin-left: -98px; margin-top: -42px; background: #fff; border: 3px solid #E4E6EB; border-radius: 22px; padding: 12px 10px; text-align: center; box-shadow: 0 6px 18px rgba(0,0,0,.06); }
+.syn b { display: block; font-size: 27px; font-weight: 900; } .syn span { font-size: 18px; color: var(--sub); }
+.syn.n1 { left: 380px; top: 62px; } .syn.n2 { left: 660px; top: 210px; } .syn.n3 { left: 600px; top: 540px; } .syn.n4 { left: 160px; top: 540px; } .syn.n5 { left: 100px; top: 210px; }
+.sycore { position: absolute; z-index: 1; left: 210px; top: 172px; width: 340px; background: var(--grad); color: #fff; border-radius: 28px; padding: 20px 24px; box-shadow: 0 10px 30px rgba(80,60,220,.25); }
+.sycore em { font-style: normal; font-size: 17px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; opacity: .85; }
+.sycore p { font-size: 17px; line-height: 1.25; margin-top: 10px; opacity: .95; } .sycore p b { display: block; font-size: 23px; font-weight: 900; }
+.syr em { font-style: normal; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; color: var(--violet); }
+.systeps { list-style: none; counter-reset: st; margin: 14px 0 0; padding: 0; }
+.systeps li { counter-increment: st; position: relative; padding: 13px 0 13px 64px; border-top: 2px solid #EEF0F3; font-size: 26px; color: var(--sub); line-height: 1.3; }
+.systeps li::before { content: counter(st); position: absolute; left: 0; top: 11px; width: 44px; height: 44px; border-radius: 50%; background: var(--grad); color: #fff; font-weight: 900; font-size: 24px; display: flex; align-items: center; justify-content: center; }
+.systeps b { color: var(--ink); }
+.sywhy { margin-top: 18px; background: var(--soft); border-radius: 20px; padding: 18px 22px; font-size: 25px; font-weight: 700; line-height: 1.3; }
+.synums { display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; margin-top: 18px; border-top: 3px solid #EEF0F3; padding-top: 16px; }
+.synums b { display: block; font-size: 54px; font-weight: 900; background: var(--grad); -webkit-background-clip: text; color: transparent; line-height: 1; }
+.synums span { display: block; font-size: 19px; color: var(--sub); line-height: 1.3; margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -975,20 +996,37 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
   </div>
 </section>
 
-<section class="slide">
-  <div class="label">04 · How we built it · agents as a team</div>
-  <h2 style="margin-top:10px;font-size:72px">Our agents worked the way we want people to: <span class="grad">together, and keeping each other honest.</span></h2>
-  <div class="cards3 wf">
-    <div class="cd"><em>Keeping each other honest</em><b>A review on every draft</b><p>One agent checked the other's slides against the repo and caught "~1.5 MB" (really 1,092 KiB) and "live" quiz nights (play is async).</p></div>
-    <div class="cd"><em>In sync</em><b>Two sessions, one answer</b><p>"Can the app attach photos yet?" came back with the build and the exact taps, minutes later.</p></div>
-    <div class="cd"><em>Sharing the load</em><b>Handed off, handed back</b><p>02:35, slides go to Artem's agent. Ten reviewed drafts later, 04:55, back to Karthik's Mac.</p></div>
+<section class="slide sync">
+  <div class="label">04 · Our process · one shared context</div>
+  <h2>Five people, each with their own agents, <span class="grad">working from one shared context.</span></h2>
+  <div class="syg">
+    <div class="syhub">
+      <div class="syn n1"><b>Karthik</b><span>front end, pitch</span></div>
+      <div class="syn n2"><b>Artem</b><span>engine, Studio</span></div>
+      <div class="syn n3"><b>Max</b><span>backend, Muse</span></div>
+      <div class="syn n4"><b>Kevin</b><span>ranking, Devpost</span></div>
+      <div class="syn n5"><b>Bayan</b><span>authoring, Messenger</span></div>
+      <svg class="sylines" viewBox="0 0 760 600"><g stroke="#C9C2F5" stroke-width="4" stroke-dasharray="10 9"><line x1="380" y1="300" x2="380" y2="62"/><line x1="380" y1="300" x2="684" y2="210"/><line x1="380" y1="300" x2="600" y2="540"/><line x1="380" y1="300" x2="160" y2="540"/><line x1="380" y1="300" x2="76" y2="210"/></g></svg>
+      <div class="sycore"><em>Shared context</em><p><b>Slack channel</b>every start, update, handoff and question</p><p><b>Agent Logistics canvas</b>who's on what, requests, branches, the phone</p><p><b>CLAUDE.md</b>the rules every agent reads first</p></div>
+    </div>
+    <div class="syr">
+      <em>How every agent stays in step</em>
+      <ol class="systeps">
+        <li><b>Read first.</b> The canvas and the last day of the channel, before any work.</li>
+        <li><b>Claim it.</b> A row on the canvas, so no two agents build the same thing.</li>
+        <li><b>Say it.</b> Starting, Update, Done: posted for the people and the other agents.</li>
+        <li><b>Ask the owner.</b> Need another person's code? Ask their agent in a thread, and log it.</li>
+        <li><b>Hand off cleanly.</b> Branch, files, what's left, how to test.</li>
+      </ol>
+      <div class="sywhy">The result: work runs in parallel across five people's machines, and nobody, human or agent, loses the thread.</div>
+    </div>
   </div>
-  <div class="wf2">
-    <div class="nums"><div><b>643</b><span>agents on one Mac: 3 lead sessions and 640 helpers</span></div><div><b>80</b><span>messages sent session to session, no human typing</span></div><div><b>7×</b><span>158 agent-hours of work in 22.5 hours</span></div></div>
-    <div class="tasks"><div class="tkey"><i class="bw"></i>with a team of agents <i class="bs"></i>one session alone (estimated)</div>
-<div class="tb"><div class="tl"><b>Review every merged screen</b><span>278 agents</span></div><div class="tbars"><div class="bw" style="width:91px"></div><em>3.1 h</em><div class="bs" style="width:840px"></div><em class="g">28 h</em></div></div><div class="tb"><div class="tl"><b>Build 21 new Curios</b><span>21 agents</span></div><div class="tbars"><div class="bw" style="width:28px"></div><em>57 min</em><div class="bs" style="width:236px"></div><em class="g">7.9 h</em></div></div><div class="tb"><div class="tl"><b>Ship 9 collaboration features</b><span>21 agents</span></div><div class="tbars"><div class="bw" style="width:51px"></div><em>1.7 h</em><div class="bs" style="width:141px"></div><em class="g">4.7 h</em></div></div></div>
+  <div class="synums">
+    <div><b>462</b><span>Slack posts and replies in 64 threads, 132 of the 152 posts by agents</span></div>
+    <div><b>478</b><span>commits from all five of us, with 63 merges</span></div>
+    <div><b>30+</b><span>times each of us was @-mentioned, by people and their agents</span></div>
+    <div><b>7×</b><span>parallel speed-up: 158 agent-hours of work in 22.5 hours on one teammate's Mac alone</span></div>
   </div>
-  <div class="foot"><span>git log on main, 04:30 PST. Agents synced through Slack, a shared canvas and CLAUDE.md.</span><span class="pg"></span></div>
 </section>
 
 <section class="slide wfb">
@@ -996,7 +1034,7 @@ h2 { font-size: 96px; line-height: 1.04; font-weight: 800; letter-spacing: -.025
   <h2>Where AI helped most, where it fell short, and how we adapted.</h2>
   <div class="hfa">
     <div class="hc h"><em>Helped most</em>
-      <p><b>Doing many things at once.</b> 643 agents on one Mac did about 158 hours of work in 22. A review of every merged screen took 3 hours, not 28.</p>
+      <p><b>Doing many things at once.</b> Five people's agents worked in parallel from one shared context. A review of every merged screen took 3 hours, not 28.</p>
       <p><b>Checking each other.</b> Every slide draft was fact-checked by another agent against the code before anyone saw it.</p>
       <p><b>Inside the product.</b> One sentence becomes a planned, tested Curio, with no developer in the loop.</p></div>
     <div class="hc f"><em>Fell short</em>
