@@ -300,7 +300,10 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
    * object are fine) or as an object. The manifest and the games it returns are sort-safe
    * (stable.mjs), because the app re-encodes JSON with sorted keys.
    */
-  function expand(manifestJSON) {
+  function expand(manifestJSON, optionsJSON = null) {
+    // options (optional): {canvas: "tall" | "classic"}; the manifest's own look.canvas still wins.
+    const o = (typeof optionsJSON === 'string' ? JSON.parse(optionsJSON || '{}') : optionsJSON) || {};
+    const expandOptions = o.canvas === 'tall' ? { canvas: 'tall' } : {};
     const t0 = now();
     const fail = (code, message) => JSON.stringify({ ok: false, authoring: null, game: null, playtest_game: null, diagnostics: [finish({ code, at: '', message })], ms: { expand: round1(now() - t0), validate: 0 } });
     let input = manifestJSON;
@@ -325,7 +328,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     }
     let result;
     try {
-      result = expandManifest(applied, library);
+      result = expandManifest(applied, library, expandOptions);
     } catch (e) {
       // The expander assumes the manifest's basic shape; anything it trips over is the model's to fix.
       return fail('A_MALFORMED', `the manifest has the wrong shape somewhere (${e?.message ?? e}). Check that uses is a list of {fragment, params, bind}, that rules is a list, and that every section matches the format.`);
@@ -567,14 +570,18 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
       if (!authoring) throw new Error('the base game has no content.authoring_json, so it can\'t be revised');
       base = { id: b.id, title: b.title, one_line_rule: b.one_line_rule ?? b.oneLineRule, brief: b.brief, seed: b.seed, emoji: b.style?.emoji, authoring_json: authoring };
     }
-    const out = await composeGame({ request: a.request, brief: a.brief, base, context: a.context ?? null }, localStudio(), {
+    // The blocking layout verifier (expander/verify-layout.mjs) reads disk and can launch Chrome, so it is
+    // Node only: it comes in through the hooks, never the bundle, and the pipeline sees it as studio.verifyLayout.
+    const local = hooks && typeof hooks.verifyLayout === 'function' ? { ...localStudio(), verifyLayout: hooks.verifyLayout } : localStudio();
+    const out = await composeGame({ request: a.request, brief: a.brief, base, context: a.context ?? null }, local, {
       ask, onEvent: typeof onEvent === 'function' ? onEvent : () => {},
       maxRepairRounds: a.max_repair_rounds, polish: a.polish !== false,
       // On by default; score_check: false or score_review: false opt out.
       scoreCheck: a.score_check !== false, scoreReview: a.score_review !== false,
       // Server-side hooks from the caller (functions, so not in argsJSON): {image, decode, deflate} for
       // picture art when the plan says art "image" (docs/harness-gaps/images.md), and {fixLayout,
-      // layoutCheck} for the layout pass and lint (expander/layout-fix.mjs, playtest/layout-check.mjs).
+      // layoutCheck} for the layout pass and lint (expander/layout-fix.mjs, playtest/layout-check.mjs), and
+      // verifyLayout (expander/verify-layout.mjs), the blocking verifier that replaces fixLayout when present.
       hooks: hooks && typeof hooks === 'object' ? hooks : null,
     });
     return JSON.stringify(out);
@@ -585,7 +592,7 @@ export function createStudio(data, { getEngine, engineError = () => null } = {})
     return {
       catalog: () => JSON.parse(catalog()),
       examples: (request, k, ids) => JSON.parse(examplesFor(request, k, ids)),
-      expand: (text) => JSON.parse(expand(text)),
+      expand: (text, options) => JSON.parse(expand(text, options ?? null)),
       gate: async (json, seed, opts) => JSON.parse(await gate(json, seed, opts)),
       scoreCheck: async (json, model) => JSON.parse(await scoreCheck(json, model)),
       storyGate: async (json, graph, manifest) => JSON.parse(await storyGate(json, graph, manifest)),

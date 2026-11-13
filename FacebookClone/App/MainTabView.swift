@@ -23,7 +23,11 @@ struct MainTabView: View {
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if !isKeyboardVisible {
-                FBTabBar()
+                VStack(spacing: 0) {
+                    // Minimized game builds, like a mini-player (GameBuildDock).
+                    GameBuildDock()
+                    FBTabBar()
+                }
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
@@ -133,6 +137,9 @@ private struct MessengerContainer: View {
         @Bindable var router = router
         NavigationStack(path: $router.messengerPath) {
             ChatsListView()
+                .safeAreaInset(edge: .bottom, spacing: 0) {
+                    GameBuildDock()
+                }
                 .appDestinations()
         }
         .overlay(alignment: .bottom) {

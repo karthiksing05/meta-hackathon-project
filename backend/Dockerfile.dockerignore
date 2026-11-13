@@ -20,6 +20,14 @@
 !authoring/playtest/layout-check.mjs
 !authoring/playtest/bots.mjs
 !authoring/playtest/frame-render.mjs
+!authoring/expander/canvas.mjs
+!authoring/expander/verify-layout.mjs
+!authoring/playtest/fill-check.mjs
+!authoring/playtest/requirements-check.mjs
+# the blocking layout verifier (its checks are loaded from the folder; tests stay out)
+!authoring/verify/*.mjs
+!authoring/verify/checks/*.mjs
+authoring/verify/test-*.mjs
 **/*_test.go
 **/node_modules
 **/*.env

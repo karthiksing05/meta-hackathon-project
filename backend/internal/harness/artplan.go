@@ -165,4 +165,30 @@ func finishArt(plan *Plan, in PlanInput) {
 	if plan.Spec != nil && style != "" && plan.Spec.Theme.ArtStyle == "" {
 		plan.Spec.Theme.ArtStyle = style
 	}
+	fillThemeType(plan.Spec, in.Context.Understanding)
+}
+
+// fillThemeType fills spec.theme.type's empty parts: theme from the understanding's theme, genre from its
+// families, style from the art style. The look kit reads it to pick the game's fonts and palette.
+func fillThemeType(spec *Spec, u ContextUnder) {
+	if spec == nil {
+		return
+	}
+	t := spec.Theme.Type
+	if t == nil {
+		t = &ThemeType{}
+	}
+	if len(t.Theme) == 0 && len(u.Theme) > 0 {
+		t.Theme = append([]string{}, u.Theme...)
+	}
+	if len(t.Genre) == 0 && len(u.Families) > 0 {
+		t.Genre = append([]string{}, u.Families...)
+	}
+	if len(t.Style) == 0 && strings.TrimSpace(spec.Theme.ArtStyle) != "" {
+		t.Style = []string{strings.TrimSpace(spec.Theme.ArtStyle)}
+	}
+	if len(t.Theme) == 0 && t.Era == "" && len(t.Genre) == 0 && len(t.Style) == 0 {
+		return
+	}
+	spec.Theme.Type = t
 }

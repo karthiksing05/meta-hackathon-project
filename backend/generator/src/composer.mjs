@@ -144,6 +144,11 @@ export async function compose({ request, brief, base = null, remixOf = null, lev
     hooks = made.hooks;
     if (made.notes.length) console.log(JSON.stringify({ time: new Date().toISOString(), msg: 'compose hooks', notes: made.notes }));
   }
+  // The canvas: context.canvas ("tall" | "classic") wins, else GENERATOR_CANVAS (classic by default for now).
+  // GENERATOR_LAYOUT_BLOCK=1 refuses to publish a game the layout verifier still blocks on (context.layout_block).
+  const canvas = ['tall', 'classic'].includes(context?.canvas) ? context.canvas : (String(env.GENERATOR_CANVAS ?? '').trim().toLowerCase() === 'tall' ? 'tall' : 'classic');
+  const layoutBlock = context?.layout_block === true || (context?.layout_block === undefined && ['1', 'on', 'true', 'yes'].includes(String(env.GENERATOR_LAYOUT_BLOCK ?? '').trim().toLowerCase()));
+  context = { ...(context ?? {}), canvas, ...(layoutBlock ? { layout_block: true } : {}) };
   const out = await studio.compose({ request, brief, base, context }, ask, (e) => onEvent(JSON.parse(JSON.stringify(e))), hooks);
   // The art step paints what the plan's visual stage marked "image". New games only for now: a revision sends the
   // whole authoring manifest back through Muse, and painted images would ride along as base64. With

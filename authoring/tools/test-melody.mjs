@@ -176,21 +176,27 @@ console.log('engine');
       const heard = [];
       let t = 0;
       for (const step of script) {
-        if (step.tap) { g.frame(); g.pointer('down', step.tap[0], step.tap[1]); g.pointer('up', step.tap[0], step.tap[1]); }
+        // `tap`: the i-th full-width target from the top (the UI kit lays them out: the replay
+        // button first, then the answer tiles).
+        if (step.tap !== undefined) {
+          g.frame();
+          const t = g.hitTargets().filter((h) => h.w >= 200).sort((a, b) => a.y - b.y)[step.tap];
+          g.pointer('down', t.x + t.w / 2, t.y + t.h / 2); g.pointer('up', t.x + t.w / 2, t.y + t.h / 2);
+        }
         for (let i = 0; i < (step.wait || 0) / 50; i++) { g.step(50); t += 50; const f = g.frame(); for (const n of samples(f)) heard.push({ t, clip: n, qi: g.state().qi }); }
       }
       const out = { heard, status: g.status(), hash: g.stateHash(), state: g.state() };
       g.dispose();
       return out;
     };
-    const answerY = (k) => 300 + k * 72;
+    const answerY = (k) => 1 + k; // target index: 0 is the replay button
     // Wait for the first clip, replay twice (the third is refused), answer, wait for the next clip.
     const script = [
       { wait: 5600 }, // the first clip plays at 600 ms and lasts under 5 s
-      { tap: [180, 86], wait: 5000 },
-      { tap: [180, 86], wait: 5000 },
-      { tap: [180, 86], wait: 500 },
-      { tap: [180, answerY(0)], wait: 2000 },
+      { tap: 0, wait: 5000 },
+      { tap: 0, wait: 5000 },
+      { tap: 0, wait: 500 },
+      { tap: answerY(0), wait: 2000 },
       { wait: 2000 },
     ];
     const run = playOnce(7, text, script);

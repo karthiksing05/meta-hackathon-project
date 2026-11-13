@@ -266,5 +266,69 @@
       "The drop input has a guard (`when: not built`) and a Space key source; the tap target is a transparent full-canvas `rect`, so bots and people can always hit it."
     ],
     "themes": "baking bake off cake dessert food cooking stack tower tetris cozy"
+  },
+  {
+    "id": "gold_kit_arcade_bramble_basket",
+    "file": "authoring/games/gold_kit_arcade_bramble_basket.authoring.json",
+    "request": "a cute catching game where you move a basket to catch falling berries and avoid spiky things",
+    "design": {
+      "pitch": "Drag a willow basket across a sunny meadow to catch falling berries for 45 seconds, chase rare gold berries and dodge the spiky burrs.",
+      "theme": [
+        "Bramble Basket",
+        "berries",
+        "gold berries",
+        "burrs",
+        "willow basket",
+        "picnic meadow",
+        "streak"
+      ],
+      "verb": "Drag left and right to glide the basket under falling berries while avoiding burrs.",
+      "twist": "A catch streak multiplies berries (x2 from 6, x3 from 15) but any dropped berry or burr prick resets it, and burrs get more common as the 40-second difficulty curve rises.",
+      "arc": [
+        "0-10 s: slow berries, few burrs; the basket glides to your finger.",
+        "10-30 s: drops fall faster and burrs reach about a third of drops; banners call out each streak multiplier.",
+        "30-45 s: fast mixed rain; the clock turns red for the last 5 seconds and surviving wins."
+      ],
+      "lose": "Three burr pricks (three heart lives) end the picnic.",
+      "win": "Survive the 45-second clock. Score: 10 per berry times the streak multiplier, plus 40 more per gold berry.",
+      "juice": [
+        "Catch: violet particles and a pluck; a gold berry adds a gold burst and a sparkle.",
+        "Streak x2 and x3: an amber banner, a rising sound and a success haptic.",
+        "Burr prick: a red \"Ouch! Streak lost\" banner, particles, a shake and a crunch."
+      ],
+      "look": "A picnic meadow at golden hour: pale mint sky, rolling hills, a woven basket, violet berries, gold berries and brown burrs. Kit tokens: soft theme, leaf-green base, amber accent, rounded family. Font: Avenir Next.",
+      "voice": "Cheerful and short: \"Streak! Berries now x2\", \"Ouch! Streak lost\", \"A basket full of berries\"."
+    },
+    "brief": {
+      "intent": "Catch falling berries in a basket and dodge burrs",
+      "audience": "everyone, casual players",
+      "mood": [
+        "cute",
+        "playful"
+      ],
+      "energy": "medium",
+      "competition": "high score"
+    },
+    "genre": "catcher / dodge arcade",
+    "fragments_used": [
+      "player_drag",
+      "score",
+      "lives",
+      "countdown",
+      "collide",
+      "difficulty_curve"
+    ],
+    "why_its_good": [
+      "Built on the UI kit (`ui: game-style/1`): the HUD is a kit bar of three chips drawn by the fragments (score, heart lives, the countdown that turns red), the streak calls are kit `banner`s and the end is a kit `result_card`. Only the real actors (berries, burrs, the basket) have coordinates, and they spawn at y 96, inside the playfield under the HUD bar.",
+      "Skill shows: the streak multiplier rewards clean play and burrs ramp up with `difficulty_curve`; bots scored 280 to 1,080 and two of five lost.",
+      "Berries and burrs are one `drops` list drawn by two `repeat`s (berries use frame 1 for gold), so spawning, falling and removal stay in three short rules."
+    ],
+    "pitfalls_avoided": [
+      "No floating \"+10\" text nodes: run-time text in hand-made boxes overflows; the kit banner fits its text.",
+      "The score fragment's `point` is emitted by the game (it has no payload), not bound to the `caught {x, y, gold}` event, which would be a payload mismatch.",
+      "Rules never read `status` (presentation only); the spawn rule just runs every 480 ms.",
+      "Burr hits go through `collide`, which gives grace, particles and the life loss; the game only removes the burr near `hit_at`."
+    ],
+    "themes": "catch falling fruit basket berries dodge picnic garden cute casual drag catcher"
   }
 ]

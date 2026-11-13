@@ -25,9 +25,18 @@ function rendererSource() {
   return readFileSync(file, 'utf8').replace(/^import[^\n]*\n/gm, '').replace(/^export\s+/gm, '');
 }
 
+// The game fonts the app bundles (FacebookClone/Bubbles/Runtime/web/game-fonts.css), with the
+// font files addressed by absolute path, so frames are measured and drawn in the fonts a player sees.
+function fontCss() {
+  const web = resolve(here, '../../FacebookClone/Bubbles/Runtime/web');
+  const file = join(web, 'game-fonts.css');
+  if (!existsSync(file)) return '';
+  return readFileSync(file, 'utf8').replace(/url\("([^"/]+\.woff2)"\)/g, (_, f) => `url("file://${join(web, f)}")`);
+}
+
 function pageHtml(data) {
   const json = JSON.stringify(data).replace(/</g, '\\u003c');
-  return `<!doctype html><html><head><meta charset="utf-8"></head><body><pre id="out">pending</pre><script>
+  return `<!doctype html><html><head><meta charset="utf-8"><style>${fontCss()}</style></head><body><pre id="out">pending</pre><script>
 function rgbaToCss(c){c=c>>>0;const a=(c&255)/255;return 'rgba('+(c>>>24)+','+((c>>>16)&255)+','+((c>>>8)&255)+','+(+a.toFixed(3))+')'}
 ${rendererSource()}
 const D=${json};
@@ -49,7 +58,9 @@ function inkBox(o,widths){const lines=o.text.split('\\n');const lh=o.line_height
  const y0=o.valign==='top'?o.y:o.valign==='bottom'?o.y+o.h-blockH:o.y+(o.h-blockH)/2;const pad=(lh-o.size)/2;
  let b={x0,y0:y0+pad,x1:x0+w,y1:y0+blockH-pad};const s=o.scale??1;if(s!==1){const cx=o.x+o.w/2,cy=o.y+o.h/2;
  b={x0:cx+(b.x0-cx)*s,y0:cy+(b.y0-cy)*s,x1:cx+(b.x1-cx)*s,y1:cy+(b.y1-cy)*s}}return b}
-(async()=>{const assets=await loadAssets(D.assets);const out=[];
+async function loadFonts(frames){const want=new Set();for(const f of frames)for(const o of f.ops)if(o.op==='text'&&o.font&&o.font!=='system')want.add((o.weight||400)+' 16px "'+String(o.font).replace(/"/g,'')+'"');
+ await Promise.all([...want].map(s=>document.fonts.load(s).catch(()=>null)))}
+(async()=>{await loadFonts(D.frames);const assets=await loadAssets(D.assets);const out=[];
  const mc=canvas(8,8).getContext('2d');
  for(const F of D.frames){const f=decode(F);const W=f.width,H=f.height;const r={texts:[]};
   // Backdrop: every op except text.

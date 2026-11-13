@@ -50,7 +50,8 @@ ok(C.pickCanvas('tall').h === 780 && C.pickCanvas(undefined).h === 640 && C.pick
   const g0 = legacy.game ?? legacy.out, g1 = tall.game ?? tall.out;
   ok(g0?.presentation?.canvas?.h === 640, 'expander default stays 640', g0?.presentation?.canvas);
   ok(g1?.presentation?.canvas?.h === 780, 'look.canvas tall gives 780', g1?.presentation?.canvas);
-  const hudY = (g) => g?.presentation?.root?.children?.find((c) => c.children?.some((k) => k.node === 'text'))?.y;
+  // The HUD text's canvas y (the UI kit places it inside its HUD bar, in absolute coordinates).
+  const hudY = (g) => { const grp = g?.presentation?.root?.children?.find((c) => c.children?.some((k) => k.node === 'text')); const t = grp?.children?.find((k) => k.node === 'text'); return grp && t ? (grp.y ?? 0) + (t.y ?? 0) : undefined; };
   ok(hudY(g1) >= 110 && hudY(g1) <= 150 && hudY(g0) < 60, 'tall HUD stack in the HUD band', [hudY(g0), hudY(g1)]);
 }
 

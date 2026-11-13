@@ -223,5 +223,42 @@ async function compose(args, reply) {
   ok(fixCalls === 0 && off.stats.layoutFixes === undefined, 'layout_fix false: no fixes');
 }
 
+{ // the blocking verifier (expander/verify-layout.mjs) through hooks.verifyLayout, no Chrome; the canvas switch
+  const { verifyLayout } = await import('../expander/verify-layout.mjs');
+  const { fixLayout } = await import('../expander/layout-fix.mjs');
+  let fixCalls = 0, verifyCalls = 0;
+  const hooks = { fixLayout: (g, o) => { fixCalls++; return fixLayout(g, { ...o, pixels: false }); }, verifyLayout: (g, o) => { verifyCalls++; return verifyLayout(g, { ...o, pixels: false, measures: null }); } };
+  const events = [];
+  const ask = async (s, u, purpose) => ({ content: JSON.stringify(/score review/.test(purpose) ? { ok: true, issues: [] } : tide), model: 'fake' });
+  const out = JSON.parse(await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: SAMPLES.dodge }), ask, (e) => events.push(e), hooks));
+  const kinds = events.map((e) => e.kind);
+  ok(verifyCalls >= 1 && fixCalls === 0 && out.stats.layout?.verifier === true && typeof out.stats.layoutVerifyMs === 'number' && !out.stats.layoutVerifyError, `the verifier replaces fixLayout (${verifyCalls} runs, ${out.stats.layoutVerifyMs} ms${out.stats.layoutVerifyError ? `, ${out.stats.layoutVerifyError}` : ''})`);
+  ok(kinds.indexOf('verifying') >= 0 && kinds.lastIndexOf('verified') < kinds.indexOf('playtesting') && events.some((e) => e.kind === 'verified' && /Layout/.test(e.summary)), `verifying and verified come before the gate (${kinds.join(', ')})`);
+  ok(out.stats.layoutBlocking === out.stats.layout.blocking && out.gate.passed, `a passing game ships with its layout report (${out.stats.layout.blocking} blocking)`);
+  // The fixed presentation reaches both copies: a hook that moves one node; the playtest copy gets it too.
+  const moving = { verifyLayout: async (g) => { const game = JSON.parse(g); game.presentation.__moved = true; return { game_json: JSON.stringify(game), fixes: [{ stage: 'solver' }], reverted: false, report: { pass: true, blocking: 0, warnings: 0, findings: [] } }; } };
+
+  const moved = JSON.parse(await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: SAMPLES.dodge }), ask, () => {}, moving));
+  const gated = JSON.parse(moved.manifest.content.game_json);
+  ok(gated.presentation.__moved === true && moved.stats.layoutFixes === 1, 'the fixed presentation goes into game_json');
+  const reverted = JSON.parse(await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: SAMPLES.dodge }), ask, () => {}, { verifyLayout: async (g) => ({ ...(await moving.verifyLayout(g)), reverted: true }) }));
+  ok(!JSON.parse(reverted.manifest.content.game_json).presentation.__moved, 'a reverted fix is not applied');
+  // layout_block: a verifier that always blocks gets repair rounds with its hints, then the game is refused.
+  const blocker = { verifyLayout: async (g) => ({ game_json: g, fixes: [], reverted: false, report: { pass: false, blocking: 2, warnings: 0, findings: [{ code: 'L_TEXT_ON_SPRITE', severity: 'block', node: '/presentation/a', message: 'label on a sprite', hint: 'move the label off the sprite' }] } }) };
+  const users = [];
+  const askB = async (s, u, purpose) => { users.push({ u, purpose }); return ask(s, u, purpose); };
+  const shipped = JSON.parse(await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: SAMPLES.dodge }), askB, () => {}, blocker));
+  ok(shipped.stats.layoutBlocking === 2 && shipped.stats.layoutRepairs >= 1 && users.some((x) => /layout repair/.test(x.purpose) && x.u.includes('move the label off the sprite')), `layout repair rounds carry the hints, then it ships with layout_block off (${shipped.stats.layoutRepairs} rounds)`);
+  let refused = null;
+  try { await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: { ...SAMPLES.dodge, layout_block: true } }), ask, () => {}, blocker); } catch (e) { refused = e; }
+  ok(refused && /blocking/.test(String(refused.message)), `layout_block true refuses it (${refused?.message})`);
+  // The canvas: context.canvas "tall" expands at 360 × 780 and the system prompt says so.
+  const prompts = [];
+  const askT = async (s, u, purpose) => { prompts.push(s); return ask(s, u, purpose); };
+  const tall = JSON.parse(await B.compose(JSON.stringify({ request: 'tap the shells', brief: { intent: 'x' }, polish: false, context: { ...SAMPLES.dodge, canvas: 'tall' } }), askT, () => {}));
+  ok(JSON.parse(tall.manifest.content.game_json).presentation.canvas.h === 780 && prompts[0].includes('360 × 780') && !prompts[0].includes('The canvas is 360 × 640'), 'canvas tall: built at 360 × 780, prompt says so');
+  ok(JSON.parse(out.manifest.content.game_json).presentation.canvas.h === 640 && P.system(catalog, {}).includes('The canvas is 360 × 640'), 'canvas classic by default');
+}
+
 console.log(`${passed} passed, ${failed} failed`);
 process.exit(failed ? 1 : 0);

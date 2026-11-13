@@ -185,87 +185,13 @@
   },
   "presentation": {
     "slots": [
-      {
-        "slot": "playfield",
-        "include": "@art.still",
-        "node": {
-          "node": "group",
-          "visible": "= sg_pic(@stills, scene) >= 0",
-          "animate_on": { "choice_made": { "prop": "opacity", "keys": [0, 1], "ms": 450 } },
-          "children": [
-            { "node": "rect", "x": 17, "y": "= @still_y - 85", "w": 326, "h": 170, "radius": 14, "fill": "$surface", "stroke": "$accent", "stroke_width": 3 },
-            { "node": "image", "asset": "@art.still.id", "frame": "= max(0, sg_pic(@stills, scene))", "anchor": "center", "x": 180, "y": "@still_y", "w": 320, "h": 164 }
-          ]
-        }
-      },
-      {
-        "slot": "playfield",
-        "include": "@art.portrait",
-        "node": {
-          "node": "group",
-          "visible": "= sg_pic(@cast_at, scene) >= 0",
-          "animate_on": { "choice_made": { "prop": "scale", "keys": [0.85, 1.08, 1], "ms": 380 } },
-          "children": [
-            { "node": "circle", "x": "@portrait_x", "y": "@portrait_y", "r": "= @portrait_size / 2.0 + 4.0", "fill": "$surface", "stroke": "$primary", "stroke_width": 3 },
-            { "node": "image", "asset": "@art.portrait.id", "frame": "= max(0, sg_pic(@cast_at, scene))", "anchor": "center", "x": "@portrait_x", "y": "@portrait_y", "w": "@portrait_size", "h": "@portrait_size" }
-          ]
-        }
-      },
-      {
-        "slot": "hud_top",
-        "include": "@limit > 0",
-        "node": {
-          "node": "text", "size": 15, "weight": 700, "color": "$ink", "role": "hud",
-          "text": "= if sg_end >= 0 then str(sg_used) + ' of ' + str(@limit) else 'Choice ' + str(min(sg_used + 1, @limit)) + ' of ' + str(@limit)",
-          "animate_on": { "choice_made": { "prop": "scale", "keys": [1, 1.2, 1], "ms": 280 } }
-        }
-      },
-      {
-        "slot": "hud_top",
-        "node": {
-          "node": "text", "size": 15, "weight": 600, "color": "$ink", "role": "hud",
-          "text": "= sg_stats_text()"
-        }
-      },
-      {
-        "slot": "hud_bottom",
-        "node": {
-          "node": "text", "size": 14, "weight": 500, "color": "$ink", "opacity": 0.85,
-          "text": "= sg_bag_text()"
-        }
-      },
-      {
-        "slot": "playfield",
-        "node": {
-          "node": "text", "x": 180, "y": "@place_y", "anchor": "center", "size": 13, "weight": 700, "color": "$accent",
-          "text": "= upper(get_or(sg_place, scene, ''))",
-          "opacity": "= if now - sg_note_at < 2400 then 0.0 else 1.0",
-          "transition": { "opacity": { "ms": 250, "ease": "out" } }
-        }
-      },
-      {
-        "slot": "playfield",
-        "node": {
-          "node": "text", "x": 180, "y": "@place_y", "anchor": "center", "size": 15, "weight": 700, "color": "$primary",
-          "text": "= sg_note_text",
-          "opacity": "= if now - sg_note_at < 2400 then 1.0 else 0.0",
-          "transition": { "opacity": { "ms": 250, "ease": "out" } }
-        }
-      },
-      {
-        "slot": "playfield",
-        "node": {
-          "node": "group",
-          "visible": "= sg_end >= 0",
-          "animate_on": { "ending_reached": { "prop": "opacity", "keys": [0, 0, 1], "ms": 900 } },
-          "children": [
-            { "node": "text", "x": 180, "y": "= @card_y", "anchor": "center", "size": 13, "weight": 700, "color": "$accent", "text": "= upper(get_or(sg_end_tag, max(sg_end, 0), ''))" },
-            { "node": "text", "x": 180, "y": "= @card_y + 32", "anchor": "center", "size": 23, "weight": 700, "color": "$primary", "text": "= get_or(sg_end_title, max(sg_end, 0), '')" },
-            { "node": "text", "x": 180, "y": "= @card_y + 68", "anchor": "center", "size": 15, "weight": 600, "color": "$ink", "text": "= sg_share_line" },
-            { "node": "text", "x": 180, "y": "= @card_y + 96", "anchor": "center", "size": 13, "weight": 500, "color": "$ink", "opacity": 0.7, "text": "= str(sg_score()) + ' points'" }
-          ]
-        }
-      }
+      {"slot":"playfield","include":"@art.still","node":{"node":"group","visible":"= sg_pic(@stills, scene) >= 0","animate_on":{"choice_made":{"prop":"opacity","keys":[0,1],"ms":450}},"children":[{"node":"rect","x":17,"y":"= @still_y - 85","w":326,"h":170,"radius":14,"fill":"$surface","stroke":"$accent","stroke_width":3},{"node":"image","asset":"@art.still.id","frame":"= max(0, sg_pic(@stills, scene))","anchor":"center","x":180,"y":"@still_y","w":320,"h":164}]}},
+      {"slot":"playfield","include":"@art.portrait","node":{"node":"group","visible":"= sg_pic(@cast_at, scene) >= 0","animate_on":{"choice_made":{"prop":"scale","keys":[0.85,1.08,1],"ms":380}},"children":[{"node":"circle","x":"@portrait_x","y":"@portrait_y","r":"= @portrait_size / 2.0 + 4.0","fill":"$surface","stroke":"$primary","stroke_width":3},{"node":"image","asset":"@art.portrait.id","frame":"= max(0, sg_pic(@cast_at, scene))","anchor":"center","x":"@portrait_x","y":"@portrait_y","w":"@portrait_size","h":"@portrait_size"}]}},
+      {"slot":"hud_top","include":"@limit > 0","node":{"ui":"stat","label":"Choice","value":"= if sg_end >= 0 then str(sg_used) + ' / ' + str(@limit) else str(min(sg_used + 1, @limit)) + ' / ' + str(@limit)","color":"$ink","animate_on":{"choice_made":{"prop":"scale","keys":[1,1.2,1],"ms":280}}}},
+      {"slot":"hud_top","node":{"node":"text","size":15,"weight":600,"color":"$ink","role":"hud","text":"= sg_stats_text()"}},
+      {"slot":"hud_bottom","node":{"node":"text","size":14,"weight":500,"color":"$ink","opacity":0.85,"text":"= sg_bag_text()"}},
+      {"slot":"playfield","node":{"ui":"text","order":-1,"step":"label","lines":1,"tone":"accent","text":"= if now - sg_note_at < 2400 then sg_note_text else upper(get_or(sg_place, scene, ''))"}},
+      {"slot":"overlay","node":{"ui":"result_card","visible":"= sg_end >= 0","eyebrow":"= upper(get_or(sg_end_tag, max(sg_end, 0), ''))","title":"= get_or(sg_end_title, max(sg_end, 0), '')","score":"= str(sg_score()) + ' points'","line":"= sg_share_line","animate_on":{"ending_reached":{"prop":"opacity","keys":[0,0,1],"ms":900}}}}
     ],
     "feedback": [
       { "on": "choice_made", "when": "sg_note_at == now", "do": [ { "moment": "pickup" }, { "haptic": "light" } ] },
