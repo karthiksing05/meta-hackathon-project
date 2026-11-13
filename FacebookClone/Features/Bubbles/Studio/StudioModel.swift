@@ -280,6 +280,7 @@ final class StudioModel {
             stage = .tryIt
             focusTweak = true
         }
+        loadSavedAnatomy()
         isReady = true
 
         #if DEBUG

@@ -139,6 +139,7 @@ struct StudioView: View {
                 return
             }
             GameSound.play(.publish, haptic: true)
+            model.saveAnatomy(gameIDs: [outcome.bubbleID] + model.levels.map(\.manifest.id))
             model.stopAll()
             // Open the new Bubble underneath first, so closing Studio reveals it.
             router.selectedTab = .bubbles

@@ -105,12 +105,13 @@ final class StudioAnatomyThread {
     }
 
     /// Sets a ready-made anatomy (DEBUG screenshots).
-    func load(_ anatomy: GameAnatomy, request: String) {
+    /// Sets an anatomy agreed earlier: a saved game's (`fixtures` false) or a DEBUG fixture.
+    func load(_ anatomy: GameAnatomy, request: String, fixtures: Bool = true) {
         task?.cancel()
         self.request = request
         self.anatomy = anatomy
         isWorking = false
-        usesFixtures = true
+        usesFixtures = fixtures || prefersFixtures
         note = nil
     }
 
@@ -318,10 +319,15 @@ extension StudioModel {
     /// New games get the anatomy conversation; edits, remixes, levels and Dailies keep their base.
     var usesAnatomy: Bool { mode == .create }
 
-    /// The agreed anatomy for the build, when there is one.
+    /// The agreed anatomy for the build, when there is one (new games, and remixes of a game that
+    /// has one).
     var agreedAnatomyText: String? {
-        usesAnatomy ? anatomyThread.agreedText : nil
+        anatomyThread.agreedText
     }
+
+    /// "How the game works" shows on the Brief step for new games, and for remixes that carry
+    /// their base's anatomy.
+    var showsAnatomyCard: Bool { usesAnatomy || anatomyThread.anatomy != nil }
 
     /// Starts Muse on the anatomy when the request is new (going back to Describe and on again
     /// with the same words keeps the person's edits).
@@ -333,7 +339,33 @@ extension StudioModel {
     }
 
     /// The Try step's "Change the game" thread shows once there is an anatomy to change.
-    var showsAnatomyChat: Bool { usesAnatomy && anatomyThread.anatomy != nil }
+    var showsAnatomyChat: Bool { anatomyThread.anatomy != nil }
+
+    /// Edit, Remix and the next level start from the base game's saved anatomy.
+    func loadSavedAnatomy() {
+        guard let base = baseBubble, let record = MakeRecordStore.shared.record(for: base.id),
+              let text = record.anatomyJSON, let value = try? JSONValue.parse(text),
+              let anatomy = GameAnatomy.decode(value) else { return }
+        anatomyThread.load(anatomy, request: record.anatomyRequest ?? base.manifest.brief.intent, fixtures: false)
+    }
+
+    /// Saves the agreed anatomy with each game Studio just shared or saved (its make record).
+    func saveAnatomy(gameIDs: [String]) {
+        guard let anatomy = anatomyThread.anatomy else { return }
+        let text = anatomy.json.jsonString()
+        let store = MakeRecordStore.shared
+        for id in Set(gameIDs) {
+            guard let bubble = bubbleStore?.bubble(id: id) else { continue }
+            var record = store.record(for: id) ?? MakeRecord.build(
+                gameID: id, events: [], reports: [:], isMicrogame: bubble.formula == .microgame,
+                concepts: bubble.manifest.conceptIDs, models: bubble.manifest.studio?.models ?? [],
+                seconds: bubble.manifest.studio?.durationSec, isOffline: bubble.manifest.studio?.offline ?? false, sourcesUsed: []
+            )
+            record.anatomyJSON = text
+            record.anatomyRequest = anatomyThread.request
+            store.save(record)
+        }
+    }
 
     /// Makes a mapped change: the updated anatomy becomes the agreed one and the tweak path
     /// rebuilds the game with it.

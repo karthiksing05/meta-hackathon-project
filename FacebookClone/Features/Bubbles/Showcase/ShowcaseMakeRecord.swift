@@ -72,6 +72,11 @@ struct MakeRecord: Codable, Hashable, Sendable {
     /// Where it was shared ("your feed", "New in SF").
     var sharedTo: String?
     var madeAt: Date = Date()
+    /// The agreed game anatomy (`GameAnatomy.json`, as text) and the request it was agreed for, so
+    /// Edit, Remix and the next level keep "Change the game" (docs/BUBBLES.md 7.13). Nil for games
+    /// made without one.
+    var anatomyJSON: String?
+    var anatomyRequest: String?
 }
 
 extension MakeRecord {

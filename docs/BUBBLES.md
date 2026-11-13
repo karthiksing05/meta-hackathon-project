@@ -1686,6 +1686,10 @@ game in the request's theme).
   onto the anatomy (Muse's reply, the updated parts, anything new to Muse); "Make the change" makes the
   updated anatomy the agreed one and runs the usual tweak (`startCompose(.tweak, text:)`) with the person's
   words, what changes and the updated anatomy. The last 6 turns stay visible.
+- *Saved with the game*: on share or save, the agreed anatomy goes into the game's make record on this
+  device (`MakeRecord.anatomyJSON` and `anatomyRequest`; the manifest is unchanged). Edit, Remix and the
+  next level load it (`StudioModel.loadSavedAnatomy`), so they keep "Change the game", and a remix shows
+  and builds with its base's anatomy. Friends' devices don't have it.
 
 **Themes and brands.** A theme, franchise or brand the person asks for ("Star Wars") is honored in names,
 art and words; Muse doesn't add ones they didn't ask for. Mechanics stay original to their idea, no specific

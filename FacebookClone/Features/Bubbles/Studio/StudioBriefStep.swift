@@ -12,7 +12,7 @@ struct StudioBriefStep: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: FBSpacing.l) {
                     StudioMuseSaysCard(model: model)
-                    if model.usesAnatomy {
+                    if model.showsAnatomyCard {
                         StudioAnatomyCard(thread: model.anatomyThread)
                             .id("anatomy")
                     }
