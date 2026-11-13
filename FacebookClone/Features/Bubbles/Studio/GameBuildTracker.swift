@@ -216,7 +216,10 @@ final class GameBuildTracker {
 
     /// Removes a build from the dock (a failed one; ready games are kept until opened).
     func dismiss(_ buildID: UUID) {
-        if let model = models[buildID] { model.stopAll() }
+        if let model = models[buildID] {
+            model.stopAll()
+            model.discardDrafts()
+        }
         forget(buildID)
     }
 
@@ -555,7 +558,9 @@ final class GameBuildTracker {
         case .expanding: return "Muse is building it…"
         case .repairing: return "Muse is fixing a few things…"
         case .playtesting: return "Muse is playtesting…"
-        case .playtested, .done: return "Muse is polishing…"
+        case .polishing, .playtested, .done: return "Muse is polishing…"
+        case .scoreChecking, .scoreReviewing, .scoreRepairing, .scoreChecked: return "Muse is checking the scoring…"
+        case .painting, .painted: return "Muse is drawing the art…"
         case .failed, .other: return "Muse is working on it…"
         }
     }
@@ -566,7 +571,10 @@ final class GameBuildTracker {
         case .expanding: return 0.4
         case .repairing: return 0.55
         case .playtesting: return 0.72
-        case .playtested: return 0.88
+        case .scoreChecking, .scoreReviewing, .scoreRepairing, .scoreChecked: return 0.8
+        case .playtested: return 0.85
+        case .painting, .painted: return 0.9
+        case .polishing: return 0.94
         case .done: return 1
         case .failed, .other: return 0.1
         }
@@ -615,9 +623,9 @@ struct TrackedGameGenerator: GameGenerator {
 
     var pollInterval: TimeInterval { inner.pollInterval }
 
-    func start(request: String, brief: BubbleBrief) async throws -> String {
+    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?) async throws -> String {
         if let jobID = await tracker.takeResumeJob(for: key) { return jobID }
-        let jobID = try await inner.start(request: request, brief: brief)
+        let jobID = try await inner.start(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound)
         await tracker.jobStarted(jobID, key: key)
         return jobID
     }
@@ -636,6 +644,14 @@ struct TrackedGameGenerator: GameGenerator {
     func cancel(id: String) async {
         await tracker.jobCancelled(id)
         await inner.cancel(id: id)
+    }
+
+    func publish(gameID: String) async throws {
+        try await inner.publish(gameID: gameID)
+    }
+
+    func discard(gameID: String) async {
+        await inner.discard(gameID: gameID)
     }
 
     func manifest(for game: RemoteGame) async throws -> BubbleManifest {
