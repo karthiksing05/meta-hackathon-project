@@ -70,6 +70,8 @@ treat the exact shapes as the first version and change them together with the cl
 | `POST /v1/creations/{id}/publish`, `DELETE /v1/creations/{id}` | bearer (owner) | list a draft in the feed, search and its Group; delete a game with its saves and scores (the files stay on the games host under their unguessable id) |
 | `GET /v1/sounds?tab=trending\|for_you\|saved\|recent&q=`, `GET /v1/sounds/{id}`, `GET /v1/sounds/{id}/games?sort=top\|recent`, `PUT\|DELETE /v1/sounds/{id}/save`, `POST /v1/sounds` | optional / bearer | the sound library: loops that play behind games (see [Sounds](#sounds)) |
 | `PUT\|DELETE /v1/games/{id}/sound` | bearer (owner) | put a sound behind a game `{soundId, offsetMs?, mix?}`, or take it off |
+| `PUT /v1/creations/{id}` | bearer (owner) | a new build of your own game as `application/zip`: keeps the id, likes, plays, scores, sound and sponsor; takes the title, rule, tags, score model, `group_play` and files from the new package (send the same score model or the board re-ranks). The old files stay on the games host, unlinked |
+| `POST /v1/rounds`, `GET /v1/rounds`, `GET /v1/rounds/{id}`, `POST /v1/rounds/{id}/plays`, `GET /v1/games/{id}/agreement` | bearer | same-seed rounds in a chat or a Group, and how opinion games compare (see [Rounds](#rounds-same-seed-play-in-a-chat-or-a-group)) |
 | `POST /v1/series`, `GET /v1/series`, `GET /v1/series/{id}`, `POST /v1/series/{id}/rounds/{n}` | bearer | best-of-N with a friend on the same games and seeds; scores come from replaying the run's input log in the engine (see [Series](#series)) |
 
 Scores are whole numbers (a fractional score is rejected). A manifest `id` that is a lowercase slug
@@ -175,6 +177,20 @@ A best-of-N between two friends. `POST /v1/series {opponentId, games: [gameId, .
 The phone derives the engine's seed from the round's seed, so `log.seed` is not the round's `seed`. The first run on a round fixes the engine seed and the second must match it. A round is decided when both have played: the higher score wins, a
 tie goes to the lower `time_ms`, otherwise it is a draw. The series ends when someone has won more than half the rounds or every round is decided. You can't see the other player's score for a round until you have played it. A friend starting a series, and a
 friend playing a round, show up in `GET /v1/me/moments` as `series_invited` and `series_round`.
+
+## Rounds: same-seed play in a chat or a Group
+
+Group play has no live multiplayer and no server chats. Someone sends a game into a chat thread or a Group; everyone plays the same single-player run on the server's seed whenever they like; the results compare afterwards. The round keeps its own result lines, so it is the thread.
+
+- A game's `group_play` (the manifest's top-level block) is stored on the game and returned as `group_play` on `GET /v1/games/{id}` and in every game view: `{mode, modes, round_seconds, result: {kind, compare, display, endings?, state?}, share_line, best_of?, same_seed}`. `compare` is `score`, `ending`, `agreement` or `none`. The app reads it to know what Send starts.
+- `POST /v1/rounds {gameId, target: {kind: "chat"|"group", id}, members?: [userId], mode?}` starts a round. A chat round needs `members` (friends of yours, up to 20 people with you). A Group round needs you in the Group; with no `members` it is the whole Group. `mode` defaults to the game's. `series` is refused: a best-of is `POST /v1/series`. The server picks the `seed` and sets `length` from `group_play.round_seconds`.
+- `POST /v1/rounds/{id}/plays {log}` takes a run's input log (as for a series round). It is replayed in the engine against the game's exact text, so only the replayed score, time and end state count. The first run fixes the engine seed and every later run must match it. A member can play once. The play appends a line to `lines`: the game's `share_line` filled with `{name}`, `{title}`, `{result}`, `{score}`, `{ending}`, `{choices}`, with `{result}` from `group_play.result.display`. Only the end-state variables named in `group_play.result.state` are kept, as `result` on the play.
+- `GET /v1/rounds/{id}` (members only; a stranger gets 404) and `GET /v1/rounds?target=chat:<id>|group:<id>` (no `target`: the rounds you are in). A round ends when everyone has played or 24 hours (`closesAt`) after it started; `finished` and `winnerId` are set then. `order` is everyone who played, best first: by the game's score model (direction, `counts_when`, tie-break), or for `compare: "ending"` by the ending's place in `endings` (best first) and then the score. A tie for first has no `winnerId`. An opinion game (`compare: "agreement"`) has no `order` and no winner; each player sees `agreement`, their match with each other player (0 to 100).
+- Moments (`GET /v1/me/moments`): `round_started` (someone started one with you), `round_played` (a member played) and `round_finished`.
+
+`GET /v1/games/{id}/agreement` compares picks in an opinion game: `?with=<friendId>`, `?scope=friends` or `?scope=group&groupId=<id>`. It returns `{agreement: 0-100, players, items: [{item, mine, group, share}]}`, built from each person's latest replay-checked `picks` in their rounds. `group` is the most common pick among the others and `share` the share of the others who picked what you did. It answers 409 until you and someone else have each played a round of the game, 422 for a game whose result is not picks.
+
+`POST /v1/generate` also takes `spec` (a game-spec/1 from `POST /v1/harness/plan`: the server uses it as the plan and does not plan again) and `answers` (`{slot: answer}` for the plan's clarifying questions; they replace the planner's guesses). Both are for new games only.
 
 ## Ranking (the recommender runs here)
 

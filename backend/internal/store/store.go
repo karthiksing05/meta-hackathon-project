@@ -52,6 +52,9 @@ type Store interface {
 	DeleteRefresh(ctx context.Context, hash string) error
 
 	InsertGame(ctx context.Context, g *model.Game) error
+	// ReplaceGameContent swaps what a package holds (files, title, rule, tags, score model, group_play, ...) on an existing
+	// game and keeps its id, owner, likes, plays, scores, sound, sponsor and draft state.
+	ReplaceGameContent(ctx context.Context, g *model.Game) error
 	GameByID(ctx context.Context, id string) (*model.Game, error)
 	GameBySlug(ctx context.Context, slug string) (*model.Game, error)
 	AllGames(ctx context.Context, limit int) ([]model.Game, error) // newest first
@@ -107,6 +110,14 @@ type Store interface {
 	AddSoundUse(ctx context.Context, soundID string, delta int64) error
 	SetGameSound(ctx context.Context, gameID string, gs *model.GameSound) error // nil takes the sound off
 	GamesBySound(ctx context.Context, soundID, order string, limit int) ([]model.Game, error)
+
+	// Rounds: a game, a seed and a set of people who each play it on their own time (chat or Group).
+	InsertRound(ctx context.Context, r *model.Round) error
+	RoundByID(ctx context.Context, id string) (*model.Round, error)
+	ReplaceRound(ctx context.Context, r *model.Round) error
+	RoundsForUser(ctx context.Context, userID string, limit int) ([]model.Round, error) // newest first
+	RoundsForTarget(ctx context.Context, kind, id string, limit int) ([]model.Round, error)
+	RoundsForGame(ctx context.Context, gameID string, limit int) ([]model.Round, error)
 
 	// Series: best-of-N between two friends with server-checked scores.
 	InsertSeries(ctx context.Context, s *model.Series) error

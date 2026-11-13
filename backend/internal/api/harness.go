@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sort"
 	"strings"
 	"time"
 
@@ -36,10 +37,27 @@ func (s *Server) harnessContext(ctx context.Context, job model.Job) map[string]a
 	if !s.HarnessContext || s.Harness == nil || s.Planner == nil || job.BaseGameID != "" || len(job.Context) > 0 {
 		return nil
 	}
+	var given *harness.Spec
+	if job.Spec != "" {
+		given = new(harness.Spec)
+		if json.Unmarshal([]byte(job.Spec), given) != nil {
+			given = nil
+		}
+	}
 	log := s.Log.With("job", job.ID)
 	ctx, cancel := context.WithTimeout(ctx, harnessBudget)
 	defer cancel()
-	b, err := s.Harness.Build(ctx, harness.Request{Text: job.Request}, s.Planner)
+	var b *harness.Built
+	var err error
+	if given != nil {
+		b, err = s.Harness.BuildGiven(ctx, harness.Request{Text: job.Request}, given)
+	} else {
+		b, err = s.Harness.Build(ctx, harness.Request{Text: job.Request}, s.Planner)
+	}
+	if err == nil && len(job.Answers) > 0 && b.Plan != nil {
+		foldAnswers(b.Plan, job.Answers)
+		err = harness.AttachPlan(&b.Context, b.Plan)
+	}
 	if err != nil {
 		log.Warn("harness: no context for this job", "err", err)
 		return nil
@@ -102,4 +120,73 @@ func (s *Server) harnessPlan(w http.ResponseWriter, r *http.Request) {
 		"timings": map[string]int64{"understand_ms": timings.Understand, "retrieve_ms": timings.Retrieve,
 			"lookup_ms": timings.Lookup, "plan_ms": b.PlanMs, "total_ms": timings.Total},
 	})
+}
+
+const (
+	maxSpecBytes   = 32 << 10
+	maxAnswers     = 12
+	maxAnswerChars = 300
+)
+
+// checkSpecAnswers validates the optional spec and answers on a generate request (a new game only). It returns the
+// spec as JSON text, the cleaned answers, or a message for a 400.
+func checkSpecAnswers(in *generateIn, isChange bool) (string, map[string]string, string) {
+	hasSpec := len(in.Spec) > 0 && string(in.Spec) != "null"
+	if !hasSpec && len(in.Answers) == 0 {
+		return "", nil, ""
+	}
+	if isChange {
+		return "", nil, "spec and answers are for a new game, not a change"
+	}
+	var specJSON string
+	if hasSpec {
+		if len(in.Spec) > maxSpecBytes {
+			return "", nil, "spec is too large"
+		}
+		var sp harness.Spec
+		if err := json.Unmarshal(in.Spec, &sp); err != nil {
+			return "", nil, "spec is not a game-spec/1"
+		}
+		if problems, _ := sp.Validate(); len(problems) > 0 {
+			return "", nil, "spec is not usable: " + problems[0]
+		}
+		fixed, _ := json.Marshal(sp) // Validate may have repaired it; keep the repaired one
+		specJSON = string(fixed)
+	}
+	answers := map[string]string{}
+	for k, v := range in.Answers {
+		k, v = strings.TrimSpace(k), strings.TrimSpace(v)
+		if k == "" || v == "" {
+			continue
+		}
+		if len(answers) >= maxAnswers || len([]rune(k)) > 40 || len([]rune(v)) > maxAnswerChars {
+			return "", nil, fmt.Sprintf("answers: up to %d, a slot name up to 40 and an answer up to %d characters", maxAnswers, maxAnswerChars)
+		}
+		answers[k] = v
+	}
+	if len(answers) == 0 {
+		answers = nil
+	}
+	return specJSON, answers, ""
+}
+
+// foldAnswers puts the person's answers into the plan's clarify slots: an answered slot is no longer a guess.
+func foldAnswers(p *harness.Plan, answers map[string]string) {
+	done := map[string]bool{}
+	for i := range p.Clarify {
+		if v, ok := answers[p.Clarify[i].Slot]; ok {
+			p.Clarify[i].Value, p.Clarify[i].Guessed, p.Clarify[i].Question, p.Clarify[i].Choices = v, false, "", nil
+			done[p.Clarify[i].Slot] = true
+		}
+	}
+	slots := make([]string, 0, len(answers))
+	for k := range answers {
+		if !done[k] {
+			slots = append(slots, k)
+		}
+	}
+	sort.Strings(slots)
+	for _, k := range slots {
+		p.Clarify = append(p.Clarify, harness.Clarify{Slot: k, Value: answers[k]})
+	}
 }

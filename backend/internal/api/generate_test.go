@@ -69,9 +69,10 @@ func newFakeGenerator(t *testing.T) *fakeGenerator {
 			var lg struct {
 				GameHash string `json:"game_hash"`
 				Final    struct {
-					Phase  string  `json:"phase"`
-					Score  float64 `json:"score"`
-					TimeMs float64 `json:"time_ms"`
+					Phase  string         `json:"phase"`
+					Score  float64        `json:"score"`
+					TimeMs float64        `json:"time_ms"`
+					State  map[string]any `json:"state"`
 				} `json:"final"`
 			}
 			json.Unmarshal([]byte(in.Log), &lg)
@@ -79,8 +80,9 @@ func newFakeGenerator(t *testing.T) *fakeGenerator {
 			g.requests = append(g.requests, "/verify game="+in.Game)
 			g.mu.Unlock()
 			ok := lg.Final.Score != 99999
-			fmt.Fprintf(w, `{"ok":%v,"game_hash_ok":%v,"problems":%s,"recomputed":{"phase":%q,"score":%v,"time_ms":%v}}`,
-				ok, lg.GameHash != "other", map[bool]string{true: "[]", false: `["final.score: log says 99999, replay gives 1"]`}[ok],
+			state, _ := json.Marshal(lg.Final.State) // the end state the engine reports (null when the log has none)
+			fmt.Fprintf(w, `{"ok":%v,"game_hash_ok":%v,"problems":%s,"result":%s,"recomputed":{"phase":%q,"score":%v,"time_ms":%v}}`,
+				ok, lg.GameHash != "other", map[bool]string{true: "[]", false: `["final.score: log says 99999, replay gives 1"]`}[ok], state,
 				lg.Final.Phase, lg.Final.Score, lg.Final.TimeMs)
 		case (r.URL.Path == "/anatomy" || r.URL.Path == "/anatomy/revise") && r.Method == "POST":
 			body := make([]byte, 1<<16)

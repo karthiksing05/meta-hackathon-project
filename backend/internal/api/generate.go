@@ -32,7 +32,7 @@ import (
 // follows its progress, and publishes the finished game as an immutable package.
 
 const (
-	jobTimeout       = 10 * time.Minute
+	jobTimeout       = 15 * time.Minute
 	maxRequestChars  = 2000
 	maxBriefBytes    = 8 << 10
 	maxAnatomyBytes  = 16 << 10
@@ -54,6 +54,11 @@ type generateIn struct {
 	// Anatomy is the agreed game anatomy text. It is kept apart from the request so it doesn't count against the
 	// 2,000 character limit (it can be up to 16 KB).
 	Anatomy string `json:"anatomy"`
+	// Spec is a game-spec/1 the person already agreed (from POST /v1/harness/plan): the server uses it as the plan and
+	// does not plan again. Answers are the person's answers to the plan's clarifying questions, by slot name; they
+	// replace the planner's guesses. Both are for new games only.
+	Spec    json.RawMessage   `json:"spec"`
+	Answers map[string]string `json:"answers"`
 	// Draft makes the finished game unlisted: reachable by id and in the owner's creations, but not in the feed or
 	// search until it is published. A change is a draft unless this is false; a new game is public unless this is true.
 	Draft *bool `json:"draft"`
@@ -136,6 +141,11 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		in.Brief["intent"] = in.Request // the brief's intent defaults to the request
 	}
 
+	specJSON, answers, specMsg := checkSpecAnswers(&in, base != nil)
+	if specMsg != "" {
+		writeErr(w, 400, specMsg)
+		return
+	}
 	var sponsor *model.Sponsor
 	if in.Sponsor != nil {
 		if !s.isBrand(userFrom(r)) {
@@ -220,6 +230,7 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		}
 		job.Anatomy = a
 	}
+	job.Spec, job.Answers = specJSON, answers
 	job.Sound = sound
 	job.Sponsor = sponsor
 	job.Draft = base != nil // a change stays a draft until it is published

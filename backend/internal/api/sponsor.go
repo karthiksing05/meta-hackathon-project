@@ -20,7 +20,7 @@ import (
 //
 // Brand accounts are the usernames in SPONSOR_USERS (comma separated); nobody else can sponsor a game, so a person can't
 // pass their own game off as an ad. Tapping a sponsored card is a feed moment event: {kind: "sponsor_tap", gameID}.
-// Demo brands must be fictional (CLAUDE.md): the server doesn't check names, so that is on whoever sets one.
+// Real brand names are allowed (CLAUDE.md, Karthik's decision): the server doesn't check names, only who may set a sponsor.
 
 const defaultSponsorCTA = "Play now"
 
