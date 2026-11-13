@@ -210,6 +210,46 @@
       if (!genericBot(m)) ok(Object.keys(variety).length >= 2, m.id + ": bot seeds vary the runs");
     }
 
+    // ------------------------------------------------------------------ resume
+    // A run saved mid-play (the host's `checkpoint`) and picked up later with `resumeRun` must end
+    // exactly like the same run played in one sitting, and its final log must replay to that score.
+    section("Resume (checkpoint, fast-forward, keep playing)");
+    for (const m of valid) {
+      const full = sim(m, { bot_seed: 5, bot_skill: 0.7 });
+      if (!full.ok || full.ticks < 4) continue;
+      const cut = Math.max(1, Math.floor(full.ticks / 2));
+      const saved = { seed: full.replay.seed, tick_rate: 60, total_ticks: cut, inputs: full.replay.inputs.filter((i) => (i.t | 0) < cut) };
+      const later = full.replay.inputs.filter((i) => (i.t | 0) >= cut);
+      const session = B.createSession(m);
+      const run = session.newRun({ mode: "headless", seed: saved.seed, replay: copy(saved) });
+      const live = B.resumeRun(run, copy(saved));
+      ok(live && run.tick === cut && run.replayInputs === null, m.id + ": resume fast-forwards to the saved tick and hands back control", "tick " + run.tick + " of " + cut);
+      // Keep playing: feed the rest of the original inputs live, each on its own tick.
+      let k = 0;
+      const maxTicks = full.outcome === "timeout" ? full.ticks : full.ticks + 600;
+      while (!run.ended && run.tick < maxTicks) {
+        while (k < later.length && (later[k].t | 0) === run.tick) {
+          const input = later[k++];
+          const v = Array.isArray(input.v) ? input.v : [0, 0];
+          run.queue(input.a, v[0], v[1]);
+        }
+        run.step();
+      }
+      if (!run.ended) run.finish("timeout");
+      ok(run.score === full.score && run.tick === full.ticks && run.outcome === full.outcome, m.id + ": a resumed run ends like the uninterrupted run",
+        full.outcome + " " + full.score + " @" + full.ticks + " vs " + run.outcome + " " + run.score + " @" + run.tick);
+      const log = run.replayLog();
+      ok(log.inputs.length === full.replay.inputs.length && log.seed === full.replay.seed, m.id + ": the resumed run's log holds every input once", log.inputs.length + " vs " + full.replay.inputs.length);
+      const cap = full.outcome === "timeout" ? full.ticks : Math.max(log.total_ticks + 120, 600);
+      const check = sim(m, { bot: false, replay: log, max_ticks: cap });
+      ok(check.ok && check.score === full.score, m.id + ": the resumed run's log verifies", check.score + " vs " + full.score + (check.error ? " " + check.error : ""));
+    }
+    {
+      const m0 = valid[0];
+      const r0 = B.createSession(m0).newRun({ mode: "headless", seed: m0.seed, replay: { seed: m0.seed, total_ticks: 0, inputs: [] } });
+      ok(B.resumeRun(r0, { seed: m0.seed, total_ticks: 0, inputs: [] }) && r0.tick === 0, "resume from tick 0 starts a fresh run");
+    }
+
     // ------------------------------------------------------------------ negative cases
     section("Negative cases");
     const dodge = cat.formulas.find((f) => f.id === "dodge");

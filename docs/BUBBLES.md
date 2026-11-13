@@ -559,6 +559,21 @@ host takes over when the page settles.
 ships, fills in every default and pins `engine_version`. Devices only check `engine_version` and
 prepare. The full validator runs in Studio and the CLI, not on every play.
 
+**Resume (closing mid-run keeps the run).** While a play run is under way the host posts
+`{type: "checkpoint", key, tick, score, replay}` every 2 s and when it pauses (the app going to the
+background), where `replay` is the run's log so far (`seed`, `tick_rate`, `total_ticks`, `inputs`,
+`length`). Nothing is posted before the first tap, in the first second, or once the run is ending.
+The player saves the latest checkpoint per game (`RunResumeStoring`, local today:
+`Features/Bubbles/Resume/`), keyed by the session key (id, version and content hash, so the same
+seed and length), and clears it when the run ends or on Play again. The next open shows Resume or
+Start over. Resume activates with `options.resume` (the saved log; play mode only, read from the
+activate options and used once): the runtime makes the run with that seed, fast-forwards silently
+through the saved inputs to `total_ticks` (`Bubble.resumeRun(run, saved)`), stops replaying, and
+shows a "Welcome back · Tap to keep going" card (it posts `{type: "resumed", tick, score}`). The run
+keeps recording, so the finished log holds every input once and verifies like a run played in one
+sitting (`tools/runtime-tests` checks this for every seed). Burst replays and the feed's in-place
+play don't save checkpoints.
+
 **Every score is verifiable.** Runs are deterministic: the seed plus the pointer log reproduces the
 run exactly. `BubbleJSRuntime.verify(_:replay:claimedScore:)` re-simulates a run headless; the app
 marks verified runs on the Bubble Board. A server would do the same before accepting a score.
@@ -1797,3 +1812,55 @@ the content prompt; covers still carry no text or logos).
 
 DEBUG: the anatomy fixtures and `FB_STUDIO_ANATOMY`/`FB_STUDIO_STEP` were removed in Stage 4;
 `FB_STUDIO_SCROLL=anatomy|anatomy-rules|anatomy-<part>` (Brief) or `chat` (Try).
+
+### 7.14 Get-to-know brackets (bracket)
+
+Meeting someone new should come with something to do together. When you become friends (you
+confirm, or they accept: `AppStore` posts `Notification.Name.friendshipStarted`), or you tap Add
+friend next to a stranger on a Group's weekly board or a game's board, the app proposes a **best of
+three** with that person: round 1 **Quick hands** (dodge, timing, microgame, merge), round 2 **Words
+and trivia** (guess, quiz night, answer, learn), round 3 **Get to know you** (answer, adventure,
+sort). Each round is a different game on a seed shared by the two of you (and the game's length), so
+it's the same course. The card (`BracketCardView`) shows both faces, the standing ("You 1 – 0
+Maya"), each round's game and both scores, and the winner; each round's Play opens the player on the
+round's seed. It sits at the top of their profile (`BubbleProfileHeaderSlots`), which also offers
+"Get to know Maya: 3 quick games" when there is none. Each round you finish posts a line to your 1:1
+chat ("Our bracket, round 1 (Hill Hopper): me 42 · you 39"); the final result goes to the chat and,
+for a bracket that started on a Group board, to the Group as a playable share card.
+
+**Files** (`Features/Bubbles/Bracket/`): `FriendBracket.swift` (model, `BracketService` protocol,
+`BracketPlanner`), `LocalBracketService.swift` (today's implementation, in memory for the launch),
+`BracketLocalOpponent.swift` (**local stand-in**: the other person's rounds are bot runs of the real
+runtime on the same seed, through `BubbleStore.runtimeWorker`, marked `theirsIsLocalStandIn`),
+`BracketCardView.swift`, `BracketHooks.swift` (install, `didFinish`, `met`). Shared edits: one line
+each in `BubbleFeatureRouter` (install, didFinish), `BubbleFeatureSlots` (profile header),
+`AppStore` (the friendship notification), `GroupWeeklyBoardActions.addFriend` and `BubbleBoardView`.
+DEBUG: `FB_BRACKET=<userID>[:played]`.
+
+**One offer per Add friend.** A server friendship (Find friends, the Group Blend's Add friend) posts
+`gamesFriendAdded`, and that tap gets the Challenges best-of-5 offer (`BestOfFiveOfferSheet`) and
+nothing from brackets. Brackets never pop up there: they live as the "Getting to know" card on the
+person's profile, start from its button, start quietly from Add friend on a game or Group weekly
+board (which use the local friend request and get no best-of-5 offer), and announce themselves with a
+toast only for friendships made through the local friend requests (`friendshipStarted`). When the
+server serves same-seed series, the bracket's rounds can become that series and the two merge.
+
+**Server endpoints the backend would need** (so `LocalBracketService` and `BracketLocalOpponent`
+can be swapped for a `GamesAPI`-backed service with no screen changes). Picking games, seeds and
+winners moves to the server; runs are verified like any score (seed plus replay).
+
+| Call | Body | Returns |
+|---|---|---|
+| `POST /v1/brackets` | `{opponent_id, origin: {kind: "new_friend" \| "group" \| "event", id?}}` | the bracket (an open one with that person if it exists) |
+| `GET /v1/brackets?with=<user_id>` | — | `{brackets: [bracket]}`, newest first |
+| `GET /v1/brackets/<id>` | — | the bracket |
+| `POST /v1/brackets/<id>/rounds/<index>/runs` | `{score, replay}` (the `BubbleInputLog`; its seed must be the round's) | the bracket, with your best score on that round |
+
+A bracket: `{id, created_at, origin, players: [user_id, user_id], rounds: [{index, theme: "reflex" |
+"words" | "about_you", game_id, seed, length, scores: {<user_id>: {score, replay_id, verified}}}],
+standing: {<user_id>: wins}, winner_id: string | null, finished: bool}`. Best of three: finished at
+two wins or when all three rounds have both scores. Events the app should hear (push or the
+notifications feed): `bracket.proposed` (a new friend; the app shows the card), `bracket.round_played`
+(the other person's score landed), `bracket.finished`. Posting the round lines to the chat and the
+final card to the Group can stay in the app (it already sends messages and Group posts) or move to the
+server with these events.

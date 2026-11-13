@@ -16,6 +16,7 @@ enum GroupWeeklyBoardActions {
     static func addFriend(_ user: User, group: FBGroup, appStore: AppStore, bubbleStore: BubbleStore) {
         guard !user.isMe, user.friendship == .none || user.friendship == .requestReceived else { return }
         appStore.sendRequest(to: user)
+        BracketHooks.met(user, on: .group(group.id))
         let bubbleID = bubbleStore.worldDailyBubble(for: group)?.id ?? bubbleStore.worldBubbles(in: group).first?.id ?? ""
         BubbleSocialSignals.post(.addFriendFromGame, bubbleID: bubbleID, with: [user.id])
         appStore.showToast(GroupsSearchCopy.requestSentToast(user.firstName), symbol: "person.badge.plus")

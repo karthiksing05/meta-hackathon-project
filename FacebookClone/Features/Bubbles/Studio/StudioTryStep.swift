@@ -365,6 +365,7 @@ private struct StudioDetailsCard: View {
 private struct StudioTweakCard: View {
     @Bindable var model: StudioModel
     var isFocused: FocusState<Bool>.Binding
+    @State private var voice = VoiceInput()
 
     private static let suggestions = ["A little slower", "Make it harder", "Calmer colors", "Use our names"]
     private static let microgameSuggestions = ["A little slower", "Make it harder", "Softer sounds", "Brighter colors"]
@@ -395,6 +396,7 @@ private struct StudioTweakCard: View {
                         RoundedRectangle(cornerRadius: FBMetrics.radiusXL, style: .continuous)
                             .strokeBorder(isFocused.wrappedValue ? AnyShapeStyle(BubbleGlow.iridescent) : AnyShapeStyle(StudioGlow.cardStroke), lineWidth: isFocused.wrappedValue ? 1.5 : 0.75)
                     }
+                VoiceInputButton(voice: voice, text: $model.tweakText)
                 Button(action: send) {
                     Image(systemName: "arrow.up.circle.fill")
                         .font(.system(size: 34)) // Display glyph: the send button, sized like Messenger's
@@ -405,6 +407,7 @@ private struct StudioTweakCard: View {
                 .disabled(!canSend)
                 .accessibilityLabel("Tweak with Muse")
             }
+            VoiceInputNote(voice: voice)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: FBSpacing.s) {
                     ForEach(suggestions, id: \.self) { suggestion in
@@ -426,6 +429,7 @@ private struct StudioTweakCard: View {
 
     private func send() {
         guard canSend else { return }
+        voice.stop()
         isFocused.wrappedValue = false
         Haptics.light()
         model.startCompose(.tweak)

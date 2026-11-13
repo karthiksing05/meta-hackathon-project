@@ -354,7 +354,7 @@ struct BubblesTabView: View {
         let post = BubbleSurfaceHooks.float(bubble, result: nil, to: group, message: message, appStore: appStore, bubbleStore: bubbleStore)
         if post != nil {
             Haptics.success()
-            appStore.showToast(group.map { "Shared to \($0.name)" } ?? "Shared to your feed", symbol: "sparkles")
+            // BubbleSurfaceHooks.float shows the "Shared to …" toast itself.
         } else {
             appStore.showToast("Couldn't share this \(ProductName.singular) right now", symbol: "exclamationmark.circle")
         }
