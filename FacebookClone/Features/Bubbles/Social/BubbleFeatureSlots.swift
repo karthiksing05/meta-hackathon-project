@@ -7,7 +7,7 @@ import SwiftUI
 //
 // Spot                          Where it's called                         Order
 // BubbleResultInfoSlots         BubbleResultSheet, under the hero         length, challenge, story, learn, nextline
-// BubbleResultActionSlots       BubbleResultSheet, above Play again       saves, challenge, remix
+// BubbleResultActionSlots       BubbleResultSheet, above Play again       challenge, saves, remix
 // BubbleFeedCaptionSlots        (unused: the feed caption merges these into one meta line and one social line)
 // BubbleDetailSlots             BubbleDetailView, under the actions       length, saves, challenge, together, remix, story, learn, nextline
 // BubblePlayerTopBarSlots       BubblePlayerView top bar, before mute     saves
@@ -63,8 +63,9 @@ struct BubbleResultActionSlots: View {
     let slot: BubbleResultSlotContext
 
     var body: some View {
-        SavesResultAction(slot: slot)
+        // Challenge Me first: it's the card's primary action.
         ChallengeResultAction(slot: slot)
+        SavesResultAction(slot: slot)
         RemixResultAction(slot: slot)
     }
 }

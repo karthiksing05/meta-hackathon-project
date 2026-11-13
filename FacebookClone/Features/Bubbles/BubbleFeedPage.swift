@@ -22,6 +22,7 @@ struct BubbleFeedPage: View {
     let actions: BubbleFeedPageActions
 
     @Environment(BubbleStore.self) private var bubbleStore
+    @Environment(Router.self) private var router
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var showsTapHint = false
@@ -57,6 +58,13 @@ struct BubbleFeedPage: View {
             if !isTakenOver {
                 chrome
                     .transition(.opacity)
+                if let sponsor = item.sponsor {
+                    SponsoredHeader(sponsor: sponsor)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .padding(.top, model.insetTop + 44)
+                        .padding(.horizontal, FBMetrics.screenPadding)
+                        .transition(.opacity)
+                }
             }
             if let failure {
                 EngineErrorCard(failure: failure, onRetry: model.retry)
@@ -68,6 +76,14 @@ struct BubbleFeedPage: View {
         .accessibilityElement(children: .contain)
         .accessibilityAction(named: "Play", play)
         .task(id: isSettled) { await runHints() }
+    }
+
+    /// The library sound behind this game, when the server gave it one.
+    private var sound: RemoteGameSound? { bubbleStore.librarySound(for: bubble) }
+
+    private func openSound() {
+        guard let sound else { return }
+        router.push(.sound(sound.id))
     }
 
     /// Starts the game in place, and counts it toward retiring the "Tap to play" hint.
@@ -142,8 +158,10 @@ struct BubbleFeedPage: View {
                     .transition(.opacity.combined(with: .scale(scale: reduceMotion ? 1 : 0.92)))
             }
             HStack(alignment: .bottom, spacing: 8) {
-                BubbleFeedCaption(item: item, bubble: bubble, run: run, onOpenBoard: { actions.openBoard(bubble) }, onOpenProfile: actions.openProfile)
-                BubbleFeedRail(bubble: bubble, actions: actions, showsSaveTip: showsSaveTip) {
+                BubbleFeedCaption(item: item, bubble: bubble, run: run, sound: sound, onOpenBoard: { actions.openBoard(bubble) },
+                                  onOpenProfile: actions.openProfile, onOpenSound: openSound, onPlay: play)
+                BubbleFeedRail(bubble: bubble, actions: actions, showsSaveTip: showsSaveTip, sound: sound,
+                               isSoundPlaying: isLive && LibrarySoundPlayer.shared.isPlaying, onOpenSound: openSound) {
                     withAnimation(GameMotion.resolved(GameMotion.reveal, reduceMotion: reduceMotion)) { showsSaveTip = false }
                 }
             }
@@ -233,13 +251,26 @@ private struct BubbleFeedCaption: View {
     let item: BubbleFeedItem
     let bubble: Bubble
     let run: BubbleScore?
+    let sound: RemoteGameSound?
     let onOpenBoard: () -> Void
     let onOpenProfile: (User) -> Void
+    let onOpenSound: () -> Void
+    let onPlay: () -> Void
 
     @Environment(BubbleStore.self) private var bubbleStore
     @Environment(Router.self) private var router
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            captionBody
+            if let sponsor = item.sponsor {
+                SponsoredFooter(sponsor: sponsor, gameID: bubble.id, onPlay: onPlay)
+                    .padding(.top, 4)
+            }
+        }
+    }
+
+    private var captionBody: some View {
         VStack(alignment: .leading, spacing: 6) {
             if let meta = metaText {
                 Text(meta)
@@ -269,6 +300,12 @@ private struct BubbleFeedCaption: View {
             }
             .accessibilityElement(children: .combine)
             socialLine
+            if let sound {
+                Button(action: onOpenSound) {
+                    SoundTicker(sound: sound)
+                }
+                .buttonStyle(.plain)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .shadow(color: Color.black.opacity(0.3), radius: 2, y: 1)
@@ -413,6 +450,9 @@ private struct BubbleFeedRail: View {
     let bubble: Bubble
     let actions: BubbleFeedPageActions
     let showsSaveTip: Bool
+    let sound: RemoteGameSound?
+    let isSoundPlaying: Bool
+    let onOpenSound: () -> Void
     let onDismissSaveTip: () -> Void
 
     @Environment(BubbleStore.self) private var bubbleStore
@@ -452,6 +492,15 @@ private struct BubbleFeedRail: View {
             }
             BubbleFeedRailButton(symbol: "arrowshape.turn.up.right.fill", label: "Share", accessibility: "Share this \(ProductName.singular)") {
                 actions.float(bubble)
+            }
+            if let sound {
+                Button(action: onOpenSound) {
+                    SoundDisc(sound: sound, isSpinning: isSoundPlaying)
+                        .frame(width: 48, height: 48)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 4)
             }
         }
         .padding(.bottom, 2)

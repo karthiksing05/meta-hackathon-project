@@ -70,7 +70,7 @@ fn diags(g: &J) -> Vec<Diagnostic> {
 }
 
 fn root_children(p: &Program) -> &[mg_core::scene::Node] {
-    let NodeKind::Group { children } = &p.presentation.root.kind else { panic!() };
+    let NodeKind::Group { children, .. } = &p.presentation.root.kind else { panic!() };
     children
 }
 
@@ -205,7 +205,7 @@ fn new_nodes_camera_and_fixed() {
     let music = p.presentation.music.as_ref().unwrap();
     assert!(is_const(&music.asset, Value::str("theme")) && is_const(&music.volume, Value::Float(0.4)) && music.playing.is_none());
     let c = root_children(&p);
-    let NodeKind::Image { asset, w, h, frame, flip_x, flip_y } = &c[0].kind else { panic!() };
+    let NodeKind::Image { asset, w, h, frame, flip_x, flip_y, .. } = &c[0].kind else { panic!() };
     assert!(is_const(asset, Value::str("hero")) && h.is_none() && flip_y.is_none());
     assert!(matches!(w, Some(Prop::Const(Value::Float(64.0)))));
     assert!(matches!(frame, Some(Prop::Expr(_))) && matches!(flip_x, Some(Prop::Const(Value::Bool(true)))));
@@ -213,14 +213,14 @@ fn new_nodes_camera_and_fixed() {
     assert!(is_const(x1, Value::Float(0.0)) && matches!(y2, Prop::Expr(_)));
     // Lines default to stroke_width 2.
     assert!(matches!(&c[1].stroke_width, Some(p) if matches!(p, Prop::Const(Value::Float(w)) if *w == 2.0)));
-    let NodeKind::Poly { points, closed } = &c[2].kind else { panic!() };
+    let NodeKind::Poly { points, closed, .. } = &c[2].kind else { panic!() };
     assert!(!closed);
     assert!(is_const(points, Value::list(vec![Value::Vec2(0.0, 0.0), Value::Vec2(20.0, 0.0), Value::Vec2(10.0, 16.5)])));
-    let NodeKind::Poly { points, closed } = &c[3].kind else { panic!() };
+    let NodeKind::Poly { points, closed, .. } = &c[3].kind else { panic!() };
     assert!(*closed && matches!(points, Prop::Expr(_)));
     // `fixed` is inherited by the whole subtree.
     assert!(!c[0].fixed && c[4].fixed);
-    let NodeKind::Group { children } = &c[4].kind else { panic!() };
+    let NodeKind::Group { children, .. } = &c[4].kind else { panic!() };
     let NodeKind::Stack { children: sc, .. } = &children[0].kind else { panic!() };
     assert!(children[0].fixed && sc[0].fixed);
     let _ = cf(0.0);
@@ -780,4 +780,81 @@ fn poly_list_literal_over_the_limit_fails_validation() {
     // A one-point list literal is caught too; computed lists are checked per frame.
     find(&diags(&poly("= [vec(score, 0)]".into())), Code::Presentation, "/presentation/root/children/0/points");
     assert!(errors(&diags(&poly("= map(range(0, 300), i => vec(i, 0))".into()))).is_empty());
+}
+
+// ── v0.2.2: clipping groups, image crops, shape hits ─────────────────
+
+#[test]
+fn clip_crop_and_shape_hit_compile() {
+    let g = game(json!({ "presentation": {
+        "root": { "node": "group", "children": [
+            { "node": "group", "x": 20, "y": 40, "w": 200, "h": "= 100 + score", "clip": true, "children": [
+                { "node": "image", "asset": "hero", "w": 200, "h": 200,
+                  "src_x": 8, "src_y": "= score", "src_w": 16, "src_h": 16 }
+            ] },
+            { "node": "group", "w": 10, "h": 10, "children": [] },
+            { "node": "poly", "points": [[0, 0], [20, 0], [10, 16]], "hit": "shape",
+              "on_tap": { "input": "go" } },
+            { "node": "poly", "points": [[0, 0], [20, 0], [10, 16]], "hit": "box" }
+        ] }
+    } }));
+    let p = compile_ok(&g);
+    let c = root_children(&p);
+    let NodeKind::Group { children, w, h, clip } = &c[0].kind else { panic!() };
+    assert!(*clip && matches!(w, Some(Prop::Const(Value::Float(200.0)))) && matches!(h, Some(Prop::Expr(_))));
+    let NodeKind::Image { src_x, src_y, src_w, src_h, .. } = &children[0].kind else { panic!() };
+    assert!(matches!(src_x, Some(Prop::Const(Value::Float(8.0)))) && matches!(src_y, Some(Prop::Expr(_))));
+    assert!(matches!(src_w, Some(Prop::Const(Value::Float(16.0)))) && src_h.is_some());
+    let NodeKind::Group { clip, w, .. } = &c[1].kind else { panic!() };
+    assert!(!clip && w.is_some());
+    let NodeKind::Poly { hit_shape, .. } = &c[2].kind else { panic!() };
+    assert!(*hit_shape);
+    let NodeKind::Poly { hit_shape, .. } = &c[3].kind else { panic!() };
+    assert!(!hit_shape);
+    // Old nodes are unchanged: a plain image has no source rect, a plain group no box.
+    let p = compile_ok(&game(json!({ "presentation": { "root": { "node": "group", "children": [
+        { "node": "image", "asset": "hero" } ] } } })));
+    let NodeKind::Group { w: None, h: None, clip: false, .. } = &p.presentation.root.kind else { panic!() };
+    let NodeKind::Image { src_x: None, src_y: None, src_w: None, src_h: None, .. } = &root_children(&p)[0].kind else {
+        panic!()
+    };
+}
+
+#[test]
+fn clip_crop_and_shape_hit_errors() {
+    let g = game(json!({ "presentation": {
+        "root": { "node": "group", "children": [
+            { "node": "group", "clip": true, "children": [] },
+            { "node": "group", "w": 10, "children": [] },
+            { "node": "group", "h": 10, "w": 5, "clip": "yes" },
+            { "node": "image", "asset": "hero", "src_w": 0, "src_h": -4 },
+            { "node": "image", "asset": "hero", "src_x": "left" },
+            { "node": "poly", "points": [[0, 0], [1, 1]], "hit": "circle" },
+            { "node": "rect", "w": 1, "h": 1, "clip": true },
+            { "node": "rect", "w": 1, "h": 1, "hit": "shape" },
+            { "node": "image", "asset": "hero", "src_w": "= score - 2" }
+        ] }
+    } }));
+    let d = diags(&g);
+    let at = |i: usize, k: &str| {
+        if k.is_empty() {
+            format!("/presentation/root/children/{i}")
+        } else {
+            format!("/presentation/root/children/{i}/{k}")
+        }
+    };
+    assert!(find(&d, Code::Presentation, &at(0, "clip")).message.contains("needs the group's box"));
+    assert!(find(&d, Code::Presentation, &at(1, "")).message.contains("also needs 'h'"));
+    assert!(find(&d, Code::Presentation, &at(2, "clip")).message.contains("true or false"));
+    let m = &find(&d, Code::Presentation, &at(3, "src_w")).message;
+    assert!(m.contains("greater than 0") && m.contains("found 0"), "{m}");
+    assert!(find(&d, Code::Presentation, &at(3, "src_h")).message.contains("found -4"));
+    find(&d, Code::Presentation, &at(4, "src_x"));
+    let hit = find(&d, Code::Presentation, &at(5, "hit"));
+    assert!(hit.message.contains("box, shape"), "{}", hit.message);
+    assert!(find(&d, Code::Presentation, &at(6, "clip")).message.contains("unknown property 'clip' on a rect node"));
+    find(&d, Code::Presentation, &at(7, "hit"));
+    // A bound value is checked each frame, not here.
+    assert!(!d.iter().any(|x| x.at == at(8, "src_w")), "{}", show(&d));
+    assert_eq!(errors(&d).len(), 9, "{}", show(&d));
 }

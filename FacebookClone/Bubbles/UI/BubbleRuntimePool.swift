@@ -24,6 +24,9 @@ struct BubbleSessionOptions: Hashable {
     var playerName: String = ""
     var bestScore: Int? = nil
     var isMuted: Bool = true
+    /// A library sound plays behind the game (natively): the game's own music stays off and its
+    /// effects play a little quieter (docs/BUBBLES.md 4.3, `backing`).
+    var hasBacking: Bool = false
     var reducedMotion: Bool = false
     /// Space at the top and bottom the runtime keeps clear for app chrome, in points.
     var insetTop: CGFloat = 0
@@ -36,6 +39,7 @@ struct BubbleSessionOptions: Hashable {
         var object: [String: JSONValue] = [
             "mode": .string(mode.name),
             "muted": .bool(isMuted),
+            "backing": .bool(hasBacking),
             "reduced_motion": .bool(reducedMotion),
             "player": .object([
                 "name": .string(playerName),
@@ -734,6 +738,19 @@ final class BubbleRuntimeHost: NSObject, WKNavigationDelegate {
         webView.callAsyncJavaScript(
             "if (window.BubbleHost && typeof BubbleHost.command === 'function') { BubbleHost.command({ type: type }) } return ''",
             arguments: ["type": type],
+            in: nil,
+            in: .page,
+            completionHandler: nil
+        )
+    }
+
+    /// `BubbleHost.command({type: "backing", on})`: a library sound plays behind the active session,
+    /// so its own music stays off (docs/BUBBLES.md 4.3).
+    func setBacking(_ on: Bool) {
+        guard isLoaded, capability == .sessions || capability == .bootOnly else { return }
+        webView.callAsyncJavaScript(
+            "if (window.BubbleHost && typeof BubbleHost.command === 'function') { BubbleHost.command({ type: 'backing', on: on }) } return ''",
+            arguments: ["on": on],
             in: nil,
             in: .page,
             completionHandler: nil

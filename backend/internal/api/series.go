@@ -265,6 +265,9 @@ func (s *Server) createSeries(w http.ResponseWriter, r *http.Request) {
 		s.serverErr(w, r, err)
 		return
 	}
+	if first, err := s.Store.GameByID(ctx, se.Rounds[0].GameID); err == nil {
+		s.notifySeries(ctx, se, first, *me)
+	}
 	v, err := s.seriesFor(r, se)
 	if err != nil {
 		s.serverErr(w, r, err)
@@ -320,9 +323,10 @@ func (s *Server) listSeries(w http.ResponseWriter, r *http.Request) {
 
 // verifyResult is what the generator's engine says about a replayed run.
 type verifyResult struct {
-	OK         bool     `json:"ok"`
-	GameHashOK bool     `json:"game_hash_ok"`
-	Problems   []string `json:"problems"`
+	OK         bool           `json:"ok"`
+	GameHashOK bool           `json:"game_hash_ok"`
+	Problems   []string       `json:"problems"`
+	Result     map[string]any `json:"result"` // the end state of the replayed run, by variable name
 	Recomputed *struct {
 		Phase  string  `json:"phase"`
 		Score  float64 `json:"score"`
@@ -331,8 +335,13 @@ type verifyResult struct {
 }
 
 // verifyRun replays a log against a game's exact text in the generator service.
-func (s *Server) verifyRun(ctx context.Context, gameText, log string) (*verifyResult, int, string) {
-	body, _ := json.Marshal(map[string]string{"game": gameText, "log": log})
+// names (optional) are the end-state variables to report as `result`.
+func (s *Server) verifyRun(ctx context.Context, gameText, log string, names ...string) (*verifyResult, int, string) {
+	payload := map[string]any{"game": gameText, "log": log}
+	if len(names) > 0 {
+		payload["state"] = names
+	}
+	body, _ := json.Marshal(payload)
 	ctx, cancel := context.WithTimeout(ctx, verifyTimeout)
 	defer cancel()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, s.GeneratorURL+"/verify", bytes.NewReader(body))

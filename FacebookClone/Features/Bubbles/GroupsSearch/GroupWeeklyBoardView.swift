@@ -45,7 +45,7 @@ struct GroupWeeklyBoardView: View {
                 .background(FBColor.background)
                 .navigationTitle(group.name)
             } else {
-                ContentUnavailableView(GroupsSearchCopy.groupMissing, systemImage: "trophy", description: Text(GroupsSearchCopy.groupMissingDetail))
+                GroupMissingState(groupID: groupID)
                     .navigationTitle(GroupsSearchCopy.weeklyTitle)
             }
         }
@@ -172,15 +172,32 @@ struct GroupWeeklyBoardCard: View {
         let state = GroupGamesStore.shared.weeklyStates[group.id] ?? .loading
         if state.isLoading {
             LiveDataStateView(kind: .loading, title: "Loading this week's board…")
+        } else if !group.isMember {
+            // The weekly board is for members (the server answers 403 to everyone else).
+            LiveDataStateView(
+                kind: .empty("Members see who's on top each week."),
+                title: "Join to see the board",
+                action: LiveDataStateView.Action(title: "Join the Group", symbol: "person.3.fill") {
+                    bubbleStore.join(group) {
+                        GroupGamesStore.shared.loadWeekly(group: group, in: bubbleStore)
+                    }
+                }
+            )
         } else if let failure = state.failure {
-            LiveDataStateView(kind: .failed(failure), title: group.isMember ? "Couldn't load the board" : "Join the Group to see its board") {
+            LiveDataStateView(kind: .failed(failure), title: "Couldn't load the board") {
                 GroupGamesStore.shared.loadWeekly(group: group, in: bubbleStore)
             }
         } else {
-            Text("Nobody has played the Group's games this week. Play one to take the top spot.")
-                .font(.fbMeta)
-                .foregroundStyle(FBColor.secondaryText)
-                .fixedSize(horizontal: false, vertical: true)
+            let first = bubbleStore.worldDailyBubble(for: group) ?? bubbleStore.worldBubbles(in: group).first
+            LiveDataStateView(
+                kind: .empty(first == nil ? "Make a game for the Group and the week starts." : "Play one of the Group's games to take the top spot."),
+                title: "Nobody's played this week",
+                action: first.map { game in
+                    LiveDataStateView.Action(title: "Play \(game.title)", symbol: "play.fill") { router.play(game.id) }
+                } ?? LiveDataStateView.Action(title: "Make one for the Group", symbol: "sparkles") {
+                    router.openStudio(StudioLaunch(mode: .create, groupID: group.id))
+                }
+            )
         }
     }
 }

@@ -34,6 +34,8 @@ struct BubbleFeedItem: Identifiable, Hashable {
     let why: String?
     /// `A` or `B` when the server interleaves.
     let team: String?
+    /// Set when the server marks this page as a sponsored post.
+    var sponsor: RemoteSponsor? = nil
     /// Whose run plays as the Burst. The server doesn't send runs yet, so pages play the bot's
     /// demo.
     var runUserID: String? { nil }
@@ -51,23 +53,31 @@ extension BubbleStore {
         guard !isPreview, feedTask == nil, feedState != .end else { return }
         feedState = .loading
         let exclude = Array(Set(feedItems.map(\.bubbleID)))
+        feedGeneration += 1
+        let generation = feedGeneration
         feedTask = Task { @MainActor [weak self] in
             guard let self else { return }
-            defer { self.feedTask = nil }
+            // A reload (account change, Try again) starts a newer request; this one then leaves
+            // the feed alone, so a cancelled request never shows as "Couldn't load".
+            defer { if self.feedGeneration == generation { self.feedTask = nil } }
             _ = await GamesAccount.shared.waitForUser()
+            guard !Task.isCancelled, feedGeneration == generation else { return }
             do {
                 let page = try await api.feed(limit: Self.feedPageSize, sessionID: feedSessionID, exclude: exclude)
+                guard !Task.isCancelled, feedGeneration == generation else { return }
                 var added: [BubbleFeedItem] = []
                 for item in page where !feedItems.contains(where: { $0.id == item.feedItemID }) {
                     guard let bubble = await adopt(item.game) else { continue }
                     added.append(BubbleFeedItem(
                         id: item.feedItemID, bubbleID: bubble.id, reason: BubbleFeedReason(server: item.reason),
-                        serverReason: item.reason, why: item.why, team: item.team
+                        serverReason: item.reason, why: item.why, team: item.team, sponsor: item.sponsor
                     ))
                 }
+                guard feedGeneration == generation else { return }
                 feedItems.append(contentsOf: added)
                 feedState = added.isEmpty ? .end : .idle
             } catch {
+                guard !Task.isCancelled, feedGeneration == generation else { return }
                 feedState = .failed(error.localizedDescription)
             }
         }
@@ -176,12 +186,13 @@ extension BubbleStore {
         }
     }
 
-    /// Your own games (`GET /v1/creations`), for the Library.
+    /// Your own games (`GET /v1/creations`), for the Library. Drafts (Studio builds and tweaks
+    /// that were never shared) stay out.
     @MainActor
     func loadMyGames() async {
         guard !isPreview, await GamesAccount.shared.waitForUser() != nil,
               let games = try? await api.creations() else { return }
-        for game in games {
+        for game in games where !game.unlisted {
             await adopt(game)
         }
     }

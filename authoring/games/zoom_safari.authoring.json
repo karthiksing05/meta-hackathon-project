@@ -1,0 +1,212 @@
+{
+  "authoring": "microgame-authoring/0.1",
+  "meta": {
+    "title": "Zoom Safari",
+    "instructions": "A tiny crop of an animal zooms out. Tap who it is before the whole picture shows: early guesses score more. Ten rounds; two wrong guesses end the safari.",
+    "duration_s": 90
+  },
+  "uses": [
+    {
+      "fragment": "zoom_reveal",
+      "params": {
+        "zoom_from": 6,
+        "zoom_ms": 7000
+      },
+      "bind": {
+        "zoom_restart": "question_done"
+      }
+    },
+    {
+      "fragment": "picture_quiz",
+      "params": {
+        "choices": 4,
+        "time_ms": 7000,
+        "goal": 0
+      }
+    },
+    {
+      "fragment": "rounds",
+      "params": {
+        "count": 10,
+        "label": "Pic"
+      },
+      "bind": {
+        "round_done": "question_done"
+      }
+    },
+    {
+      "fragment": "lives",
+      "params": {
+        "count": 2
+      },
+      "bind": {
+        "hit": "answered_wrong"
+      }
+    }
+  ],
+  "state": {
+    "score": {
+      "type": "int",
+      "init": "0"
+    }
+  },
+  "functions": {
+    "quiz_questions": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_questions"
+    },
+    "quiz_choices": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_choices"
+    },
+    "quiz_answers": {
+      "params": {},
+      "returns": "list<string>",
+      "body": "content_answers"
+    },
+    "zoom_index": {
+      "params": {},
+      "returns": "int",
+      "body": "get_or(order, qi, 0)"
+    },
+    "zoom_hold": {
+      "params": {},
+      "returns": "bool",
+      "body": "locked"
+    }
+  },
+  "rules": [
+    {
+      "id": "pay_early",
+      "on": "answered_right",
+      "do": [
+        {
+          "incr": "score",
+          "by": "10 + zoom_left() / 5"
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "score": "score",
+    "time_limit": "90s",
+    "on_timeout": "win"
+  },
+  "presentation": {
+    "slots": [
+      {
+        "slot": "hud_top",
+        "node": {
+          "node": "text",
+          "text": "= str(score) + ' pts'",
+          "size": 18,
+          "weight": 600,
+          "color": "$ink"
+        }
+      }
+    ]
+  },
+  "look": {
+    "id": "paper",
+    "tokens": {}
+  },
+  "art": {
+    "style": "Flat, friendly animal portraits on soft single-colour backgrounds.",
+    "palette": {
+      "bg": "#F6F1E7",
+      "surface": "#E9E1D2",
+      "primary": "#3A7D5C",
+      "accent": "#E2702B",
+      "ink": "#1F2A24",
+      "danger": "#C8463B",
+      "secondary": "#6C7BD9"
+    },
+    "sprites": {
+      "picture": {
+        "svg": [
+          "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' fill='#CFE3D4'/><ellipse cx='64' cy='100' rx='40' ry='10' fill='#E8EEF2'/><polygon points='30,30 44,60 22,58' fill='#E2702B'/><polygon points='98,30 84,60 106,58' fill='#E2702B'/><polygon points='33,38 42,56 28,55' fill='#3B2A20'/><polygon points='95,38 86,56 100,55' fill='#3B2A20'/><path d='M22 58 Q64 40 106 58 L64 104 Z' fill='#E2702B'/><path d='M36 72 Q64 64 92 72 L64 104 Z' fill='#FFF6EC'/><circle cx='48' cy='66' r='5' fill='#2B1D14'/><circle cx='80' cy='66' r='5' fill='#2B1D14'/><circle cx='49.5' cy='64.5' r='1.6' fill='#FFF'/><circle cx='81.5' cy='64.5' r='1.6' fill='#FFF'/><ellipse cx='64' cy='98' rx='6' ry='4.5' fill='#2B1D14'/></svg>",
+          "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' fill='#2E3A59'/><rect x='0' y='100' width='128' height='10' rx='5' fill='#6B4A2E'/><ellipse cx='64' cy='66' rx='38' ry='42' fill='#8C6A4A'/><ellipse cx='64' cy='80' rx='24' ry='26' fill='#D9C2A0'/><path d='M50 84 q4 4 8 0 M62 92 q4 4 8 0 M70 82 q4 4 8 0' stroke='#8C6A4A' stroke-width='2' fill='none'/><polygon points='30,24 40,40 28,42' fill='#8C6A4A'/><polygon points='98,24 88,40 100,42' fill='#8C6A4A'/><circle cx='48' cy='52' r='14' fill='#FFF8E1'/><circle cx='80' cy='52' r='14' fill='#FFF8E1'/><circle cx='48' cy='52' r='7' fill='#F2A900'/><circle cx='80' cy='52' r='7' fill='#F2A900'/><circle cx='48' cy='52' r='3.5' fill='#1B1B1B'/><circle cx='80' cy='52' r='3.5' fill='#1B1B1B'/><polygon points='64,58 59,66 69,66' fill='#E08A1E'/></svg>",
+          "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' fill='#BFE6F2'/><ellipse cx='64' cy='112' rx='60' ry='14' fill='#3E8E5E'/><ellipse cx='64' cy='78' rx='44' ry='30' fill='#5CC46B'/><circle cx='42' cy='46' r='16' fill='#5CC46B'/><circle cx='86' cy='46' r='16' fill='#5CC46B'/><circle cx='42' cy='44' r='10' fill='#FFF'/><circle cx='86' cy='44' r='10' fill='#FFF'/><rect x='37' y='41' width='10' height='6' rx='3' fill='#1B1B1B'/><rect x='81' y='41' width='10' height='6' rx='3' fill='#1B1B1B'/><path d='M38 84 Q64 100 90 84' stroke='#2C6B3F' stroke-width='3' fill='none' stroke-linecap='round'/><circle cx='54' cy='70' r='2' fill='#2C6B3F'/><circle cx='74' cy='70' r='2' fill='#2C6B3F'/></svg>",
+          "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' fill='#F4E3B5'/><ellipse cx='26' cy='78' rx='14' ry='10' fill='#9BC27A'/><circle cx='20' cy='75' r='2.5' fill='#1B1B1B'/><ellipse cx='44' cy='98' rx='8' ry='6' fill='#9BC27A'/><ellipse cx='92' cy='98' rx='8' ry='6' fill='#9BC27A'/><path d='M30 90 Q68 22 108 90 Z' fill='#6E8B3D'/><polygon points='58,52 78,52 86,70 68,82 50,70' fill='#A5C46A'/><polygon points='42,78 50,70 68,82 60,90 40,90' fill='#8BAA55'/><polygon points='86,70 96,80 98,90 76,90 68,82' fill='#8BAA55'/><path d='M108 88 l10 4 l-10 2 Z' fill='#9BC27A'/></svg>",
+          "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' fill='#9FC9E8'/><rect x='0' y='104' width='128' height='24' fill='#EAF4FB'/><ellipse cx='64' cy='70' rx='30' ry='40' fill='#1E2533'/><ellipse cx='64' cy='80' rx='20' ry='30' fill='#FFFFFF'/><circle cx='56' cy='46' r='4' fill='#FFF'/><circle cx='72' cy='46' r='4' fill='#FFF'/><circle cx='56' cy='46' r='2' fill='#1E2533'/><circle cx='72' cy='46' r='2' fill='#1E2533'/><polygon points='58,54 70,54 64,62' fill='#F2A900'/><ellipse cx='52' cy='110' rx='9' ry='4' fill='#F2A900'/><ellipse cx='76' cy='110' rx='9' ry='4' fill='#F2A900'/></svg>",
+          "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' fill='#F3EBC8'/><path d='M10 118 Q64 60 118 118 Z' fill='#4E9F4A'/><circle cx='64' cy='40' r='14' fill='#1B1B1B'/><ellipse cx='64' cy='72' rx='34' ry='36' fill='#D7263D'/><line x1='64' y1='38' x2='64' y2='108' stroke='#1B1B1B' stroke-width='3'/><circle cx='48' cy='62' r='6' fill='#1B1B1B'/><circle cx='80' cy='62' r='6' fill='#1B1B1B'/><circle cx='46' cy='86' r='5' fill='#1B1B1B'/><circle cx='82' cy='86' r='5' fill='#1B1B1B'/><circle cx='58' cy='36' r='3' fill='#FFF'/><circle cx='70' cy='36' r='3' fill='#FFF'/></svg>",
+          "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' fill='#DDEFD0'/><rect x='0' y='100' width='128' height='28' fill='#7BAE5A'/><path d='M18 100 Q20 84 40 86 L104 86 Q112 92 108 100 Z' fill='#E8C9A0'/><circle cx='70' cy='66' r='28' fill='#B5713A'/><circle cx='70' cy='66' r='18' fill='#CF8A4E'/><circle cx='70' cy='66' r='9' fill='#B5713A'/><line x1='28' y1='86' x2='20' y2='62' stroke='#E8C9A0' stroke-width='4' stroke-linecap='round'/><line x1='34' y1='86' x2='36' y2='60' stroke='#E8C9A0' stroke-width='4' stroke-linecap='round'/><circle cx='20' cy='60' r='4' fill='#1B1B1B'/><circle cx='36' cy='58' r='4' fill='#1B1B1B'/></svg>",
+          "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'><rect width='128' height='128' fill='#BFE3FF'/><rect x='0' y='70' width='128' height='58' fill='#2D6CA2'/><path d='M14 76 Q20 40 70 44 Q104 46 110 70 Q96 92 50 92 Q20 92 14 76 Z' fill='#3E4E6E'/><path d='M22 80 Q60 96 104 74 Q90 88 50 90 Q28 90 22 80 Z' fill='#C9D6E8'/><path d='M108 66 L124 52 L120 70 L126 84 Z' fill='#3E4E6E'/><circle cx='34' cy='66' r='3' fill='#FFF'/><path d='M60 42 Q56 26 50 22 M60 42 Q64 26 70 22' stroke='#BFE3FF' stroke-width='3' fill='none' stroke-linecap='round'/></svg>"
+        ],
+        "w": 512,
+        "h": 512,
+        "color": "#E2702B"
+      }
+    }
+  },
+  "content": {
+    "questions": [
+      "Who is hiding here?",
+      "Who is hiding here?",
+      "Who is hiding here?",
+      "Who is hiding here?",
+      "Who is hiding here?",
+      "Who is hiding here?",
+      "Who is hiding here?",
+      "Who is hiding here?"
+    ],
+    "choices": [
+      "Fox",
+      "Cat",
+      "Squirrel",
+      "Deer",
+      "Owl",
+      "Hawk",
+      "Bat",
+      "Parrot",
+      "Frog",
+      "Lizard",
+      "Newt",
+      "Toad",
+      "Turtle",
+      "Crab",
+      "Hedgehog",
+      "Armadillo",
+      "Penguin",
+      "Puffin",
+      "Seal",
+      "Goose",
+      "Ladybug",
+      "Beetle",
+      "Bee",
+      "Ant",
+      "Snail",
+      "Slug",
+      "Clam",
+      "Worm",
+      "Whale",
+      "Shark",
+      "Dolphin",
+      "Seal"
+    ],
+    "answers": [
+      "Fox",
+      "Owl",
+      "Frog",
+      "Turtle",
+      "Penguin",
+      "Ladybug",
+      "Snail",
+      "Whale"
+    ]
+  },
+  "score": {
+    "kind": "points",
+    "measures": "animals named, more for early guesses",
+    "unit": "points",
+    "direction": "higher",
+    "counts_when": "any",
+    "aggregate": "best",
+    "format": "{n} pts",
+    "events": [
+      "answered_right"
+    ]
+  }
+}

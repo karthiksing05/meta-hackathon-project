@@ -73,7 +73,7 @@ export class Microgame {
 
   static validate(json) { return requireDefault().validate(json); }
   static load(json, seed) { return requireDefault().load(json, seed); }
-  static verify(gameText, log) { return requireDefault().verify(gameText, log); }
+  static verify(gameText, log, state) { return requireDefault().verify(gameText, log, state); }
 
   constructor(exports) {
     this.x = exports;
@@ -109,9 +109,13 @@ export class Microgame {
    * it claims: `{ok, game_hash_ok, steps, recomputed, claimed, problems}`. `gameText` must be the
    * exact game file text the run was loaded from (its hash is in the log). Lets a server or a
    * friend's phone confirm a challenge score without trusting the player's device.
+   * `result` holds the end values of the game's state from the replay: the names in `state` (the
+   * manifest's `group_play.result.state`, e.g. `["ending", "choices_used"]`), or all of it.
    */
-  verify(gameText, log) {
-    const req = JSON.stringify({ game: String(gameText), log: typeof log === 'string' ? log : log });
+  verify(gameText, log, state) {
+    const body = { game: String(gameText), log: typeof log === 'string' ? log : log };
+    if (state != null) body.state = state;
+    const req = JSON.stringify(body);
     let len;
     try {
       len = this._withBytes(utf8enc.encode(req), (p, n) => this.x.mg_verify(p, n));
@@ -367,6 +371,15 @@ export function decodeFrame(view, strings, out = newFrame()) {
       op.asset = af & 0xffff; op.frame = af >>> 16;
       op.flip_x = (head & 0x100) !== 0; op.flip_y = (head & 0x200) !== 0;
       op.rotation = f32(); op.scale = f32(); op.opacity = f32();
+      // v0.2.2 head bit 10: a source rectangle within the frame (asset units).
+      if (head & 0x400) { op.src_x = f32(); op.src_y = f32(); op.src_w = f32(); op.src_h = f32(); }
+      else if (op.src_w !== undefined) { op.src_x = op.src_y = op.src_w = op.src_h = undefined; }
+    } else if (tag === 7) {
+      // v0.2.2: clip the following ops to a rectangle until the matching unclip.
+      op.op = 'clip';
+      op.x = f32(); op.y = f32(); op.w = f32(); op.h = f32();
+    } else if (tag === 8) {
+      op.op = 'unclip';
     } else if (tag === 5) {
       op.op = 'line';
       op.x1 = f32(); op.y1 = f32(); op.x2 = f32(); op.y2 = f32();

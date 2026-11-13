@@ -9,9 +9,12 @@ struct GameGeneratorLive: GameGenerator {
     let api: GamesAPILive
     var pollInterval: TimeInterval { 1.5 }
 
-    func start(request: String, brief: BubbleBrief) async throws -> String {
+    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?) async throws -> String {
         if await !api.isSignedIn { _ = try await api.signInAsDevice() }
-        let body = try JSONSerialization.data(withJSONObject: ["request": request, "brief": Self.json(brief)])
+        var payload: [String: Any] = ["request": request, "brief": Self.json(brief), "draft": draft]
+        if let anatomy = Self.anatomyField(anatomy) { payload["anatomy"] = anatomy }
+        Self.add(sound, to: &payload)
+        let body = try JSONSerialization.data(withJSONObject: payload)
         let data = try await api.generationStart(body: body)
         return try decode(GenerationStarted.self, data).jobID
     }
@@ -31,8 +34,34 @@ struct GameGeneratorLive: GameGenerator {
         }
         if revision.nextLevel { payload["nextLevel"] = true }
         if let brief = revision.brief { payload["brief"] = Self.json(brief) }
+        if let anatomy = Self.anatomyField(revision.anatomy) { payload["anatomy"] = anatomy }
+        Self.add(revision.sound, to: &payload)
         let data = try await api.generationStart(body: try JSONSerialization.data(withJSONObject: payload))
         return try decode(GenerationStarted.self, data).jobID
+    }
+
+    /// A library sound for the game: `soundId`, `offsetMs`, `mix` (backend/README.md, "Sounds").
+    static func add(_ sound: RemoteGameSound?, to payload: inout [String: Any]) {
+        guard let sound else { return }
+        payload["soundId"] = sound.id
+        payload["offsetMs"] = sound.offsetMs
+        payload["mix"] = sound.mix
+    }
+
+    /// The server takes up to 16 KB of anatomy text; anything longer is cut at a line.
+    static let maxAnatomyBytes = 16 * 1024
+
+    static func anatomyField(_ text: String?) -> String? {
+        guard let text = text?.trimmingCharacters(in: .whitespacesAndNewlines), !text.isEmpty else { return nil }
+        guard text.utf8.count > maxAnatomyBytes else { return text }
+        var lines: [Substring] = []
+        var bytes = 0
+        for line in text.split(separator: "\n", omittingEmptySubsequences: false) {
+            bytes += line.utf8.count + 1
+            if bytes > maxAnatomyBytes { break }
+            lines.append(line)
+        }
+        return lines.joined(separator: "\n")
     }
 
     /// `BubbleBrief` as the server reads it (snake_case keys, like the app's manifest).
@@ -52,6 +81,16 @@ struct GameGeneratorLive: GameGenerator {
 
     func cancel(id: String) async {
         await api.generationCancel(id: id)
+    }
+
+    func publish(gameID: String) async throws {
+        guard let id = api.ids.serverID(for: gameID) else { throw GamesAPIError.unknownGame(gameID) }
+        try await api.creationPublish(id: id)
+    }
+
+    func discard(gameID: String) async {
+        guard let id = api.ids.serverID(for: gameID) else { return }
+        await api.creationDelete(id: id)
     }
 
     func manifest(for game: RemoteGame) async throws -> BubbleManifest {

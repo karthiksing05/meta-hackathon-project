@@ -135,8 +135,11 @@ func TestWebPlayer(t *testing.T) {
 	if code != 200 || !strings.HasPrefix(ct, "text/html") || !strings.Contains(body, "Game player") {
 		t.Fatalf("player page: %d %s", code, ct)
 	}
-	if !strings.Contains(body, `id="del"`) || !strings.Contains(body, "/v1/creations/") || !strings.Contains(body, "confirm(") {
+	if !strings.Contains(body, `id="del"`) || !strings.Contains(body, "/v1/debug/games/") || !strings.Contains(body, "confirm(") {
 		t.Fatal("the player page has no delete button for the open game")
+	}
+	if strings.Contains(body, `id="signin"`) || strings.Contains(body, "Authorization") {
+		t.Fatal("the debug viewer must not have a login")
 	}
 	if code, ct, body := get("/play/runtime/bubble-runtime.js"); code != 200 || !strings.Contains(ct, "javascript") || len(body) < 100000 {
 		t.Fatalf("runtime: %d %s %d bytes", code, ct, len(body))

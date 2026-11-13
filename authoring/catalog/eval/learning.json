@@ -28,5 +28,12 @@
     "expect": [
       "map_place_pin_quiz"
     ]
+  },
+  {
+    "request": "pin the capital city on a world map, closer pins score more",
+    "expect": [
+      "map_place_pin_quiz",
+      "geo_guess"
+    ]
   }
 ]

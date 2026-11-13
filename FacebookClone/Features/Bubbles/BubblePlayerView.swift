@@ -111,6 +111,10 @@ struct BubblePlayerView: View {
         .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: failure)
         .animation(GameMotion.resolved(GameMotion.appear, reduceMotion: reduceMotion), value: result?.id)
         .onAppear(perform: appear)
+        .onDisappear { LibrarySoundPlayer.shared.stop(.player) }
+        .onChange(of: bubbleID) {
+            LibrarySoundPlayer.shared.play(bubble.flatMap { bubbleStore.librarySound(for: $0) }, for: .player)
+        }
         .task(id: "\(bubbleID)#\(attempt)") {
             // A start that never reports `ready` gets the error card and a retry, not an endless loader.
             try? await Task.sleep(for: EngineFailure.startTimeout)
@@ -145,6 +149,7 @@ struct BubblePlayerView: View {
             bestScore: bubbleStore.bestScore(of: appStore.me, in: bubble)?.score,
             isActive: scenePhase == .active,
             isMuted: GameSound.isMuted,
+            hasBacking: bubbleStore.librarySound(for: bubble) != nil,
             reducedMotion: reduceMotion,
             restartToken: restartToken,
             insetTop: safeArea.top + Self.topBarHeight,
@@ -376,6 +381,8 @@ struct BubblePlayerView: View {
 
     private func appear() {
         offerResume()
+        // The game's library sound keeps playing from the feed (or starts here).
+        if let bubble { LibrarySoundPlayer.shared.play(bubbleStore.librarySound(for: bubble), for: .player) }
         #if DEBUG
         // FB_ENGINE_FAIL=1 shows the engine error card; "Try again" then starts the game for real.
         if DebugLaunch.value("FB_ENGINE_FAIL") == "1", attempt == 0 {

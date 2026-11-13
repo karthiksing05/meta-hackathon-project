@@ -218,14 +218,20 @@ Swift to call `BubbleHost.boot(payloadJSON)`:
 ```json
 { "manifest": { }, "mode": "play" | "replay" | "demo" | "poster",
   "replay": { "seed": 1, "tick_rate": 60, "total_ticks": 600, "inputs": [{ "t": 12, "a": "tap" }] },
-  "player": { "name": "Alex", "best": 42 }, "muted": true, "reduced_motion": false,
+  "player": { "name": "Alex", "best": 42 }, "muted": true, "backing": false, "reduced_motion": false,
   "insets": { "top": 0, "bottom": 0 } }
 ```
+
+- `backing: true` means a sound from the server's library (`/v1/sounds`, TikTok-style) is playing
+  behind the game, natively in the app. The game's own music stays off, and its effects play a
+  little quieter (master gain 0.24 instead of 0.32). It's presentation only: replays and score checks
+  don't change. `BubbleHost.command({"type": "backing", "on": true|false})` switches it on a live
+  session.
 
 - `replay` plays an input log exactly (seeded, fixed timestep). `demo` lets the built-in bot play.
   `poster` draws one still frame. Tapping during `replay` or `demo` **takes over**: the runtime
   restarts the same seed in `play` mode and posts `takeover`.
-- Swift → JS: `BubbleHost.command({"type": "pause" | "resume" | "restart" | "mute" | "unmute"})`.
+- Swift → JS: `BubbleHost.command({"type": "pause" | "resume" | "restart" | "mute" | "unmute" | "backing"})`.
   `unmute`, `resume`, a tap and the page becoming visible again all resume the Web Audio context
   when it is `suspended` or `interrupted` (iOS interrupts it for calls, Siri and other apps).
   While a session is unmuted and not paused, the host holds the app's audio session in
@@ -1586,6 +1592,9 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   engine is seeded from the run's RNG.
 - Its frames draw in one `space` layer, scaled to fit the 360×640 playfield. Audio goes through the
   runtime's master gain (`fx.audio()`, new), so mute applies. Haptics and toasts go through `fx`.
+  Sound assets decode with `fx.audioContext()` (the shared context, created even while muted or
+  suspended), and a sound that loads before any context exists decodes as soon as one does, so a run
+  that opened muted or before the first tap still has its sounds and music once audio starts.
 - Taps, drags and holds are forwarded; a quick flick is also sent as a swipe. The runtime has no key
   events, so microgames must be playable by touch, apart from typed text (next item).
 - **Text field.** A game with a text input (`{"text": "submit"}` or `{"text": "change"}` sources, so
@@ -1628,6 +1637,15 @@ result, share, posters, demos, replays, haptics, mute) works as for any formula:
   and checks that honest logs verify and raised scores don't. The engine logs text calls itself, so
   typed answers verify like taps. The runtime's `result` message carries the log to Swift as
   `engine_log` (`BubbleRunResult.engineLog`), which series rounds submit (7.14).
+  `verify` also returns `result`, the replay's end state: `MicrogameEngine.verify(game, log,
+  ["ending", "choices_used"])` gives just those names (unknown ones are `null`), the manifest's
+  `group_play.result.state`; without names it gives every state variable. Servers compare story
+  endings and opinion picks from it, never from the phone (harness-gaps/group-play.md).
+  `tools/runtime-tests/microgame-story-share.js` checks it.
+- **Story results** (story_vars, harness-gaps/story.md). When the game's state has a non-empty
+  `sg_share_line` ("I became king in 6 choices"), the kit's `share()` uses it as `score_text`
+  instead of points, and a non-empty `ending` sets the result tag
+  `ending=<id>;choices=<choices_used>;path=<sg_path>`. Other microgames keep "N points" and no tag.
 
 **Engine bundle.** `bubble-kit-microgame-engine.js` is **generated and committed** (the Mac that builds
 the app needn't have Rust): `engine/web/microgame.js` and `engine/web/render.js` plus the WASM as base64,
@@ -1796,9 +1814,15 @@ turns the server's events (`kind` + `summary`) into the same `StudioEvent`s as `
 so Build, Try, Share and "How Muse made it" are unchanged. Optional fields (`data` on events, `position`,
 `code`) are used when present; the server puts each step's details (`round`, `passed`, `headline`,
 `bots`) on the event itself, and `GenerationEvent.data` falls back to the whole event. Changes to a game
-(`{baseGameId, change?, look?, nextLevel?}`, 4.4) use the same job and polling. `request` may be at
-most 2,000 characters, so when the agreed anatomy would push a new game's request past that, it goes
-in the brief's `notes` instead. The games API client is always the live server (`GamesAPIFactory.current`,
+(`{baseGameId, change?, look?, nextLevel?, anatomy?}`, 4.4) use the same job and polling. `request` may
+be at most 2,000 characters; the agreed anatomy goes in its own `anatomy` field (up to 16 KB; the
+server adds it to what Muse reads), for new games, remixes and anatomy changes. New games are sent
+with `draft: true` (changes are drafts by default), so a build the person drops never reaches the
+feed. Share publishes the shared levels (`POST /v1/creations/{id}/publish`, `GameGenerator.publish`);
+Discard deletes the session's drafts (`DELETE /v1/creations/{id}`, `GameGenerator.discard`); levels a
+tweak replaced stay unlisted drafts, and the Library skips drafts (`RemoteGame.unlisted`). `polishing` events (the quality check's polish round) show as one more fix round. The server
+runs one job per person: a start that hears "you already have a game being made" right after a
+cancel waits and tries again for about 8 s (shown as waiting for a slot). The games API client is always the live server (`GamesAPIFactory.current`,
 base URL `https://api.ol4ol.com`, `FB_API_URL` overrides it in DEBUG); the app signs in once at launch
 with a device account (`GamesAccount`). There is no mock client.
 
@@ -1864,8 +1888,8 @@ the card says why.
   the change; after local edits or answers, "Have Muse check my changes" folds them in.
 - *The build*: `GameAnatomy.agreedText(request:)` ("Agreed game anatomy (follow the rules and mechanics
   exactly, not just the look)", with the person's request verbatim and a requested theme kept as said) is
-  appended to the microgame request text (`microgameRequestText`, so repair rounds see it too) or, for
-  formula games, to the brief's `notes`. `MicrogamePrompts` is unchanged.
+  sent as the job's `anatomy` field (`POST /v1/generate`), and the server appends it to the request
+  Muse reads, so repair rounds see it too. `MicrogamePrompts` is unchanged.
 - *Try step*: "Change the game" replaces "Tweak it" when there is an anatomy. Each message is first mapped
   onto the anatomy (Muse's reply, the updated parts, anything new to Muse); "Make the change" makes the
   updated anatomy the agreed one and runs the usual tweak (`startCompose(.tweak, text:)`, a change on the

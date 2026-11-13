@@ -1,0 +1,484 @@
+{
+  "format": "story-graph/1",
+  "request": "Star Wars choose your own adventure game where I play as Princess Leia escaping the Death Star",
+  "made_by": "muse-wonder-1.0 (effort low) via authoring/tools/story-muse.mjs, 0 repair round(s), 2026-11-12",
+  "title": "Leia: Death Star Escape",
+  "premise": "You are Princess Leia, and you must escape the Death Star with the rebel plans.",
+  "start": "detention",
+  "vars": [
+    {
+      "id": "heat",
+      "label": "Heat",
+      "kind": "stat",
+      "init": 0,
+      "min": 0,
+      "max": 6
+    },
+    {
+      "id": "nerve",
+      "label": "Nerve",
+      "kind": "stat",
+      "init": 3,
+      "min": 0,
+      "max": 6
+    },
+    {
+      "id": "blaster",
+      "label": "Blaster",
+      "kind": "item"
+    },
+    {
+      "id": "codes",
+      "label": "Codes",
+      "kind": "item"
+    },
+    {
+      "id": "disguise",
+      "label": "Disguise",
+      "kind": "item"
+    },
+    {
+      "id": "trusted",
+      "kind": "flag"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "detention",
+      "place": "Detention cell",
+      "text": "You are Leia in a Death Star detention cell. Stormtroopers patrol outside and an alarm hums.",
+      "choices": [
+        {
+          "label": "Feign a faint",
+          "to": "cell_fight",
+          "do": "nerve+1",
+          "note": "+1 Nerve"
+        },
+        {
+          "label": "Grab reaching blaster",
+          "to": "cell_fight",
+          "do": "blaster heat+2",
+          "note": "Blaster, +2 Heat"
+        },
+        {
+          "label": "Listen at the door",
+          "to": "overhear",
+          "note": "Learn the layout"
+        }
+      ]
+    },
+    {
+      "id": "overhear",
+      "place": "Detention cell",
+      "text": "You hear guards mention a terminal, escape pods, and a prisoner transfer nearby.",
+      "choices": [
+        {
+          "label": "Slip into the vent",
+          "to": "vent",
+          "note": "Quiet but cramped"
+        },
+        {
+          "label": "Call the guard in",
+          "to": "cell_fight",
+          "do": "nerve-1",
+          "note": "-1 Nerve"
+        },
+        {
+          "label": "Wait for patrol change",
+          "to": "cell_fight",
+          "do": "heat-1",
+          "note": "-1 Heat"
+        }
+      ]
+    },
+    {
+      "id": "cell_fight",
+      "place": "Cell doorway",
+      "text": "A guard enters. You have seconds to act before he raises his comlink.",
+      "choices": [
+        {
+          "label": "Shoot the comlink",
+          "to": "corridor",
+          "if": "blaster",
+          "do": "heat+1",
+          "note": "+1 Heat"
+        },
+        {
+          "label": "Rush and disarm him",
+          "to": "corridor",
+          "do": "blaster nerve-1",
+          "note": "Blaster, -1 Nerve",
+          "routes": [
+            {
+              "if": "nerve<1",
+              "to": "end_captured"
+            }
+          ]
+        },
+        {
+          "label": "Surrender calmly",
+          "to": "end_captured",
+          "note": "Give up the escape"
+        }
+      ]
+    },
+    {
+      "id": "corridor",
+      "place": "Detention corridor",
+      "text": "You step into a bright corridor. Signs point to terminals, pods, and detention levels.",
+      "choices": [
+        {
+          "label": "Hack a side terminal",
+          "to": "terminal",
+          "note": "Seek useful codes"
+        },
+        {
+          "label": "Head for escape pods",
+          "to": "pod_bay",
+          "do": "heat+1",
+          "note": "+1 Heat"
+        },
+        {
+          "label": "Follow prisoner cries",
+          "to": "prisoners",
+          "note": "Someone needs help"
+        }
+      ]
+    },
+    {
+      "id": "terminal",
+      "place": "Side terminal",
+      "text": "A unattended terminal glows. Prisoner cells and hangar schedules flicker on its screen.",
+      "choices": [
+        {
+          "label": "Download station codes",
+          "to": "prisoners",
+          "do": "codes heat+1",
+          "note": "Codes, +1 Heat"
+        },
+        {
+          "label": "Raise a false alarm",
+          "to": "control",
+          "do": "nerve+1 heat-1",
+          "note": "+1 Nerve, -1 Heat"
+        },
+        {
+          "label": "Sprint to the hangar",
+          "to": "hangar_bay",
+          "note": "Move fast"
+        }
+      ]
+    },
+    {
+      "id": "vent",
+      "place": "Vent shaft",
+      "text": "You crawl through a vent above the corridor, dust stinging your eyes.",
+      "choices": [
+        {
+          "label": "Drop into trash chute",
+          "to": "trash",
+          "note": "A risky shortcut"
+        },
+        {
+          "label": "Drop near terminal",
+          "to": "terminal",
+          "do": "heat-1",
+          "note": "-1 Heat"
+        },
+        {
+          "label": "Keep crawling onward",
+          "to": "control",
+          "do": "nerve-1",
+          "note": "-1 Nerve"
+        }
+      ]
+    },
+    {
+      "id": "trash",
+      "place": "Trash compactor",
+      "text": "You land in a trash compactor. Wet walls groan and begin to close around you.",
+      "choices": [
+        {
+          "label": "Shoot the wall panel",
+          "to": "corridor",
+          "if": "blaster",
+          "do": "heat+2",
+          "note": "+2 Heat"
+        },
+        {
+          "label": "Climb the slick walls",
+          "to": "corridor",
+          "do": "nerve-1",
+          "note": "-1 Nerve",
+          "routes": [
+            {
+              "if": "nerve<1",
+              "to": "end_trash"
+            }
+          ]
+        },
+        {
+          "label": "Shout for help",
+          "to": "end_trash",
+          "note": "Call out in panic"
+        }
+      ]
+    },
+    {
+      "id": "control",
+      "place": "Control hub",
+      "text": "You reach a control hub. Screens show the hangar, a shuttle, and tractor beams.",
+      "choices": [
+        {
+          "label": "Disable tractor beam",
+          "to": "hangar_bay",
+          "if": "codes",
+          "do": "nerve+1",
+          "note": "+1 Nerve"
+        },
+        {
+          "label": "Take officer disguise",
+          "to": "hangar_bay",
+          "do": "disguise heat-1",
+          "note": "Disguise, -1 Heat"
+        },
+        {
+          "label": "Blast the console",
+          "to": "hangar_bay",
+          "do": "heat+3",
+          "note": "+3 Heat",
+          "routes": [
+            {
+              "if": "heat>=6",
+              "to": "end_captured"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "prisoners",
+      "place": "Prisoner cells",
+      "text": "You find rebel prisoners behind a ray shield, begging you for help.",
+      "choices": [
+        {
+          "label": "Free the prisoners",
+          "to": "control",
+          "if": "blaster",
+          "do": "trusted",
+          "note": "They will remember this"
+        },
+        {
+          "label": "Lead prisoners to pods",
+          "to": "pod_bay",
+          "do": "trusted nerve-1",
+          "note": "Trusted, -1 Nerve"
+        },
+        {
+          "label": "Slip away alone",
+          "to": "control",
+          "do": "nerve-1",
+          "note": "-1 Nerve"
+        }
+      ]
+    },
+    {
+      "id": "pod_bay",
+      "place": "Escape pod bay",
+      "text": "Escape pods line the wall. One is fueled, but troopers are approaching fast.",
+      "choices": [
+        {
+          "label": "Launch the solo pod",
+          "to": "end_pod",
+          "note": "Escape alone now"
+        },
+        {
+          "label": "Set a pod decoy",
+          "to": "hangar_bay",
+          "do": "heat-1",
+          "note": "-1 Heat"
+        },
+        {
+          "label": "Wait in the shadows",
+          "to": "hangar_bay",
+          "do": "nerve-1",
+          "note": "-1 Nerve"
+        }
+      ]
+    },
+    {
+      "id": "hangar_bay",
+      "place": "Main hangar",
+      "text": "The hangar is busy. The Millennium Falcon sits beside an Imperial shuttle.",
+      "choices": [
+        {
+          "label": "Board the Falcon",
+          "to": "falcon_approach",
+          "note": "Trust your rescuers"
+        },
+        {
+          "label": "Board Imperial shuttle",
+          "to": "shuttle_bay",
+          "if": "disguise",
+          "note": "Use your disguise"
+        },
+        {
+          "label": "Hide in cargo crates",
+          "to": "beam_room",
+          "do": "heat+1",
+          "note": "+1 Heat"
+        }
+      ]
+    },
+    {
+      "id": "beam_room",
+      "place": "Tractor beam room",
+      "text": "You hide near the tractor beam projector as troopers search the hangar.",
+      "choices": [
+        {
+          "label": "Sabotage the projector",
+          "to": "falcon_approach",
+          "if": "codes",
+          "do": "nerve+1",
+          "note": "+1 Nerve"
+        },
+        {
+          "label": "Sneak back to hangar",
+          "to": "hangar_bay",
+          "do": "nerve-1",
+          "note": "-1 Nerve",
+          "routes": [
+            {
+              "if": "nerve<1",
+              "to": "end_captured"
+            }
+          ]
+        },
+        {
+          "label": "Surrender to troopers",
+          "to": "end_captured",
+          "note": "End the chase"
+        }
+      ]
+    },
+    {
+      "id": "falcon_approach",
+      "place": "Falcon ramp",
+      "text": "You sprint for the Falcon's ramp as Han and Luke urge you aboard.",
+      "choices": [
+        {
+          "label": "Provide covering fire",
+          "to": "end_falcon",
+          "if": "blaster",
+          "note": "Cover your friends"
+        },
+        {
+          "label": "Dive aboard now",
+          "to": "end_falcon",
+          "routes": [
+            {
+              "if": "heat>=5",
+              "to": "end_captured"
+            }
+          ]
+        },
+        {
+          "label": "Grab droids and board",
+          "to": "end_falcon",
+          "if": "codes",
+          "note": "Save the plans too"
+        }
+      ]
+    },
+    {
+      "id": "shuttle_bay",
+      "place": "Imperial shuttle",
+      "text": "Inside the shuttle, the pilot seat waits and prisoner manifests glow on screen.",
+      "choices": [
+        {
+          "label": "Launch with everyone",
+          "to": "end_shuttle_secret",
+          "if": "codes & trusted",
+          "note": "Needs Codes and trust"
+        },
+        {
+          "label": "Launch shuttle alone",
+          "to": "end_alone",
+          "note": "Leave everyone behind"
+        },
+        {
+          "label": "Return to the hangar",
+          "to": "hangar_bay",
+          "do": "nerve-1",
+          "note": "-1 Nerve",
+          "routes": [
+            {
+              "if": "nerve<1",
+              "to": "end_captured"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_falcon",
+      "text": "The Falcon blasts free of the Death Star, carrying you and the plans to safety.",
+      "ending": {
+        "title": "Escape on the Falcon",
+        "tone": "good",
+        "rank": 1,
+        "share": "I escaped on the Falcon in {choices} choices!"
+      }
+    },
+    {
+      "id": "end_shuttle_secret",
+      "text": "Your stolen shuttle frees the prisoners and slips away before anyone reacts.",
+      "ending": {
+        "title": "The Shuttle Liberation",
+        "tone": "secret",
+        "rank": 2,
+        "share": "I freed everyone by shuttle in {choices} choices!"
+      }
+    },
+    {
+      "id": "end_alone",
+      "text": "You escape in the shuttle, but the prisoners and plans are left behind.",
+      "ending": {
+        "title": "Alone Among Stars",
+        "tone": "neutral",
+        "rank": 3,
+        "share": "I escaped alone in {choices} choices."
+      }
+    },
+    {
+      "id": "end_pod",
+      "text": "Your pod drifts away safely, but the Death Star keeps its prisoners and secrets.",
+      "ending": {
+        "title": "Pod Escape",
+        "tone": "neutral",
+        "rank": 4,
+        "share": "I escaped by pod in {choices} choices."
+      }
+    },
+    {
+      "id": "end_trash",
+      "text": "The compactor walls close in before you can find a way out.",
+      "ending": {
+        "title": "Crushed in the Trash",
+        "tone": "bad",
+        "rank": 5,
+        "share": "I met a trash ending in {choices} choices."
+      }
+    },
+    {
+      "id": "end_captured",
+      "text": "Stormtroopers surround you and march you back to a locked cell.",
+      "ending": {
+        "title": "Captured Again",
+        "tone": "bad",
+        "rank": 6,
+        "share": "I was captured in {choices} choices."
+      }
+    }
+  ]
+}

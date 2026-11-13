@@ -512,6 +512,21 @@ pub fn verify_json(input: &str) -> serde_json::Value {
         }
     };
     let recomputed = log::final_json(&player);
+    // The end values of the game's state, from the replay (never the phone's claim): the names in
+    // "state" (the manifest's `group_play.result.state`, e.g. ending, choices_used, picks), or every
+    // state variable when it's left out. Unknown names come back as null.
+    let all = player.game.program().state_to_json(player.game.state());
+    let result = match req.get("state") {
+        Some(J::Array(names)) => {
+            let mut m = serde_json::Map::new();
+            for name in names.iter().filter_map(J::as_str) {
+                m.insert(name.to_string(), all.get(name).cloned().unwrap_or(J::Null));
+            }
+            J::Object(m)
+        }
+        Some(J::String(name)) => json!({ name.as_str(): all.get(name.as_str()).cloned().unwrap_or(J::Null) }),
+        _ => all,
+    };
     let same = |a: &J, b: &J| match (a.as_f64(), b.as_f64()) {
         (Some(x), Some(y)) => x == y,
         _ => a == b,
@@ -524,7 +539,7 @@ pub fn verify_json(input: &str) -> serde_json::Value {
     }
     json!({
         "ok": problems.is_empty(), "game_hash_ok": game_hash_ok, "steps": steps,
-        "recomputed": recomputed, "claimed": parsed.final_, "problems": problems,
+        "recomputed": recomputed, "claimed": parsed.final_, "problems": problems, "result": result,
     })
 }
 

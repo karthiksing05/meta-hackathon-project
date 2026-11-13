@@ -6,6 +6,7 @@ struct BubbleGroupSection: View {
     let group: FBGroup
 
     @Environment(BubbleStore.self) private var bubbleStore
+    @Environment(Router.self) private var router
     @State private var state: FeedLoadState = .idle
     @State private var games: [Bubble] = []
 
@@ -23,8 +24,12 @@ struct BubbleGroupSection: View {
                 }
                 .background(FBColor.surface)
             case .end where games.isEmpty:
-                LiveDataStateView(kind: .empty("Nobody has made one for this Group yet."), title: "No \(ProductName.plural) here yet")
-                    .background(FBColor.surface)
+                LiveDataStateView(
+                    kind: .empty(group.isMember ? "Make the first one. Describe a game and Muse builds it for the Group." : "Join to play the Group's games and make your own."),
+                    title: "No \(ProductName.plural) here yet",
+                    action: emptyAction
+                )
+                .background(FBColor.surface)
             default:
                 EmptyView()
             }
@@ -34,7 +39,8 @@ struct BubbleGroupSection: View {
                     .background(FBColor.surface)
             }
             BubbleGroupFeaturedSlots(group: group)
-            if group.isMember {
+            // The empty state already offers "Make one"; don't offer it twice.
+            if group.isMember, !isEmpty {
                 BubbleGroupBlowRow(group: group)
             }
             if !others.isEmpty {
@@ -42,6 +48,22 @@ struct BubbleGroupSection: View {
             }
         }
         .task(id: group.id) { await load() }
+    }
+
+    private var isEmpty: Bool {
+        if case .end = state { return games.isEmpty }
+        return false
+    }
+
+    private var emptyAction: LiveDataStateView.Action {
+        if group.isMember {
+            return LiveDataStateView.Action(title: "Make one for the Group", symbol: "sparkles") {
+                router.openStudio(StudioLaunch(mode: .create, groupID: group.id))
+            }
+        }
+        return LiveDataStateView.Action(title: "Join the Group", symbol: "person.3.fill") {
+            bubbleStore.join(group) { Task { await load() } }
+        }
     }
 
     private func load() async {

@@ -42,7 +42,20 @@ export function drawFrame(ctx, f, assets, opts = {}) {
   if (f.shake > 0.05 && !opts.noShake) {
     ctx.translate((Math.random() * 2 - 1) * f.shake, (Math.random() * 2 - 1) * f.shake);
   }
+  let clips = 0; // open v0.2.2 clip ops (each one a ctx.save)
   for (const op of f.ops) {
+    if (op.op === 'clip') {
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(op.x, op.y, Math.max(0, op.w), Math.max(0, op.h));
+      ctx.clip();
+      clips++;
+      continue;
+    }
+    if (op.op === 'unclip') {
+      if (clips > 0) { ctx.restore(); clips--; }
+      continue;
+    }
     const alpha = Math.min(1, op.opacity);
     if (!(alpha > 0) || !(op.scale !== 0)) continue;
     ctx.globalAlpha = alpha;
@@ -55,6 +68,7 @@ export function drawFrame(ctx, f, assets, opts = {}) {
       case 'poly': drawPoly(ctx, op); break;
     }
   }
+  while (clips-- > 0) ctx.restore();
   ctx.restore();
 }
 
@@ -123,7 +137,9 @@ function drawImage(ctx, op, assets) {
     const cols = a.cols, rows = Math.ceil(a.frames / cols);
     const sw = a.img.naturalWidth / cols, sh = a.img.naturalHeight / rows;
     const f = op.frame % a.frames;
-    ctx.drawImage(a.img, (f % cols) * sw, Math.floor(f / cols) * sh, sw, sh, op.x, op.y, op.w, op.h);
+    const fx = (f % cols) * sw, fy = Math.floor(f / cols) * sh;
+    if (op.src_w > 0 && op.src_h > 0) drawImageSrc(ctx, a, op, fx, fy, sw, sh);
+    else ctx.drawImage(a.img, fx, fy, sw, sh, op.x, op.y, op.w, op.h);
   } else {
     // Missing or still loading: a placeholder box with a cross.
     ctx.fillStyle = 'rgba(128,128,128,0.25)';
@@ -137,6 +153,24 @@ function drawImage(ctx, op, assets) {
     ctx.stroke();
   }
   if (saved) ctx.restore();
+}
+
+/**
+ * v0.2.2: draws the part `src_x, src_y, src_w, src_h` (asset units: the
+ * asset's declared frame w/h) of the frame at (fx, fy, sw, sh) pixels into
+ * the op's box. The source is cut to the frame first, with the destination
+ * cut to match, so a crop past the frame's edge is transparent there and
+ * never bleeds into the neighbouring sprite-sheet frame.
+ */
+export function drawImageSrc(ctx, a, op, fx, fy, sw, sh) {
+  const kx = a.w > 0 ? sw / a.w : 1, ky = a.h > 0 ? sh / a.h : 1;
+  const rx = op.src_x * kx, ry = op.src_y * ky, rw = op.src_w * kx, rh = op.src_h * ky;
+  const x0 = Math.max(rx, 0), y0 = Math.max(ry, 0);
+  const x1 = Math.min(rx + rw, sw), y1 = Math.min(ry + rh, sh);
+  if (!(x1 > x0 && y1 > y0)) return;
+  const dx = op.x + ((x0 - rx) / rw) * op.w, dy = op.y + ((y0 - ry) / rh) * op.h;
+  const dw = ((x1 - x0) / rw) * op.w, dh = ((y1 - y0) / rh) * op.h;
+  ctx.drawImage(a.img, fx + x0, fy + y0, x1 - x0, y1 - y0, dx, dy, dw, dh);
 }
 
 function drawLine(ctx, op) {
@@ -256,6 +290,7 @@ function note(out, wave, freq, slideHz, t0, dur, peak) {
 }
 
 function playSample(out, s, volume, assets) {
+  if (assets && assets.decodePending) assets.decodePending();
   const buf = assets && assets.buffers[s.asset];
   if (!buf) return;
   const src = out.ctx.createBufferSource();
@@ -271,6 +306,7 @@ function playSample(out, s, volume, assets) {
 export class MusicPlayer {
   constructor() { this.cur = null; } // { buffer, src, gain }
   sync(out, m, assets) {
+    if (assets && assets.decodePending && m && m.playing) assets.decodePending();
     const buf = m && m.playing && assets ? assets.buffers[m.asset] : null;
     if (!buf || !out || !out.ctx || out.ctx.state !== 'running') { this.stop(); return; }
     if (this.cur && this.cur.buffer !== buf) this.stop();
@@ -301,6 +337,11 @@ export class MusicPlayer {
  * AudioBuffers with `audioCtx()` (a function, so audio can start late).
  * Failures are recorded and draw a placeholder; they never stop the game.
  * `onProgress(store)` runs after each asset settles.
+ *
+ * A sound that loads before there's an audio context (muted, or before the
+ * first tap unlocks audio) keeps its bytes and is decoded by `decodePending()`
+ * as soon as `audioCtx()` returns one; playSample and MusicPlayer call it, so a
+ * run that opened silent still gets its sounds and music once audio starts.
  */
 export class AssetStore {
   constructor(list, { audioCtx = () => null, onProgress = null, timeoutMs = 15000 } = {}) {
@@ -312,6 +353,8 @@ export class AssetStore {
     this.loaded = 0;
     this.done = list.length === 0;
     this.audioCtx = audioCtx;
+    this.pending = []; // [{a, bytes}]: sounds waiting for an audio context
+    this.decoding = false;
     const jobs = list.map((a) => this.load(a)
       .catch((e) => { this.failed.push({ name: a.name, error: String(e?.message || e) }); })
       .finally(() => { this.loaded++; if (onProgress) onProgress(this); }));
@@ -338,7 +381,8 @@ export class AssetStore {
       const img = new Image();
       if (!src.startsWith('data:') && !src.startsWith('blob:')) img.crossOrigin = 'anonymous';
       img.decoding = 'async';
-      const entry = { img, ok: false, frames, cols };
+      // w/h: the declared frame size, the unit of an image op's src_* (v0.2.2).
+      const entry = { img, ok: false, frames, cols, w: a.w, h: a.h };
       this.images[a.id] = entry;
       await new Promise((resolve, reject) => {
         img.onload = resolve;
@@ -348,20 +392,39 @@ export class AssetStore {
       if (!img.naturalWidth || !img.naturalHeight) throw new Error(`image '${a.name}' has no size`);
       entry.ok = true;
     } else if (a.kind === 'sound') {
-      const ac = this.audioCtx();
-      if (!ac) throw new Error('no WebAudio');
       const bytes = await fetchBytes(a.src);
-      this.buffers[a.id] = await new Promise((resolve, reject) => {
-        const p = ac.decodeAudioData(bytes, resolve, reject);
-        if (p && p.then) p.then(resolve, reject);
-      });
+      const ac = this.audioCtx();
+      if (!ac) { this.pending.push({ a, bytes }); return; }
+      this.buffers[a.id] = await decodeSound(ac, bytes);
     }
+  }
+
+  /** Decodes sounds that loaded before there was an audio context, once there is one. */
+  decodePending() {
+    if (!this.pending.length || this.decoding) return;
+    const ac = this.audioCtx();
+    if (!ac) return;
+    const jobs = this.pending.splice(0);
+    this.decoding = true;
+    Promise.all(jobs.map(({ a, bytes }) => decodeSound(ac, bytes)
+      .then((buf) => { this.buffers[a.id] = buf; })
+      .catch((e) => { this.failed.push({ name: a.name, error: String(e?.message || e) }); })))
+      .finally(() => { this.decoding = false; });
   }
 
   dispose() {
     for (const u of this.urls) URL.revokeObjectURL(u);
     this.urls = [];
   }
+}
+
+/** decodeAudioData, callback or promise style (older WebKit has only callbacks). Works on a suspended context. */
+function decodeSound(ac, bytes) {
+  return new Promise((resolve, reject) => {
+    // decodeAudioData detaches the buffer, so decode a copy (a retry may need the bytes again).
+    const p = ac.decodeAudioData(bytes.slice(0), resolve, reject);
+    if (p && p.then) p.then(resolve, reject);
+  });
 }
 
 /** data: URIs are decoded locally (fetch of data: URIs is blocked in some web views). */

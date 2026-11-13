@@ -60,7 +60,12 @@ extension BubbleStore {
     func loadGroup(id: String) {
         guard !isPreview, !id.isEmpty, serverGroups[id] == nil, groupRequests.insert(id).inserted else { return }
         Task { @MainActor [weak self] in
-            guard let self, let detail = try? await api.group(id: id) else { return }
+            guard let self else { return }
+            guard let detail = try? await api.group(id: id) else {
+                // Let a later look (Try again) ask once more.
+                groupRequests.remove(id)
+                return
+            }
             let group = adopt(detail)
             for bubble in bubbles where bubble.group == nil && bubble.manifest.structure.groupID == id {
                 bubble.group = group
@@ -89,5 +94,25 @@ extension BubbleStore {
         let group = adopt(detail.group)
         group.memberSample = detail.members.map(person)
         return group
+    }
+
+    /// Joins a Group (the "Join the Group" next step on its empty game states). A Group on the
+    /// games server is joined there too (`PUT /v1/groups/{id}/members/me`), so its games, boards
+    /// and weekly board open up; if the server says no, the join is undone with a toast.
+    @MainActor
+    func join(_ group: FBGroup, then done: (() -> Void)? = nil) {
+        guard !group.isMember else { done?(); return }
+        appStore.toggleMembership(group)
+        guard !isPreview, GameIDMap.isServerID(group.id) else { done?(); return }
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            do {
+                try await api.setMember(true, groupID: group.id)
+            } catch {
+                if group.isMember { group.isMember = false; group.memberCount -= 1 }
+                appStore.showToast("Couldn't join \(group.name). Try again.", symbol: "exclamationmark.circle")
+            }
+            done?()
+        }
     }
 }

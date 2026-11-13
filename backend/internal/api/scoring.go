@@ -284,7 +284,7 @@ func (s *Server) submitScored(w http.ResponseWriter, r *http.Request, g *model.G
 		s.writeBoard(w, r, g, extra)
 		return
 	}
-	if err := s.Store.PutScore(r.Context(), neu); err != nil {
+	if err := s.watchLeader(r.Context(), g, func() error { return s.Store.PutScore(r.Context(), neu) }); err != nil {
 		s.serverErr(w, r, err)
 		return
 	}

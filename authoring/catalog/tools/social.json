@@ -193,5 +193,138 @@
     "example_types": [
       "photo_scavenger_prompt"
     ]
+  },
+  {
+    "id": "chat_round",
+    "kind": "server_tool",
+    "name": "Send a game into a chat or Group",
+    "aliases": [
+      "send to the group chat",
+      "play in the chat",
+      "your turn",
+      "pass it round the group",
+      "game in a thread"
+    ],
+    "summary": "Sends a game into a chat thread or a Group as a round: everyone plays the same seed and length on their own turn, whenever they like, and each finished run posts its result line back to the same thread.",
+    "when_to_use": "Every game is played this way; the plan's social.mode says what a send starts. Games need a fair shared seed, a 30-90 s round and one result line (social.share_line).",
+    "api": "planned: POST /v1/rounds {gameId, target: {kind: chat|group, id}, mode, bestOf?} -> {round: {id, seed, length, members, plays}}; POST /v1/rounds/{id}/plays {log}; GET /v1/rounds/{id}",
+    "params": {
+      "mode": "same_seed_async | series | group_round | weekly_board | opinion_compare (the manifest's group_play.mode)",
+      "target": "chat or Group id"
+    },
+    "events": [
+      "round.started",
+      "round.played",
+      "round.finished"
+    ],
+    "status": "planned",
+    "gaps_it_closes": [
+      "live_multiplayer"
+    ],
+    "example_types": [],
+    "notes": "Shipped pieces: 1:1 'beat my score' (score_challenge), friend series (series_best_of), the Group weekly board (weekly_group_board). Missing: a round tied to a chat thread with many members, and results posted back to it. docs/harness-gaps/group-play.md has the request for Max."
+  },
+  {
+    "id": "series_best_of",
+    "kind": "server_tool",
+    "name": "Best-of series with a friend",
+    "aliases": [
+      "best of 3",
+      "best of five",
+      "rematch series",
+      "first to 2"
+    ],
+    "summary": "A best-of-N (1-5 rounds) between two friends on server-picked seeds; each run is replayed in the engine and the server keeps the replayed score, decides each round and the series.",
+    "when_to_use": "Skill games two friends replay to settle who's better: racing, reaction, sports, arcade. The plan's social.mode series with best_of 3 or 5.",
+    "api": "POST /v1/series {opponentId, games: [gameId]}; POST /v1/series/{id}/rounds/{n} {log}; GET /v1/series/{id}",
+    "params": {
+      "best_of": "3 or 5"
+    },
+    "events": [
+      "series_invited",
+      "series_round"
+    ],
+    "status": "shipped",
+    "path": "backend/README.md",
+    "notes": "Two players only. A round goes to the higher score today, so a lower-is-better score (time_to_complete) needs the score model's direction on the server (Max)."
+  },
+  {
+    "id": "weekly_group_board",
+    "kind": "server_tool",
+    "name": "Group weekly board",
+    "aliases": [
+      "weekly leaderboard",
+      "group league",
+      "this week's standings"
+    ],
+    "summary": "A Group's members ranked across the Group's games for an ISO week by rank points (10, 7, 5, 3, 2, then 1), with rank change from last week.",
+    "when_to_use": "Group dailies and any ranked game made for a Group: the plan's social.mode weekly_board.",
+    "api": "GET /v1/groups/{id}/leaderboard?week=2026-W46",
+    "status": "shipped",
+    "path": "backend/README.md"
+  },
+  {
+    "id": "group_round",
+    "kind": "server_tool",
+    "name": "Group round",
+    "aliases": [
+      "everyone plays",
+      "group challenge",
+      "who won the group",
+      "game night podium"
+    ],
+    "summary": "Everyone in a group chat or Group plays the same seed and length; the round ranks every member who played by the score model (or the ending, or agreement) and names the winner when the round closes.",
+    "when_to_use": "Quiz, word and daily games for a whole chat or Group: the plan's social.mode group_round.",
+    "api": "planned: the chat_round API with mode group_round; closes when everyone has played or after closesAt",
+    "params": {
+      "closes_after": "hours, default 24"
+    },
+    "events": [
+      "round.played",
+      "round.finished"
+    ],
+    "status": "planned",
+    "notes": "The app's sessions and game nights do this locally today (docs/BUBBLES.md 7.2, 7.7); the server has only per-game scoped boards."
+  },
+  {
+    "id": "opinion_aggregate",
+    "kind": "server_tool",
+    "name": "Agreement with the group",
+    "aliases": [
+      "compare with everyone",
+      "vs everyone",
+      "what everyone picked",
+      "group consensus",
+      "how in sync are we"
+    ],
+    "summary": "For games with no right answer (ratings, tier lists, rankings, this-or-that): keeps each player's picks from the replay, and returns how closely they agree with a friend, with the chat or Group, and with everyone, plus the group's pick per item.",
+    "when_to_use": "Opinion games: the plan's social.result.compare agreement and mode opinion_compare. The score stays unranked.",
+    "api": "planned: POST /v1/games/{id}/picks {log} (picks read from the replay's end state, group_play.result.state); GET /v1/games/{id}/agreement?with=<userId>|scope=friends|group&groupId= -> {agreement: 0-100, items: [{item, mine, group, share}]}",
+    "params": {
+      "state": "the game state that holds the picks (group_play.result.state)"
+    },
+    "events": [
+      "picks_recorded"
+    ],
+    "status": "planned",
+    "gaps_it_closes": [
+      "opinion games can't compare with everyone"
+    ],
+    "notes": "Stand-in until it ships: two friends in a chat compare picks side by side (authoring/expander/group-play.mjs agreement), and the game reveals no group average it doesn't have."
+  },
+  {
+    "id": "run_result_state",
+    "kind": "runtime_tool",
+    "name": "Run result from the replay",
+    "aliases": [
+      "which ending",
+      "final picks",
+      "end state"
+    ],
+    "summary": "The engine's verify reports the end values of the game state named in the manifest's group_play.result.state (the ending reached, choices used, the picks), so the server can compare runs by more than the score.",
+    "when_to_use": "Story games compared by ending, and opinion games compared by picks.",
+    "api": "planned: MicrogameEngine.verify(game, log) -> {..., result: {<state name>: value}}",
+    "status": "planned",
+    "notes": "Today verify returns phase, time and score only. Request for Artem in docs/harness-gaps/group-play.md."
   }
 ]

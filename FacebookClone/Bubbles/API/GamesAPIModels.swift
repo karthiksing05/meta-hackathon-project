@@ -30,9 +30,15 @@ struct RemoteGame: Codable, Identifiable, Hashable, Sendable {
     var manifestURL: URL
     var coverURL: URL?
     var createdAt: Date
+    /// The library sound that plays behind the game in the feed, when it has one (`/v1/sounds`).
+    var sound: RemoteGameSound?
+    /// Set when the game is an ad (a brand account marked it; the server decides).
+    var sponsor: RemoteSponsor?
+    /// A draft: in the owner's creations, not in the feed or search until it is published.
+    var unlisted = false
 
     enum CodingKeys: String, CodingKey {
-        case id, slug, title, description, tags, formula, likes, plays, finishes, likedByMe, remixOf, createdAt
+        case id, slug, title, description, tags, formula, likes, plays, finishes, likedByMe, remixOf, createdAt, sound, sponsor, unlisted
         case groupID = "groupId"
         case eventID = "eventId"
         case ownerID = "ownerId"
@@ -63,6 +69,9 @@ struct RemoteGame: Codable, Identifiable, Hashable, Sendable {
         manifestURL = try c.decode(URL.self, forKey: .manifestURL)
         coverURL = try c.decodeIfPresent(URL.self, forKey: .coverURL)
         createdAt = try c.decode(Date.self, forKey: .createdAt)
+        sound = try? c.decodeIfPresent(RemoteGameSound.self, forKey: .sound)
+        sponsor = (try? c.decodeIfPresent(RemoteSponsor.self, forKey: .sponsor)).flatMap { $0?.name.isEmpty == false ? $0 : nil }
+        unlisted = (try? c.decodeIfPresent(Bool.self, forKey: .unlisted)) ?? false
     }
 
     init(
@@ -179,11 +188,13 @@ struct RemoteFeedItem: Decodable, Identifiable, Hashable, Sendable {
     var unproven: Bool
     /// `A` or `B` when the server interleaves; sent back in page events.
     var team: String?
+    /// Set when this page is a sponsored post. Only the server decides that.
+    var sponsor: RemoteSponsor?
 
     var id: String { feedItemID }
 
     enum CodingKeys: String, CodingKey {
-        case feedItemID, reason, why, unproven, team
+        case feedItemID, reason, why, unproven, team, sponsor
     }
 
     init(from decoder: Decoder) throws {
@@ -194,7 +205,127 @@ struct RemoteFeedItem: Decodable, Identifiable, Hashable, Sendable {
         why = try c.decodeIfPresent(String.self, forKey: .why).flatMap { $0.isEmpty ? nil : $0 }
         unproven = try c.decodeIfPresent(Bool.self, forKey: .unproven) ?? false
         team = try c.decodeIfPresent(String.self, forKey: .team).flatMap { $0.isEmpty ? nil : $0 }
+        sponsor = (try? c.decodeIfPresent(RemoteSponsor.self, forKey: .sponsor)).flatMap { $0?.name.isEmpty == false ? $0 : nil } ?? game.sponsor
     }
+}
+
+/// Who sponsors a feed page (proposed in Slack; Max to confirm): `{name, avatarUrl?, cta?, url?}`.
+struct RemoteSponsor: Codable, Hashable, Sendable {
+    var name: String
+    var avatarURL: URL?
+    /// The button's words; "Play now" when empty.
+    var cta: String?
+    /// The sponsor's own page, for "Learn more".
+    var url: URL?
+
+    enum CodingKeys: String, CodingKey {
+        case name, cta, url
+        case avatarURL = "avatarUrl"
+    }
+}
+
+// MARK: - Sounds
+
+/// A sound on a game or feed item: `{id, title, creator, audioUrl, coverUrl, offsetMs, mix}`.
+struct RemoteGameSound: Codable, Hashable, Sendable {
+    var id: String
+    var title: String
+    var creator: String
+    var audioURL: URL
+    var coverURL: URL?
+    /// Where in the loop to start, in milliseconds.
+    var offsetMs: Int
+    /// 0 is only the game's own sound, 1 only this sound; 0.7 by default.
+    var mix: Double
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, creator, offsetMs, mix
+        case audioURL = "audioUrl"
+        case coverURL = "coverUrl"
+    }
+
+    init(id: String, title: String, creator: String, audioURL: URL, coverURL: URL?, offsetMs: Int = 0, mix: Double = 0.7) {
+        self.id = id; self.title = title; self.creator = creator; self.audioURL = audioURL
+        self.coverURL = coverURL; self.offsetMs = offsetMs; self.mix = mix
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        title = try c.decodeIfPresent(String.self, forKey: .title) ?? ""
+        creator = try c.decodeIfPresent(String.self, forKey: .creator) ?? ""
+        audioURL = try c.decode(URL.self, forKey: .audioURL)
+        coverURL = try? c.decodeIfPresent(URL.self, forKey: .coverURL)
+        offsetMs = max(0, try c.decodeIfPresent(Int.self, forKey: .offsetMs) ?? 0)
+        mix = min(1, max(0, try c.decodeIfPresent(Double.self, forKey: .mix) ?? 0.7))
+    }
+}
+
+/// A sound in the library (`GET /v1/sounds`, `GET /v1/sounds/{id}`).
+struct RemoteSound: Decodable, Identifiable, Hashable, Sendable {
+    var id: String
+    var title: String
+    var creator: String
+    var creatorID: String
+    /// `library` or `original`.
+    var kind: String
+    var durationMs: Int?
+    var bpm: Double?
+    var audioURL: URL
+    var coverURL: URL?
+    var useCount: Int
+    var saves: Int
+    var savedByMe: Bool
+    var createdAt: Date?
+
+    enum CodingKeys: String, CodingKey {
+        case id, title, creator, kind, durationMs, bpm, useCount, saves, savedByMe, createdAt
+        case creatorID = "creatorId"
+        case audioURL = "audioUrl"
+        case coverURL = "coverUrl"
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        title = try c.decodeIfPresent(String.self, forKey: .title) ?? ""
+        creator = try c.decodeIfPresent(String.self, forKey: .creator) ?? ""
+        creatorID = try c.decodeIfPresent(String.self, forKey: .creatorID) ?? ""
+        kind = try c.decodeIfPresent(String.self, forKey: .kind) ?? "library"
+        durationMs = try? c.decodeIfPresent(Int.self, forKey: .durationMs)
+        bpm = try? c.decodeIfPresent(Double.self, forKey: .bpm)
+        audioURL = try c.decode(URL.self, forKey: .audioURL)
+        coverURL = try? c.decodeIfPresent(URL.self, forKey: .coverURL)
+        useCount = try c.decodeIfPresent(Int.self, forKey: .useCount) ?? 0
+        saves = try c.decodeIfPresent(Int.self, forKey: .saves) ?? 0
+        savedByMe = try c.decodeIfPresent(Bool.self, forKey: .savedByMe) ?? false
+        createdAt = try? c.decodeIfPresent(Date.self, forKey: .createdAt)
+    }
+
+    /// As it plays behind a game, from the start.
+    var asGameSound: RemoteGameSound {
+        RemoteGameSound(id: id, title: title, creator: creator, audioURL: audioURL, coverURL: coverURL)
+    }
+}
+
+/// `GET /v1/sounds/{id}/games`: `{items, total}`.
+struct RemoteSoundGames: Decodable, Sendable {
+    var items: [RemoteGame]
+    var total: Int
+
+    enum CodingKeys: String, CodingKey { case items, total }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        items = try c.decodeIfPresent([RemoteGame].self, forKey: .items) ?? []
+        total = try c.decodeIfPresent(Int.self, forKey: .total) ?? items.count
+    }
+}
+
+/// `PUT|DELETE /v1/sounds/{id}/save`.
+struct RemoteSoundSaveState: Decodable, Sendable {
+    var saves: Int
+    var savedByMe: Bool
 }
 
 struct RemoteFeedPage: Decodable, Sendable {

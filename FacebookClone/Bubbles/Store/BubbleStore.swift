@@ -50,6 +50,8 @@ final class BubbleStore {
     @ObservationIgnored var remoteGames: [String: RemoteGame] = [:]
     @ObservationIgnored var groupRequests: Set<String> = []
     @ObservationIgnored var feedTask: Task<Void, Never>?
+    /// Bumped for each feed request, so a superseded one can tell it no longer owns the feed.
+    @ObservationIgnored var feedGeneration = 0
     @ObservationIgnored var gameRequests: [String: Task<Bubble?, Never>] = [:]
     @ObservationIgnored private var dayObservers: [NSObjectProtocol] = []
     @ObservationIgnored let isPreview: Bool
@@ -228,10 +230,12 @@ final class BubbleStore {
         }
         bubble.playCount += 1
         let gameID = bubble.serverID
+        let log = result.engineLog
         Task { @MainActor [weak self] in
             guard let self else { return }
             do {
-                let rows = try await api.submitScore(entry.score, gameID: gameID)
+                // The engine log lets the server replay the run (required for games with a score model).
+                let rows = try await api.submitScore(entry.score, log: log, gameID: gameID)
                 apply(rows, to: bubble, keepingReplay: entry)
             } catch {
                 boardStates[bubble.id] = .failed(error.localizedDescription)

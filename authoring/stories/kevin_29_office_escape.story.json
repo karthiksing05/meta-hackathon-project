@@ -1,0 +1,428 @@
+{
+  "format": "story-graph/1",
+  "request": "Survival game where I'm the last person in an office on Friday at 4:59pm dodging the manager with 'one quick thing'",
+  "made_by": "muse-wonder-1.0 (effort low) via authoring/tools/story-muse.mjs, 1 repair round(s), 2026-11-12",
+  "title": "Friday 4:59: The Last One In",
+  "premise": "You are the last worker in the office and must escape before your manager finds you one quick thing.",
+  "start": "start",
+  "vars": [
+    {
+      "id": "energy",
+      "label": "Energy",
+      "kind": "stat",
+      "init": 3,
+      "min": 0,
+      "max": 5
+    },
+    {
+      "id": "snack",
+      "label": "Snack",
+      "kind": "item"
+    },
+    {
+      "id": "badge",
+      "label": "Badge",
+      "kind": "item"
+    },
+    {
+      "id": "helped",
+      "label": "Helped",
+      "kind": "flag"
+    },
+    {
+      "id": "spotted",
+      "label": "Spotted",
+      "kind": "flag"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "start",
+      "place": "Your desk, 4:59pm",
+      "text": "You are alone at your desk. Down the hall, your manager rises, folder in hand, smiling.",
+      "choices": [
+        {
+          "label": "Dash for the hallway",
+          "to": "hall"
+        },
+        {
+          "label": "Slip into the kitchen",
+          "to": "kitchen"
+        },
+        {
+          "label": "Duck under your desk",
+          "to": "underdesk",
+          "do": "energy-1",
+          "note": "-1 energy"
+        }
+      ]
+    },
+    {
+      "id": "kitchen",
+      "place": "Kitchen",
+      "text": "You press flat against the fridge. Manager footsteps pass, then pause outside the door.",
+      "choices": [
+        {
+          "label": "Pocket a snack bar",
+          "to": "hall",
+          "do": "snack",
+          "note": "+ snack bar"
+        },
+        {
+          "label": "Eat the mystery yogurt",
+          "to": "bathroom",
+          "do": "energy-1",
+          "note": "-1 energy, bad idea"
+        },
+        {
+          "label": "Sneak to the side door",
+          "to": "colleague"
+        }
+      ]
+    },
+    {
+      "id": "underdesk",
+      "place": "Under your desk",
+      "text": "You crouch among cables and a forgotten shoe. The manager's shoes stop beside you.",
+      "choices": [
+        {
+          "label": "Hold breath and wait",
+          "to": "hall"
+        },
+        {
+          "label": "Crawl toward the bathroom",
+          "to": "bathroom"
+        },
+        {
+          "label": "Text Priya for cover",
+          "to": "colleague"
+        }
+      ]
+    },
+    {
+      "id": "hall",
+      "place": "Main hallway",
+      "text": "You edge into the hallway. The manager patrols between you and every obvious exit.",
+      "choices": [
+        {
+          "label": "Walk casually, whistling",
+          "to": "meeting"
+        },
+        {
+          "label": "Sprint to the elevators",
+          "to": "elevator",
+          "do": "energy-1",
+          "note": "-1 energy"
+        },
+        {
+          "label": "Duck into the copy room",
+          "to": "copyroom"
+        }
+      ]
+    },
+    {
+      "id": "bathroom",
+      "place": "Bathroom",
+      "text": "You lock yourself in a stall until the hallway goes quiet. Your legs are cramping.",
+      "choices": [
+        {
+          "label": "Eat your snack bar",
+          "to": "hall",
+          "if": "snack",
+          "do": "energy+2 snack=0",
+          "note": "+2 energy, uses snack"
+        },
+        {
+          "label": "Splash cold water",
+          "to": "hall",
+          "do": "energy+1",
+          "note": "+1 energy"
+        },
+        {
+          "label": "Climb out the window",
+          "to": "stairwell"
+        }
+      ]
+    },
+    {
+      "id": "copyroom",
+      "place": "Copy room",
+      "text": "You hide as the copier warms up, loud enough to cover almost any escape plan.",
+      "choices": [
+        {
+          "label": "Hide behind the copier",
+          "to": "stairwell",
+          "do": "energy-1",
+          "note": "-1 energy"
+        },
+        {
+          "label": "Grab a spare badge",
+          "to": "service",
+          "do": "badge",
+          "note": "+ service badge"
+        },
+        {
+          "label": "Make noisy decoy copies",
+          "to": "elevator",
+          "do": "spotted",
+          "note": "Loud: you may be spotted"
+        }
+      ]
+    },
+    {
+      "id": "colleague",
+      "place": "Priya's desk",
+      "text": "Priya wrestles a jammed printer, one shoe off, whispering threats at the paper tray.",
+      "choices": [
+        {
+          "label": "Fix Priya's printer",
+          "to": "elevator",
+          "do": "helped energy-1",
+          "note": "-1 energy, Priya owes you"
+        },
+        {
+          "label": "Give Priya your snack",
+          "to": "elevator",
+          "if": "snack",
+          "do": "helped snack=0",
+          "note": "Uses snack, Priya owes you"
+        },
+        {
+          "label": "Leave Priya behind",
+          "to": "elevator",
+          "do": "spotted",
+          "note": "She shouts your name"
+        }
+      ]
+    },
+    {
+      "id": "meeting",
+      "place": "Open-plan floor",
+      "text": "Your manager lights up and raises the folder. One quick thing, they say, already walking.",
+      "choices": [
+        {
+          "label": "Accept the quick thing",
+          "to": "end_caught"
+        },
+        {
+          "label": "Fake an urgent call",
+          "to": "stairwell",
+          "do": "energy-1",
+          "note": "-1 energy",
+          "routes": [
+            {
+              "if": "spotted",
+              "to": "end_caught"
+            }
+          ]
+        },
+        {
+          "label": "Dive into the server room",
+          "to": "server"
+        }
+      ]
+    },
+    {
+      "id": "elevator",
+      "place": "Elevator lobby",
+      "text": "You jab the call button. Somewhere behind you, a chair rolls and footsteps start.",
+      "choices": [
+        {
+          "label": "Ride the main elevator",
+          "to": "ground",
+          "routes": [
+            {
+              "if": "spotted",
+              "to": "meeting"
+            }
+          ]
+        },
+        {
+          "label": "Take the service lift",
+          "to": "service",
+          "if": "badge",
+          "note": "Needs service badge"
+        },
+        {
+          "label": "Take the stairs instead",
+          "to": "stairwell",
+          "do": "energy-1",
+          "note": "-1 energy"
+        }
+      ]
+    },
+    {
+      "id": "stairwell",
+      "place": "Stairwell",
+      "text": "The stairwell echoes with your steps and, worryingly, with someone else's above you.",
+      "choices": [
+        {
+          "label": "Leap down two at a time",
+          "to": "ground",
+          "do": "energy-1",
+          "note": "-1 energy"
+        },
+        {
+          "label": "Climb up to the roof",
+          "to": "roof",
+          "do": "energy-1",
+          "note": "-1 energy"
+        },
+        {
+          "label": "Eat your snack and descend",
+          "to": "ground",
+          "if": "snack",
+          "do": "snack=0 energy+1",
+          "note": "+1 energy, uses snack"
+        }
+      ]
+    },
+    {
+      "id": "server",
+      "place": "Server room",
+      "text": "Cold air and blinking lights hide you. A service badge hangs by the back door.",
+      "choices": [
+        {
+          "label": "Grab badge, use back door",
+          "to": "service",
+          "do": "badge",
+          "note": "+ service badge"
+        },
+        {
+          "label": "Exit by the loading dock",
+          "to": "ground"
+        },
+        {
+          "label": "Nap behind the servers",
+          "to": "end_exhausted"
+        }
+      ]
+    },
+    {
+      "id": "service",
+      "place": "Service corridor",
+      "text": "Your badge beeps green. This bare corridor bypasses the whole office floor.",
+      "choices": [
+        {
+          "label": "Follow the exit signs",
+          "to": "ground"
+        },
+        {
+          "label": "Ride down to the lobby",
+          "to": "ground",
+          "do": "energy-1",
+          "note": "-1 energy, slower lift"
+        },
+        {
+          "label": "Head up the service stairs",
+          "to": "roof",
+          "do": "energy-1",
+          "note": "-1 energy"
+        }
+      ]
+    },
+    {
+      "id": "roof",
+      "place": "Roof",
+      "text": "Friday evening glows over the city. The fire escape rattles in the wind below you.",
+      "choices": [
+        {
+          "label": "Call Priya up to watch",
+          "to": "end_secret",
+          "if": "helped",
+          "note": "Priya brings drinks"
+        },
+        {
+          "label": "Climb down the fire escape",
+          "to": "ground",
+          "do": "energy-1",
+          "note": "-1 energy"
+        },
+        {
+          "label": "Wait out the manager",
+          "to": "end_late"
+        }
+      ]
+    },
+    {
+      "id": "ground",
+      "place": "Ground-floor lobby",
+      "text": "Freedom glows through the glass doors. Your manager steps from behind the front desk.",
+      "choices": [
+        {
+          "label": "Dash through the doors",
+          "to": "end_escape",
+          "routes": [
+            {
+              "if": "energy==0",
+              "to": "end_exhausted"
+            }
+          ]
+        },
+        {
+          "label": "Leave with Priya, badged",
+          "to": "end_secret",
+          "if": "helped & badge",
+          "note": "Needs Priya's help and badge"
+        },
+        {
+          "label": "Offer the guard your snack",
+          "to": "end_escape",
+          "if": "snack",
+          "do": "snack=0",
+          "note": "Uses snack as a distraction"
+        }
+      ]
+    },
+    {
+      "id": "end_escape",
+      "text": "You burst into Friday evening as the office lights click off behind you.",
+      "ending": {
+        "title": "Freedom Friday",
+        "tone": "good",
+        "rank": 1,
+        "share": "I escaped Friday in {choices} choices with {energy} energy"
+      }
+    },
+    {
+      "id": "end_secret",
+      "text": "You slip out the staff exit together as the manager locks up an empty office.",
+      "ending": {
+        "title": "Staff Exit Legends",
+        "tone": "secret",
+        "rank": 2,
+        "share": "Secret exit! I escaped in {choices} choices"
+      }
+    },
+    {
+      "id": "end_late",
+      "text": "You outwait your manager, but the last train is gone and the office is dark.",
+      "ending": {
+        "title": "Last Train Missed",
+        "tone": "neutral",
+        "rank": 3,
+        "share": "I survived but missed Friday in {choices} choices"
+      }
+    },
+    {
+      "id": "end_caught",
+      "text": "One quick thing becomes a weekend project, a status deck and three follow-up meetings.",
+      "ending": {
+        "title": "Weekend Warrior",
+        "tone": "bad",
+        "rank": 4,
+        "share": "Caught by one quick thing in {choices} choices"
+      }
+    },
+    {
+      "id": "end_exhausted",
+      "text": "You wake at your desk on Saturday, cheek stuck to a sticky note about synergy.",
+      "ending": {
+        "title": "Asleep at Your Desk",
+        "tone": "bad",
+        "rank": 5,
+        "share": "I collapsed escaping Friday in {choices} choices"
+      }
+    }
+  ]
+}

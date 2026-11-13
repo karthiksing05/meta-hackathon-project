@@ -117,6 +117,15 @@ final class FeedEventReporter {
 
     // MARK: - Moments
 
+    /// The CTA on a sponsored page was tapped: its own moment event, `{kind: "sponsor_tap", gameID}`
+    /// (Max, backend-api `cdbd915`).
+    func sponsorTap(gameID: String) {
+        guard enabled else { return }
+        var event = FeedEvent(gameID: gameID)
+        event.kind = "sponsor_tap"
+        enqueue(event)
+    }
+
     private func moment(_ kind: String, gameID: String, with userIDs: [String]) {
         guard enabled else { return }
         if let page = current, page.event.gameID == gameID {

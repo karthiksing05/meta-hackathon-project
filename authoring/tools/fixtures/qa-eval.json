@@ -1,0 +1,4487 @@
+{
+ "note": "Open-text gap measurement (docs/harness-gaps/open-text.md). first_draft: the bank real Muse wrote from the request alone (muse-wonder-1.0, low effort, one call). bank: the same bank after one refine round (Muse wrote 40 probe questions with true replies, the matcher answered them, and Muse repaired the failures once: 2 more calls). questions: held out; written by a player who saw only the setup, then labelled with the replies the solution supports. Never used to build or repair a bank.",
+ "puzzles": [
+  {
+   "id": "bar",
+   "first_draft": {
+    "bank": "qa-bank/1",
+    "cases": [
+     {
+      "title": "Water and a Gun",
+      "setup": "A man walks into a bar and asks for a glass of water. The bartender pulls out a gun and points it at him. The man says 'Thank you' and leaves. Why?",
+      "solution": "The man had hiccups and hoped water would cure them. The bartender realised this and pointed a gun at him to frighten him. The shock cured his hiccups, so he no longer needed the water. He thanked the bartender and left.",
+      "facts": [
+       {
+        "ask": "Did the bartender intend to scare the man to cure his hiccups?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "hiccup",
+          "hiccough",
+          "hiccups",
+          "hiccuping",
+          "cure",
+          "cured"
+         ]
+        ],
+        "also_ask": [
+         "Did the bartender use the gun as a hiccup cure?",
+         "Was the gun meant to stop the man's hiccups?"
+        ]
+       },
+       {
+        "ask": "Did the man ask for water because of his hiccups?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "water",
+          "drink",
+          "glass"
+         ],
+         [
+          "hiccup",
+          "hiccough",
+          "hiccups",
+          "hiccuping",
+          "cure",
+          "cured",
+          "stop"
+         ]
+        ],
+        "also_ask": [
+         "Was the water supposed to help his hiccups?",
+         "Did he want a drink to stop hiccuping?"
+        ]
+       },
+       {
+        "ask": "Did the man thank the bartender because his hiccups were gone?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "thank",
+          "thanks",
+          "thanked",
+          "grateful",
+          "gratitude"
+         ],
+         [
+          "hiccup",
+          "hiccough",
+          "hiccups",
+          "gone",
+          "cured",
+          "stopped"
+         ]
+        ],
+        "also_ask": [
+         "Was he grateful because he stopped hiccuping?",
+         "Did he say thanks after being cured?"
+        ]
+       },
+       {
+        "ask": "Did the bartender point the gun at the man to frighten him?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "scare",
+          "scared",
+          "fright",
+          "frighten",
+          "startle",
+          "shock",
+          "surprise",
+          "spook"
+         ]
+        ],
+        "also_ask": [
+         "Was the bartender trying to startle him?",
+         "Did the bartender mean to give him a shock?"
+        ]
+       },
+       {
+        "ask": "Did the bartender intend to shoot the man?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "shoot",
+          "shot",
+          "kill",
+          "murder",
+          "fire",
+          "firing"
+         ]
+        ],
+        "also_ask": [
+         "Was the bartender going to shoot him?",
+         "Did the bartender want to kill him?"
+        ]
+       },
+       {
+        "ask": "Was the bartender angry with the man?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "angry",
+          "mad",
+          "annoyed",
+          "upset",
+          "furious",
+          "irritated"
+         ]
+        ],
+        "also_ask": [
+         "Had the man annoyed the bartender?",
+         "Was the bartender mad at him?"
+        ]
+       },
+       {
+        "ask": "Did the bartender know the man from before?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "know",
+          "knew",
+          "known",
+          "recognise",
+          "recognize",
+          "friend",
+          "stranger"
+         ]
+        ],
+        "also_ask": [
+         "Were the bartender and the man friends?",
+         "Had the bartender met him before?"
+        ]
+       },
+       {
+        "ask": "Did the bartender want to help the man?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "help",
+          "helped",
+          "helping",
+          "assist",
+          "kind",
+          "cure"
+         ]
+        ],
+        "also_ask": [
+         "Was the bartender trying to help him?",
+         "Was the bartender being helpful?"
+        ]
+       },
+       {
+        "ask": "Did the man actually drink any water?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "water",
+          "drink",
+          "glass",
+          "drank",
+          "drinking"
+         ],
+         [
+          "drink",
+          "drank",
+          "drunk",
+          "sip",
+          "sipped",
+          "swallow",
+          "taste"
+         ]
+        ],
+        "also_ask": [
+         "Did he drink the glass of water?",
+         "Did he take a sip before leaving?"
+        ]
+       },
+       {
+        "ask": "Did the bartender give the man any water?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "give",
+          "gave",
+          "serve",
+          "served"
+         ],
+         [
+          "water",
+          "drink",
+          "glass",
+          "beverage"
+         ]
+        ],
+        "also_ask": [
+         "Did he ever get served his water?",
+         "Did the bartender pour him a drink?"
+        ]
+       },
+       {
+        "ask": "Was the gun fired?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "gun",
+          "pistol",
+          "firearm",
+          "weapon",
+          "revolver"
+         ],
+         [
+          "fire",
+          "fired",
+          "shoot",
+          "shot",
+          "shooting",
+          "bang",
+          "discharge"
+         ]
+        ],
+        "also_ask": [
+         "Did the bartender shoot the gun?",
+         "Was a shot fired in the bar?"
+        ]
+       },
+       {
+        "ask": "Was there an argument between the man and the bartender?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep"
+         ],
+         [
+          "argument",
+          "argue",
+          "fight",
+          "quarrel",
+          "dispute",
+          "row",
+          "conflict"
+         ]
+        ],
+        "also_ask": [
+         "Did they have a fight first?",
+         "Were they arguing about something?"
+        ]
+       },
+       {
+        "ask": "Did the man have hiccups when he walked in?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "hiccup",
+          "hiccough",
+          "hiccups",
+          "hiccuping",
+          "hiccuped"
+         ]
+        ],
+        "also_ask": [
+         "Was he hiccuping when he entered?",
+         "Did he come in with the hiccups?"
+        ]
+       },
+       {
+        "ask": "Was the man mainly thirsty?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "thirsty",
+          "thirst",
+          "parched",
+          "dehydrated",
+          "dry"
+         ]
+        ],
+        "also_ask": [
+         "Did he ask for water because he was thirsty?",
+         "Was he parched?"
+        ]
+       },
+       {
+        "ask": "Did the shock cure the man's problem?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "shock",
+          "scare",
+          "scared",
+          "fright",
+          "startle",
+          "surprise",
+          "spook"
+         ]
+        ],
+        "also_ask": [
+         "Was he scared out of his condition?",
+         "Did being frightened fix it?"
+        ]
+       },
+       {
+        "ask": "Was the gun real?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "gun",
+          "pistol",
+          "firearm",
+          "weapon",
+          "revolver"
+         ]
+        ],
+        "also_ask": [
+         "Was it a real firearm?",
+         "Was the weapon genuine?"
+        ]
+       },
+       {
+        "ask": "Was the gun loaded?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "loaded",
+          "bullets",
+          "bullet",
+          "ammunition",
+          "ammo",
+          "unloaded"
+         ]
+        ],
+        "also_ask": [
+         "Did the gun have bullets in it?",
+         "Was there ammunition in the weapon?"
+        ]
+       },
+       {
+        "ask": "Was the man in actual danger of being shot?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "danger",
+          "dangerous",
+          "threat",
+          "threatened",
+          "risk",
+          "harm",
+          "harmed",
+          "hurt"
+         ]
+        ],
+        "also_ask": [
+         "Was he really going to be hurt?",
+         "Was his life in danger?"
+        ]
+       },
+       {
+        "ask": "Did the man rob or try to rob the bar?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "rob",
+          "robbery",
+          "steal",
+          "stealing",
+          "thief",
+          "holdup",
+          "burglary"
+         ]
+        ],
+        "also_ask": [
+         "Was it a robbery?",
+         "Did he try to steal anything?"
+        ]
+       },
+       {
+        "ask": "Was a crime committed?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "crime",
+          "criminal",
+          "illegal",
+          "law",
+          "police",
+          "arrest",
+          "offence",
+          "offense"
+         ]
+        ],
+        "also_ask": [
+         "Did anyone break the law?",
+         "Were the police involved?"
+        ]
+       },
+       {
+        "ask": "Was the man drunk?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "drunk",
+          "alcohol",
+          "beer",
+          "whiskey",
+          "whisky",
+          "wine",
+          "intoxicated",
+          "liquor"
+         ]
+        ],
+        "also_ask": [
+         "Had he been drinking alcohol?",
+         "Was he intoxicated?"
+        ]
+       },
+       {
+        "ask": "Was the man ill or having a medical emergency?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "ill",
+          "sick",
+          "illness",
+          "medical",
+          "doctor",
+          "hospital",
+          "emergency",
+          "unwell"
+         ]
+        ],
+        "also_ask": [
+         "Was he sick?",
+         "Did he need a doctor?"
+        ]
+       },
+       {
+        "ask": "Was the man choking?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "choke",
+          "choking",
+          "choked",
+          "breath",
+          "breathing",
+          "cough",
+          "coughing",
+          "throat"
+         ]
+        ],
+        "also_ask": [
+         "Could he not breathe properly?",
+         "Was something stuck in his throat?"
+        ]
+       },
+       {
+        "ask": "Was the man joking or playing a prank?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "joke",
+          "joking",
+          "prank",
+          "funny",
+          "trick",
+          "humour",
+          "humor",
+          "laugh"
+         ]
+        ],
+        "also_ask": [
+         "Was it all a joke?",
+         "Was he playing a trick?"
+        ]
+       },
+       {
+        "ask": "Was the bartender joking or playing a prank?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep"
+         ],
+         [
+          "joke",
+          "joking",
+          "prank",
+          "trick",
+          "funny",
+          "humour",
+          "humor"
+         ]
+        ],
+        "also_ask": [
+         "Was the bartender pulling a prank?",
+         "Did the bartender do it as a joke?"
+        ]
+       },
+       {
+        "ask": "Did the man ask for water politely and normally?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "ask",
+          "asked",
+          "asking",
+          "request",
+          "requested",
+          "order",
+          "ordered"
+         ]
+        ],
+        "also_ask": [
+         "Did he order the water normally?",
+         "Did he request a glass of water?"
+        ]
+       },
+       {
+        "ask": "Did the man leave because he no longer needed the water?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "leave",
+          "left",
+          "leaving",
+          "exit",
+          "walked",
+          "gone",
+          "depart"
+         ]
+        ],
+        "also_ask": [
+         "Did he walk out because he was cured?",
+         "Did he leave once his problem was gone?"
+        ]
+       },
+       {
+        "ask": "Did the man leave because he was afraid for his life?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "afraid",
+          "fear",
+          "terrified",
+          "panic",
+          "panicked",
+          "flee",
+          "fled",
+          "run",
+          "ran"
+         ]
+        ],
+        "also_ask": [
+         "Did he run away in fear?",
+         "Did he flee because he thought he would be shot?"
+        ]
+       },
+       {
+        "ask": "Did anyone else in the bar intervene?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "customer",
+          "customers",
+          "patron",
+          "patrons",
+          "witness",
+          "witnesses",
+          "crowd",
+          "bystander",
+          "other",
+          "others",
+          "people"
+         ]
+        ],
+        "also_ask": [
+         "Were there other customers involved?",
+         "Did any witnesses do anything?"
+        ]
+       },
+       {
+        "ask": "Was anyone else involved in what happened?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "involved",
+          "involvement",
+          "accomplice",
+          "partner",
+          "helper",
+          "third",
+          "another"
+         ]
+        ],
+        "also_ask": [
+         "Was a third person involved?",
+         "Did anyone have an accomplice?"
+        ]
+       },
+       {
+        "ask": "Was the whole thing planned in advance?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "planned",
+          "plan",
+          "premeditated",
+          "arranged",
+          "staged",
+          "rehearsed",
+          "setup"
+         ]
+        ],
+        "also_ask": [
+         "Was it staged beforehand?",
+         "Did they plan it in advance?"
+        ]
+       },
+       {
+        "ask": "Did the bartender act on the spur of the moment?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "improvise",
+          "improvised",
+          "spur",
+          "impulse",
+          "impulsive",
+          "suddenly",
+          "spontaneous",
+          "idea"
+         ]
+        ],
+        "also_ask": [
+         "Did the bartender suddenly get the idea?",
+         "Was it an impulsive decision?"
+        ]
+       },
+       {
+        "ask": "Did the bartender understand why the man wanted water?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "understand",
+          "understood",
+          "realise",
+          "realize",
+          "realised",
+          "realized",
+          "notice",
+          "noticed",
+          "guess",
+          "guessed",
+          "figure"
+         ]
+        ],
+        "also_ask": [
+         "Did the bartender realise what was wrong with him?",
+         "Did the bartender notice his problem?"
+        ]
+       },
+       {
+        "ask": "Did the man expect the bartender to pull out a gun?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "expect",
+          "expected",
+          "anticipate",
+          "anticipated",
+          "predict",
+          "predicted"
+         ]
+        ],
+        "also_ask": [
+         "Was he expecting the gun?",
+         "Did he know what the bartender would do?"
+        ]
+       },
+       {
+        "ask": "Was the man happy or pleased at the end?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "happy",
+          "pleased",
+          "relieved",
+          "relief",
+          "satisfied",
+          "glad",
+          "delighted"
+         ]
+        ],
+        "also_ask": [
+         "Was he relieved afterwards?",
+         "Was he pleased with the result?"
+        ]
+       },
+       {
+        "ask": "Was the man angry at the end?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "angry",
+          "mad",
+          "furious",
+          "annoyed",
+          "upset",
+          "offended",
+          "insulted"
+         ]
+        ],
+        "also_ask": [
+         "Was he mad at the bartender?",
+         "Did he leave feeling upset?"
+        ]
+       },
+       {
+        "ask": "Does it matter exactly what time of day this happened?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "time",
+          "morning",
+          "afternoon",
+          "evening",
+          "night",
+          "day",
+          "clock",
+          "hour"
+         ]
+        ],
+        "also_ask": [
+         "Did it happen at night?",
+         "Does the time of day matter?"
+        ]
+       },
+       {
+        "ask": "Does it matter exactly which bar this was?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "bar",
+          "pub",
+          "tavern",
+          "inn",
+          "saloon",
+          "location",
+          "place",
+          "city",
+          "town"
+         ]
+        ],
+        "also_ask": [
+         "Was the specific pub important?",
+         "Does the location matter?"
+        ]
+       },
+       {
+        "ask": "Does the man's name or age matter?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "name",
+          "age",
+          "old",
+          "young",
+          "identity",
+          "occupation",
+          "job",
+          "appearance",
+          "look"
+         ]
+        ],
+        "also_ask": [
+         "How old was he?",
+         "Does his job matter?"
+        ]
+       },
+       {
+        "ask": "Was money involved in any way?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "money",
+          "pay",
+          "paid",
+          "cash",
+          "bill",
+          "tab",
+          "debt",
+          "owe",
+          "owed",
+          "cost"
+         ]
+        ],
+        "also_ask": [
+         "Did he owe the bartender money?",
+         "Was it about a debt?"
+        ]
+       },
+       {
+        "ask": "Was revenge a motive for the bartender?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "revenge",
+          "vengeance",
+          "payback",
+          "punish",
+          "punishment",
+          "retaliate",
+          "grudge"
+         ]
+        ],
+        "also_ask": [
+         "Was the bartender getting revenge?",
+         "Did the bartender hold a grudge?"
+        ]
+       }
+      ],
+      "solve": [
+       [
+        [
+         "hiccup",
+         "hiccough",
+         "hiccups",
+         "hiccuping"
+        ],
+        [
+         "scare",
+         "scared",
+         "fright",
+         "frighten",
+         "startle",
+         "shock",
+         "gun"
+        ]
+       ],
+       [
+        [
+         "hiccup",
+         "hiccough",
+         "hiccups",
+         "hiccuping"
+        ],
+        [
+         "cure",
+         "cured",
+         "gone",
+         "stopped",
+         "water"
+        ]
+       ]
+      ],
+      "hints": [
+       "The man did not mainly want the water because he was thirsty.",
+       "The bartender understood the man's problem without being told, and wanted to help him.",
+       "A sudden shock or fright is a traditional cure for the man's condition."
+      ]
+     }
+    ]
+   },
+   "bank": {
+    "bank": "qa-bank/1",
+    "cases": [
+     {
+      "title": "Water and a Gun",
+      "setup": "A man walks into a bar and asks for a glass of water. The bartender pulls out a gun and points it at him. The man says 'Thank you' and leaves. Why?",
+      "solution": "The man had hiccups and hoped water would cure them. The bartender realised this and pointed a gun at him to frighten him. The shock cured his hiccups, so he no longer needed the water. He thanked the bartender and left.",
+      "facts": [
+       {
+        "ask": "Was the man just thirsty?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "just",
+          "only",
+          "simply",
+          "merely",
+          "solely"
+         ],
+         [
+          "thirsty",
+          "thirst",
+          "parched",
+          "dehydrated"
+         ]
+        ],
+        "also_ask": [
+         "Was he only thirsty?",
+         "Did he simply want a drink because of thirst?"
+        ]
+       },
+       {
+        "ask": "Did the bartender plan it before he walked in?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "plan",
+          "planned",
+          "planning",
+          "premeditated",
+          "advance",
+          "before"
+         ]
+        ],
+        "also_ask": [
+         "Did the bartender plan it in advance?",
+         "Had the bartender planned this before the man arrived?"
+        ]
+       },
+       {
+        "ask": "Did he leave just because he was scared?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "leave",
+          "left",
+          "leaving",
+          "exit",
+          "depart"
+         ],
+         [
+          "scare",
+          "scared",
+          "fright",
+          "frightened",
+          "afraid",
+          "fear",
+          "just",
+          "only"
+         ]
+        ],
+        "also_ask": [
+         "Did he leave only because he was frightened?",
+         "Did he walk out just from fear?"
+        ]
+       },
+       {
+        "ask": "Was the thank you sarcastic?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "thank",
+          "thanks",
+          "thanked",
+          "gratitude"
+         ],
+         [
+          "sarcastic",
+          "sarcasm",
+          "ironic",
+          "insincere",
+          "mocking",
+          "joking"
+         ]
+        ],
+        "also_ask": [
+         "Was he being sarcastic when he thanked him?",
+         "Was the thanks insincere?"
+        ]
+       },
+       {
+        "ask": "Was he thanking him for the water?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "thank",
+          "thanks",
+          "thanked",
+          "grateful"
+         ],
+         [
+          "water",
+          "drink",
+          "glass",
+          "beverage"
+         ]
+        ],
+        "also_ask": [
+         "Did he thank him for giving him water?",
+         "Was he grateful for the drink?"
+        ]
+       },
+       {
+        "ask": "Did the man do something wrong earlier?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "wrong",
+          "bad",
+          "offend",
+          "offended",
+          "misbehave",
+          "trouble",
+          "fault",
+          "wrongdoing"
+         ],
+         [
+          "earlier",
+          "before",
+          "previously",
+          "prior"
+         ]
+        ],
+        "also_ask": [
+         "Had he done something bad before this?",
+         "Did he offend anyone earlier?"
+        ]
+       },
+       {
+        "ask": "Did it actually cure him?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "actually",
+          "really",
+          "truly"
+         ],
+         [
+          "cure",
+          "cured",
+          "curing",
+          "fix",
+          "fixed",
+          "healed",
+          "gone"
+         ]
+        ],
+        "also_ask": [
+         "Did it really fix his problem?",
+         "Did it actually make it go away?"
+        ]
+       },
+       {
+        "ask": "Did his voice sound weird when he spoke?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "voice",
+          "sound",
+          "sounded",
+          "speech",
+          "spoke",
+          "speak",
+          "speaking",
+          "talk",
+          "talking"
+         ],
+         [
+          "weird",
+          "strange",
+          "odd",
+          "unusual",
+          "different",
+          "funny"
+         ]
+        ],
+        "also_ask": [
+         "Did he sound strange when he talked?",
+         "Was his speech odd?"
+        ]
+       },
+       {
+        "ask": "Was the problem with his breathing?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "problem",
+          "issue",
+          "condition",
+          "trouble"
+         ],
+         [
+          "breathing",
+          "breath",
+          "breathe",
+          "breaths",
+          "respiratory"
+         ]
+        ],
+        "also_ask": [
+         "Was it a breathing problem?",
+         "Was the issue with his breath?"
+        ]
+       },
+       {
+        "ask": "Did he pay for anything?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "pay",
+          "paid",
+          "payment",
+          "buy",
+          "bought",
+          "purchase",
+          "paying"
+         ],
+         [
+          "anything",
+          "something",
+          "water",
+          "drink",
+          "glass"
+         ]
+        ],
+        "also_ask": [
+         "Did he pay for the water?",
+         "Did he buy anything?"
+        ]
+       },
+       {
+        "ask": "So he didn't need the water anymore?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "water",
+          "drink",
+          "glass"
+         ],
+         [
+          "anymore",
+          "longer",
+          "need",
+          "needed",
+          "necessary",
+          "require"
+         ]
+        ],
+        "also_ask": [
+         "Did he no longer need the water?",
+         "Was the water not needed anymore?"
+        ]
+       },
+       {
+        "ask": "Would the water have helped by itself?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "water",
+          "drink",
+          "glass"
+         ],
+         [
+          "help",
+          "helped",
+          "helping",
+          "itself",
+          "alone",
+          "cure",
+          "cured"
+         ]
+        ],
+        "also_ask": [
+         "Would water alone have helped?",
+         "Could the drink by itself have cured it?"
+        ]
+       },
+       {
+        "ask": "Did the bartender intend to scare the man to cure his hiccups?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "hiccup",
+          "hiccough",
+          "hiccups",
+          "hiccuping",
+          "cure",
+          "cured"
+         ]
+        ],
+        "also_ask": [
+         "Did the bartender use the gun as a hiccup cure?",
+         "Was the gun meant to stop the man's hiccups?"
+        ]
+       },
+       {
+        "ask": "Did the man ask for water because of his hiccups?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "water",
+          "drink",
+          "glass"
+         ],
+         [
+          "hiccup",
+          "hiccough",
+          "hiccups",
+          "hiccuping",
+          "cure",
+          "cured",
+          "stop"
+         ]
+        ],
+        "also_ask": [
+         "Was the water supposed to help his hiccups?",
+         "Did he want a drink to stop hiccuping?"
+        ]
+       },
+       {
+        "ask": "Did the man thank the bartender because his hiccups were gone?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "thank",
+          "thanks",
+          "thanked",
+          "grateful",
+          "gratitude"
+         ],
+         [
+          "hiccup",
+          "hiccough",
+          "hiccups",
+          "gone",
+          "cured",
+          "stopped"
+         ]
+        ],
+        "also_ask": [
+         "Was he grateful because he stopped hiccuping?",
+         "Did he say thanks after being cured?"
+        ]
+       },
+       {
+        "ask": "Did the bartender point the gun at the man to frighten him?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "scare",
+          "scared",
+          "fright",
+          "frighten",
+          "startle",
+          "shock",
+          "surprise",
+          "spook"
+         ]
+        ],
+        "also_ask": [
+         "Was the bartender trying to startle him?",
+         "Did the bartender mean to give him a shock?"
+        ]
+       },
+       {
+        "ask": "Did the bartender intend to shoot the man?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "shoot",
+          "shot",
+          "kill",
+          "murder",
+          "fire",
+          "firing"
+         ]
+        ],
+        "also_ask": [
+         "Was the bartender going to shoot him?",
+         "Did the bartender want to kill him?"
+        ]
+       },
+       {
+        "ask": "Was the bartender angry with the man?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "angry",
+          "mad",
+          "annoyed",
+          "upset",
+          "furious",
+          "irritated"
+         ]
+        ],
+        "also_ask": [
+         "Had the man annoyed the bartender?",
+         "Was the bartender mad at him?"
+        ]
+       },
+       {
+        "ask": "Did the bartender know the man from before?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "know",
+          "knew",
+          "known",
+          "recognise",
+          "recognize",
+          "friend",
+          "stranger"
+         ]
+        ],
+        "also_ask": [
+         "Were the bartender and the man friends?",
+         "Had the bartender met him before?"
+        ]
+       },
+       {
+        "ask": "Did the bartender want to help the man?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "server"
+         ],
+         [
+          "help",
+          "helped",
+          "helping",
+          "assist",
+          "kind",
+          "cure"
+         ]
+        ],
+        "also_ask": [
+         "Was the bartender trying to help him?",
+         "Was the bartender being helpful?"
+        ]
+       },
+       {
+        "ask": "Did the man actually drink any water?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "water",
+          "drink",
+          "glass",
+          "drank",
+          "drinking"
+         ],
+         [
+          "drink",
+          "drank",
+          "drunk",
+          "sip",
+          "sipped",
+          "swallow",
+          "taste"
+         ]
+        ],
+        "also_ask": [
+         "Did he drink the glass of water?",
+         "Did he take a sip before leaving?"
+        ]
+       },
+       {
+        "ask": "Did the bartender give the man any water?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep",
+          "give",
+          "gave",
+          "serve",
+          "served"
+         ],
+         [
+          "water",
+          "drink",
+          "glass",
+          "beverage"
+         ]
+        ],
+        "also_ask": [
+         "Did he ever get served his water?",
+         "Did the bartender pour him a drink?"
+        ]
+       },
+       {
+        "ask": "Was the gun fired?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "gun",
+          "pistol",
+          "firearm",
+          "weapon",
+          "revolver"
+         ],
+         [
+          "fire",
+          "fired",
+          "shoot",
+          "shot",
+          "shooting",
+          "bang",
+          "discharge"
+         ]
+        ],
+        "also_ask": [
+         "Did the bartender shoot the gun?",
+         "Was a shot fired in the bar?"
+        ]
+       },
+       {
+        "ask": "Was there an argument between the man and the bartender?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep"
+         ],
+         [
+          "argument",
+          "argue",
+          "fight",
+          "quarrel",
+          "dispute",
+          "row",
+          "conflict"
+         ]
+        ],
+        "also_ask": [
+         "Did they have a fight first?",
+         "Were they arguing about something?"
+        ]
+       },
+       {
+        "ask": "Did the man have hiccups when he walked in?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "hiccup",
+          "hiccough",
+          "hiccups",
+          "hiccuping",
+          "hiccuped"
+         ]
+        ],
+        "also_ask": [
+         "Was he hiccuping when he entered?",
+         "Did he come in with the hiccups?"
+        ]
+       },
+       {
+        "ask": "Was the man mainly thirsty?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "thirsty",
+          "thirst",
+          "parched",
+          "dehydrated",
+          "dry"
+         ]
+        ],
+        "also_ask": [
+         "Did he ask for water because he was thirsty?",
+         "Was he parched?"
+        ]
+       },
+       {
+        "ask": "Did the shock cure the man's problem?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "shock",
+          "scare",
+          "scared",
+          "fright",
+          "startle",
+          "surprise",
+          "spook"
+         ]
+        ],
+        "also_ask": [
+         "Was he scared out of his condition?",
+         "Did being frightened fix it?"
+        ]
+       },
+       {
+        "ask": "Was the gun real?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "gun",
+          "pistol",
+          "firearm",
+          "weapon",
+          "revolver"
+         ]
+        ],
+        "also_ask": [
+         "Was it a real firearm?",
+         "Was the weapon genuine?"
+        ]
+       },
+       {
+        "ask": "Is the water important?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "water",
+          "drink",
+          "glass"
+         ]
+        ],
+        "also_ask": [
+         "Is the drink important?",
+         "Does the glass of water matter?"
+        ]
+       },
+       {
+        "ask": "Did it cure him?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "cure",
+          "cured",
+          "curing",
+          "fix",
+          "fixed",
+          "healed"
+         ]
+        ],
+        "also_ask": [
+         "Did it fix him?",
+         "Was he cured?"
+        ]
+       },
+       {
+        "ask": "Was the gun loaded?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "loaded",
+          "bullets",
+          "bullet",
+          "ammunition",
+          "ammo",
+          "unloaded"
+         ]
+        ],
+        "also_ask": [
+         "Did the gun have bullets in it?",
+         "Was there ammunition in the weapon?"
+        ]
+       },
+       {
+        "ask": "Was the man in actual danger of being shot?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "danger",
+          "dangerous",
+          "threat",
+          "threatened",
+          "risk",
+          "harm",
+          "harmed",
+          "hurt"
+         ]
+        ],
+        "also_ask": [
+         "Was he really going to be hurt?",
+         "Was his life in danger?"
+        ]
+       },
+       {
+        "ask": "Did the man rob or try to rob the bar?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "rob",
+          "robbery",
+          "steal",
+          "stealing",
+          "thief",
+          "holdup",
+          "burglary"
+         ]
+        ],
+        "also_ask": [
+         "Was it a robbery?",
+         "Did he try to steal anything?"
+        ]
+       },
+       {
+        "ask": "Was a crime committed?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "crime",
+          "criminal",
+          "illegal",
+          "law",
+          "police",
+          "arrest",
+          "offence",
+          "offense"
+         ]
+        ],
+        "also_ask": [
+         "Did anyone break the law?",
+         "Were the police involved?"
+        ]
+       },
+       {
+        "ask": "Was the man drunk?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "drunk",
+          "alcohol",
+          "beer",
+          "whiskey",
+          "whisky",
+          "wine",
+          "intoxicated",
+          "liquor"
+         ]
+        ],
+        "also_ask": [
+         "Had he been drinking alcohol?",
+         "Was he intoxicated?"
+        ]
+       },
+       {
+        "ask": "Was the man ill or having a medical emergency?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "ill",
+          "sick",
+          "illness",
+          "medical",
+          "doctor",
+          "hospital",
+          "emergency",
+          "unwell"
+         ]
+        ],
+        "also_ask": [
+         "Was he sick?",
+         "Did he need a doctor?"
+        ]
+       },
+       {
+        "ask": "Was the man choking?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "choke",
+          "choking",
+          "choked",
+          "cough",
+          "coughing",
+          "throat"
+         ]
+        ],
+        "also_ask": [
+         "Was he choking on something?",
+         "Was something stuck in his throat?"
+        ]
+       },
+       {
+        "ask": "Was the man joking or playing a prank?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "joke",
+          "joking",
+          "prank",
+          "funny",
+          "trick",
+          "humour",
+          "humor",
+          "laugh"
+         ]
+        ],
+        "also_ask": [
+         "Was it all a joke?",
+         "Was he playing a trick?"
+        ]
+       },
+       {
+        "ask": "Was the bartender joking or playing a prank?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "bartender",
+          "barman",
+          "barkeep"
+         ],
+         [
+          "joke",
+          "joking",
+          "prank",
+          "trick",
+          "funny",
+          "humour",
+          "humor"
+         ]
+        ],
+        "also_ask": [
+         "Was the bartender pulling a prank?",
+         "Did the bartender do it as a joke?"
+        ]
+       },
+       {
+        "ask": "Did the man ask for water politely and normally?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "ask",
+          "asked",
+          "asking",
+          "request",
+          "requested",
+          "order",
+          "ordered"
+         ]
+        ],
+        "also_ask": [
+         "Did he order the water normally?",
+         "Did he request a glass of water?"
+        ]
+       },
+       {
+        "ask": "Did the man leave because he no longer needed the water?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "leave",
+          "left",
+          "leaving",
+          "exit",
+          "depart"
+         ]
+        ],
+        "also_ask": [
+         "Did he walk out because he was cured?",
+         "Did he leave once his problem was gone?"
+        ]
+       },
+       {
+        "ask": "Did the man leave because he was afraid for his life?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "afraid",
+          "fear",
+          "terrified",
+          "panic",
+          "panicked",
+          "flee",
+          "fled",
+          "run",
+          "ran"
+         ]
+        ],
+        "also_ask": [
+         "Did he run away in fear?",
+         "Did he flee because he thought he would be shot?"
+        ]
+       },
+       {
+        "ask": "Did anyone else in the bar intervene?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "customer",
+          "customers",
+          "patron",
+          "patrons",
+          "witness",
+          "witnesses",
+          "crowd",
+          "bystander",
+          "other",
+          "others",
+          "people"
+         ]
+        ],
+        "also_ask": [
+         "Were there other customers involved?",
+         "Did any witnesses do anything?"
+        ]
+       },
+       {
+        "ask": "Was anyone else involved in what happened?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "involved",
+          "involvement",
+          "accomplice",
+          "partner",
+          "helper",
+          "third",
+          "another"
+         ]
+        ],
+        "also_ask": [
+         "Was a third person involved?",
+         "Did anyone have an accomplice?"
+        ]
+       },
+       {
+        "ask": "Was the whole thing planned in advance?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "planned",
+          "plan",
+          "premeditated",
+          "arranged",
+          "staged",
+          "rehearsed",
+          "setup"
+         ]
+        ],
+        "also_ask": [
+         "Was it staged beforehand?",
+         "Did they plan it in advance?"
+        ]
+       },
+       {
+        "ask": "Did the bartender act on the spur of the moment?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "improvise",
+          "improvised",
+          "spur",
+          "impulse",
+          "impulsive",
+          "suddenly",
+          "spontaneous",
+          "idea"
+         ]
+        ],
+        "also_ask": [
+         "Did the bartender suddenly get the idea?",
+         "Was it an impulsive decision?"
+        ]
+       },
+       {
+        "ask": "Did the bartender understand why the man wanted water?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "understand",
+          "understood",
+          "realise",
+          "realize",
+          "realised",
+          "realized",
+          "notice",
+          "noticed",
+          "guess",
+          "guessed",
+          "figure"
+         ]
+        ],
+        "also_ask": [
+         "Did the bartender realise what was wrong with him?",
+         "Did the bartender notice his problem?"
+        ]
+       },
+       {
+        "ask": "Did the man expect the bartender to pull out a gun?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "expect",
+          "expected",
+          "anticipate",
+          "anticipated",
+          "predict",
+          "predicted"
+         ]
+        ],
+        "also_ask": [
+         "Was he expecting the gun?",
+         "Did he know what the bartender would do?"
+        ]
+       },
+       {
+        "ask": "Was the man happy or pleased at the end?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "happy",
+          "pleased",
+          "relieved",
+          "relief",
+          "satisfied",
+          "glad",
+          "delighted"
+         ]
+        ],
+        "also_ask": [
+         "Was he relieved afterwards?",
+         "Was he pleased with the result?"
+        ]
+       },
+       {
+        "ask": "Was the man angry at the end?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "angry",
+          "mad",
+          "furious",
+          "annoyed",
+          "upset",
+          "offended",
+          "insulted"
+         ]
+        ],
+        "also_ask": [
+         "Was he mad at the bartender?",
+         "Did he leave feeling upset?"
+        ]
+       },
+       {
+        "ask": "Does it matter exactly what time of day this happened?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "time",
+          "morning",
+          "afternoon",
+          "evening",
+          "night",
+          "day",
+          "clock",
+          "hour"
+         ]
+        ],
+        "also_ask": [
+         "Did it happen at night?",
+         "Does the time of day matter?"
+        ]
+       },
+       {
+        "ask": "Does it matter exactly which bar this was?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "bar",
+          "pub",
+          "tavern",
+          "inn",
+          "saloon",
+          "location",
+          "place",
+          "city",
+          "town"
+         ]
+        ],
+        "also_ask": [
+         "Was the specific pub important?",
+         "Does the location matter?"
+        ]
+       },
+       {
+        "ask": "Does the man's name or age matter?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "name",
+          "age",
+          "old",
+          "young",
+          "identity",
+          "occupation",
+          "job",
+          "appearance",
+          "look"
+         ]
+        ],
+        "also_ask": [
+         "How old was he?",
+         "Does his job matter?"
+        ]
+       },
+       {
+        "ask": "Was money involved in any way?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "money",
+          "pay",
+          "paid",
+          "cash",
+          "bill",
+          "tab",
+          "debt",
+          "owe",
+          "owed",
+          "cost"
+         ]
+        ],
+        "also_ask": [
+         "Did he owe the bartender money?",
+         "Was it about a debt?"
+        ]
+       },
+       {
+        "ask": "Was revenge a motive for the bartender?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "revenge",
+          "vengeance",
+          "payback",
+          "punish",
+          "punishment",
+          "retaliate",
+          "grudge"
+         ]
+        ],
+        "also_ask": [
+         "Was the bartender getting revenge?",
+         "Did the bartender hold a grudge?"
+        ]
+       }
+      ],
+      "solve": [
+       [
+        [
+         "hiccup",
+         "hiccough",
+         "hiccups",
+         "hiccuping"
+        ],
+        [
+         "scare",
+         "scared",
+         "fright",
+         "frighten",
+         "startle",
+         "shock",
+         "gun"
+        ]
+       ],
+       [
+        [
+         "hiccup",
+         "hiccough",
+         "hiccups",
+         "hiccuping"
+        ],
+        [
+         "cure",
+         "cured",
+         "gone",
+         "stopped",
+         "water"
+        ]
+       ]
+      ],
+      "hints": [
+       "The man did not mainly want the water because he was thirsty.",
+       "The bartender understood the man's problem without being told, and wanted to help him.",
+       "A sudden shock or fright is a traditional cure for the man's condition."
+      ]
+     }
+    ]
+   },
+   "questions": [
+    {
+     "q": "was the man thirsty",
+     "accept": [
+      "no",
+      "partly"
+     ]
+    },
+    {
+     "q": "did the bartender know the man",
+     "accept": [
+      "no"
+     ]
+    },
+    {
+     "q": "was the gun real",
+     "accept": [
+      "yes",
+      "irrelevant"
+     ]
+    },
+    {
+     "q": "did the bartender want to rob him",
+     "accept": [
+      "no"
+     ]
+    },
+    {
+     "q": "did the man have hiccups",
+     "accept": [
+      "yes"
+     ]
+    },
+    {
+     "q": "was the man sick",
+     "accept": [
+      "partly",
+      "no"
+     ]
+    },
+    {
+     "q": "was the bartender trying to help him",
+     "accept": [
+      "yes"
+     ]
+    },
+    {
+     "q": "did the man get scared",
+     "accept": [
+      "yes"
+     ]
+    },
+    {
+     "q": "is the water important",
+     "accept": [
+      "yes",
+      "partly"
+     ]
+    },
+    {
+     "q": "did he drink the water",
+     "accept": [
+      "no"
+     ]
+    },
+    {
+     "q": "was the man a criminal",
+     "accept": [
+      "no"
+     ]
+    },
+    {
+     "q": "did the bartendr shoot",
+     "accept": [
+      "no"
+     ]
+    },
+    {
+     "q": "was it a robbery",
+     "accept": [
+      "no"
+     ]
+    },
+    {
+     "q": "does it matter what time it was",
+     "accept": [
+      "irrelevant"
+     ]
+    },
+    {
+     "q": "did the man need the water for something other than drinking",
+     "accept": [
+      "yes"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "second_alarm",
+   "first_draft": {
+    "bank": "qa-bank/1",
+    "cases": [
+     {
+      "title": "The Second Alarm",
+      "setup": "Priya sets a loud kitchen alarm for five minutes after her bedside one. Every morning she races to stop it before it sounds. The night her power failed, she chose to sleep at a friend's house instead.",
+      "solution": "Priya lives alone after collapsing once, undetected for hours. Her neighbour listens each morning: if Priya is well she reaches the kitchen and stops the second alarm before it sounds; if it rings on, she may be unable to get up and needs help. Without power the safeguard could fail, so she stayed with a friend.",
+      "facts": [
+       {
+        "ask": "Is the second alarm meant as a signal to her neighbour?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "neighbour",
+          "neighbor",
+          "nextdoor",
+          "next-door",
+          "nearby"
+         ],
+         [
+          "alarm",
+          "signal",
+          "alert",
+          "sound",
+          "ringing"
+         ]
+        ],
+        "also_ask": [
+         "Would her neighbour be listening for the kitchen alarm?",
+         "Does the ringing alarm tell someone nearby something?"
+        ]
+       },
+       {
+        "ask": "If the alarm keeps ringing, does that mean Priya may need help?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "alarm",
+          "ringing",
+          "rings",
+          "sound"
+         ],
+         [
+          "help",
+          "emergency",
+          "trouble",
+          "danger",
+          "assistance",
+          "rescue"
+         ]
+        ],
+        "also_ask": [
+         "Does a long-ringing alarm mean she is in trouble?",
+         "Is the sound a call for assistance?"
+        ]
+       },
+       {
+        "ask": "Would the neighbour check on Priya if the alarm was not stopped?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "neighbour",
+          "neighbor",
+          "nextdoor",
+          "next-door"
+         ],
+         [
+          "check",
+          "rescue",
+          "help",
+          "visit",
+          "investigate",
+          "call"
+         ]
+        ],
+        "also_ask": [
+         "Would someone nearby come to check if it rang on?",
+         "Is her neighbour supposed to respond to the alarm?"
+        ]
+       },
+       {
+        "ask": "Is the neighbour a relative of Priya?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "neighbour",
+          "neighbor",
+          "nextdoor",
+          "next-door"
+         ],
+         [
+          "relative",
+          "family",
+          "mother",
+          "sister",
+          "brother",
+          "daughter",
+          "son"
+         ]
+        ],
+        "also_ask": [
+         "Is the person next door related to her?",
+         "Is her neighbour also a family member?"
+        ]
+       },
+       {
+        "ask": "Does Priya race to stop the alarm partly to avoid needlessly alarming her neighbour?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "stop",
+          "silence",
+          "off",
+          "disable",
+          "prevent"
+         ],
+         [
+          "neighbour",
+          "neighbor",
+          "worry",
+          "panic",
+          "disturb",
+          "bother"
+         ]
+        ],
+        "also_ask": [
+         "Does she hurry so her neighbour will not worry?",
+         "Is she trying not to disturb the person next door?"
+        ]
+       },
+       {
+        "ask": "Did the power failure make the alarm safeguard unreliable?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "power",
+          "electricity",
+          "outage",
+          "blackout",
+          "electric"
+         ],
+         [
+          "alarm",
+          "clock",
+          "safeguard",
+          "system",
+          "fail"
+         ]
+        ],
+        "also_ask": [
+         "Did losing electricity break her safety plan?",
+         "Could the alarm fail without power?"
+        ]
+       },
+       {
+        "ask": "Does Priya live alone?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "live",
+          "living",
+          "alone",
+          "solo",
+          "herself",
+          "single"
+         ]
+        ],
+        "also_ask": [
+         "Is there nobody else living with her?",
+         "Does she live by herself?"
+        ]
+       },
+       {
+        "ask": "Has Priya previously collapsed or been unable to get help?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "collapse",
+          "fainted",
+          "faint",
+          "fall",
+          "blackout",
+          "unconscious",
+          "episode"
+         ]
+        ],
+        "also_ask": [
+         "Has she fainted and been left undetected before?",
+         "Did she once fall ill alone and nobody knew?"
+        ]
+       },
+       {
+        "ask": "Does she race to reach the kitchen alarm before it sounds every morning?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "race",
+          "rush",
+          "hurry",
+          "run",
+          "quickly",
+          "dash"
+         ]
+        ],
+        "also_ask": [
+         "Does she hurry to reach it in time?",
+         "Does she rush across her home each morning?"
+        ]
+       },
+       {
+        "ask": "Is the first alarm beside her bed?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "bedside",
+          "bedroom",
+          "bed",
+          "pillow",
+          "bedside-table"
+         ]
+        ],
+        "also_ask": [
+         "Is one alarm in her bedroom?",
+         "Does the first alarm wake her in bed?"
+        ]
+       },
+       {
+        "ask": "Is the second alarm placed in the kitchen?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "kitchen",
+          "cooker",
+          "oven",
+          "counter"
+         ]
+        ],
+        "also_ask": [
+         "Is the later alarm in another room, the kitchen?",
+         "Did she put the second clock where she cooks?"
+        ]
+       },
+       {
+        "ask": "Is Priya deaf or hard of hearing?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "deaf",
+          "hearing",
+          "ears",
+          "hear",
+          "listening"
+         ]
+        ],
+        "also_ask": [
+         "Does she have trouble hearing alarms?",
+         "Is the loud alarm because of her hearing?"
+        ]
+       },
+       {
+        "ask": "Is the second alarm simply a backup in case the first fails?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "backup",
+          "back-up",
+          "reserve",
+          "failsafe",
+          "oversleep",
+          "overslept"
+         ]
+        ],
+        "also_ask": [
+         "Is it just there in case she sleeps through the first?",
+         "Did she set it because she might oversleep?"
+        ]
+       },
+       {
+        "ask": "Does she need the second alarm to wake her up?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "wake",
+          "waking",
+          "awaken",
+          "asleep",
+          "sleeping"
+         ]
+        ],
+        "also_ask": [
+         "Does the kitchen alarm actually wake her?",
+         "Would she stay asleep without the second alarm?"
+        ]
+       },
+       {
+        "ask": "Is she forgetful and afraid of forgetting something in the kitchen?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "forget",
+          "forgetful",
+          "memory",
+          "remember",
+          "forgot"
+         ]
+        ],
+        "also_ask": [
+         "Does the alarm remind her of something?",
+         "Is it about her poor memory?"
+        ]
+       },
+       {
+        "ask": "Does she race to the kitchen mainly for exercise?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "exercise",
+          "fitness",
+          "workout",
+          "steps",
+          "exercise-routine"
+         ]
+        ],
+        "also_ask": [
+         "Is the morning dash a way to keep fit?",
+         "Does she do it for her health routine rather than safety?"
+        ]
+       },
+       {
+        "ask": "Is her job the reason for the unusual alarm arrangement?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "job",
+          "work",
+          "shift",
+          "office",
+          "boss",
+          "employment"
+         ]
+        ],
+        "also_ask": [
+         "Does her work require this system?",
+         "Is it connected to getting to her job?"
+        ]
+       },
+       {
+        "ask": "Does she have an important appointment every morning?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "appointment",
+          "meeting",
+          "train",
+          "bus",
+          "deadline",
+          "schedule"
+         ]
+        ],
+        "also_ask": [
+         "Is she racing to catch transport each day?",
+         "Does she have a daily meeting she cannot miss?"
+        ]
+       },
+       {
+        "ask": "Is a pet involved in the alarm system?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "pet",
+          "cat",
+          "dog",
+          "animal",
+          "feed",
+          "feeding"
+         ]
+        ],
+        "also_ask": [
+         "Does an animal need feeding when it rings?",
+         "Is the alarm for a cat or dog?"
+        ]
+       },
+       {
+        "ask": "Is anyone else living in Priya's home part of the plan?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "housemate",
+          "roommate",
+          "partner",
+          "husband",
+          "wife",
+          "lodger"
+         ]
+        ],
+        "also_ask": [
+         "Does a partner or roommate help monitor her?",
+         "Is someone else in the flat involved?"
+        ]
+       },
+       {
+        "ask": "Is the friend she stayed with the same person as the neighbour?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "friend",
+          "friends",
+          "friend's",
+          "mate"
+         ]
+        ],
+        "also_ask": [
+         "Did she stay at the neighbour's house that night?",
+         "Was the friend part of the daily alarm plan?"
+        ]
+       },
+       {
+        "ask": "Did she stay elsewhere because she was afraid of the dark during the power cut?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "dark",
+          "darkness",
+          "afraid",
+          "scared",
+          "fear",
+          "candles"
+         ]
+        ],
+        "also_ask": [
+         "Did she leave because the blackout frightened her?",
+         "Was she scared to sleep without lights?"
+        ]
+       },
+       {
+        "ask": "Could a crime or intruder explain the alarms?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "crime",
+          "criminal",
+          "burglar",
+          "intruder",
+          "thief",
+          "break-in",
+          "stolen"
+         ]
+        ],
+        "also_ask": [
+         "Is she trying to deter a burglar?",
+         "Was there a break-in behind this?"
+        ]
+       },
+       {
+        "ask": "Is Priya in danger from another person?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "threat",
+          "threatened",
+          "stalker",
+          "attacker",
+          "enemy",
+          "revenge"
+         ]
+        ],
+        "also_ask": [
+         "Is someone threatening her?",
+         "Is she hiding from a person?"
+        ]
+       },
+       {
+        "ask": "Did anyone die in the events behind the alarm system?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "die",
+          "died",
+          "death",
+          "dead",
+          "killed",
+          "murder"
+         ]
+        ],
+        "also_ask": [
+         "Was somebody killed?",
+         "Is a death part of the story?"
+        ]
+       },
+       {
+        "ask": "Is Priya seriously ill every day?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "ill",
+          "sick",
+          "illness",
+          "disease",
+          "condition",
+          "diagnosis"
+         ]
+        ],
+        "also_ask": [
+         "Does she have a health condition that concerns her?",
+         "Is she unwell in a way that makes falling a risk?"
+        ]
+       },
+       {
+        "ask": "Could Priya have a medical emergency while alone?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "medical",
+          "health",
+          "heart",
+          "stroke",
+          "seizure",
+          "diabetes",
+          "emergency"
+         ]
+        ],
+        "also_ask": [
+         "Is there a health risk if she becomes ill alone?",
+         "Could she suddenly become unable to call for help?"
+        ]
+       },
+       {
+        "ask": "Is she elderly?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "elderly",
+          "old",
+          "age",
+          "aged",
+          "senior",
+          "pensioner"
+         ]
+        ],
+        "also_ask": [
+         "Is Priya an old woman?",
+         "Does her age explain the system?"
+        ]
+       },
+       {
+        "ask": "Does she know the neighbour well enough to rely on them?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "trust",
+          "trusted",
+          "rely",
+          "reliable",
+          "know",
+          "knows"
+         ]
+        ],
+        "also_ask": [
+         "Does she trust the person next door?",
+         "Is the neighbour someone she knows well?"
+        ]
+       },
+       {
+        "ask": "Was the two-alarm system planned deliberately?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "planned",
+          "plan",
+          "deliberate",
+          "intentional",
+          "arranged",
+          "designed"
+         ]
+        ],
+        "also_ask": [
+         "Did she set this up on purpose with a plan?",
+         "Was the arrangement agreed in advance?"
+        ]
+       },
+       {
+        "ask": "Did the neighbour agree to listen and respond?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "agree",
+          "agreed",
+          "agreement",
+          "arrangement",
+          "promise",
+          "promised"
+         ]
+        ],
+        "also_ask": [
+         "Was this an agreed arrangement with the neighbour?",
+         "Did the neighbour promise to help if needed?"
+        ]
+       },
+       {
+        "ask": "Is the loudness of the kitchen alarm important?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "loud",
+          "loudly",
+          "volume",
+          "noisy",
+          "audible"
+         ]
+        ],
+        "also_ask": [
+         "Does it need to be loud enough to hear through a wall?",
+         "Is the volume part of the plan?"
+        ]
+       },
+       {
+        "ask": "Could the walls between the homes let the neighbour hear it?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "wall",
+          "walls",
+          "thin",
+          "adjoining",
+          "attached",
+          "through"
+         ]
+        ],
+        "also_ask": [
+         "Can the sound be heard from next door?",
+         "Are the homes close enough for that?"
+        ]
+       },
+       {
+        "ask": "Does Priya dislike the sound and simply want silence in the morning?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "dislike",
+          "hate",
+          "annoying",
+          "irritating",
+          "silence",
+          "quiet"
+         ]
+        ],
+        "also_ask": [
+         "Does she race because she hates the noise?",
+         "Is she just trying to keep her home quiet?"
+        ]
+       },
+       {
+        "ask": "Is she happy or relieved when she stops it in time?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "happy",
+          "relieved",
+          "relief",
+          "glad",
+          "pleased",
+          "calm"
+         ]
+        ],
+        "also_ask": [
+         "Does stopping it reassure her each day?",
+         "Does she feel relief when she reaches it?"
+        ]
+       },
+       {
+        "ask": "Was she angry with the electricity company on the night of the failure?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "angry",
+          "mad",
+          "annoyed",
+          "furious",
+          "upset",
+          "complaint"
+         ]
+        ],
+        "also_ask": [
+         "Did she leave because she was annoyed about the outage?",
+         "Was anger the reason she stayed with a friend?"
+        ]
+       },
+       {
+        "ask": "Is money involved in the explanation?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "money",
+          "paid",
+          "pay",
+          "cost",
+          "expensive",
+          "cheap",
+          "bet",
+          "wager"
+         ]
+        ],
+        "also_ask": [
+         "Did she do it for money or a bet?",
+         "Was the alarm system expensive to arrange?"
+        ]
+       },
+       {
+        "ask": "Is the alarm connected to cooking or preventing a fire?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "cooking",
+          "cook",
+          "fire",
+          "smoke",
+          "burn",
+          "burning",
+          "oven"
+         ]
+        ],
+        "also_ask": [
+         "Is it a timer to stop food burning?",
+         "Was she worried about a kitchen fire?"
+        ]
+       },
+       {
+        "ask": "Does the time of five minutes matter exactly?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "five",
+          "minutes",
+          "timing",
+          "exact",
+          "exactly",
+          "interval"
+         ]
+        ],
+        "also_ask": [
+         "Is five minutes a crucial precise interval?",
+         "Would four or six minutes change the story?"
+        ]
+       },
+       {
+        "ask": "Would a phone app alone give her the same protection?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "phone",
+          "mobile",
+          "app",
+          "smartphone",
+          "text",
+          "call"
+         ]
+        ],
+        "also_ask": [
+         "Could she simply phone someone each morning instead?",
+         "Is a phone part of the system?"
+        ]
+       }
+      ],
+      "solve": [
+       [
+        [
+         "neighbour",
+         "neighbor",
+         "nextdoor",
+         "next-door",
+         "nearby"
+        ],
+        [
+         "help",
+         "emergency",
+         "trouble",
+         "unable",
+         "rescue",
+         "check"
+        ]
+       ],
+       [
+        [
+         "alone",
+         "live",
+         "living",
+         "herself",
+         "solo"
+        ],
+        [
+         "alarm",
+         "ringing",
+         "rings",
+         "signal",
+         "alert",
+         "sounds"
+        ]
+       ]
+      ],
+      "hints": [
+       "The second alarm is not really meant to wake Priya.",
+       "Think about who else might hear it if Priya failed to stop it.",
+       "Priya once had a health emergency at home, and no one knew."
+      ]
+     }
+    ]
+   },
+   "bank": {
+    "bank": "qa-bank/1",
+    "cases": [
+     {
+      "title": "The Second Alarm",
+      "setup": "Priya sets a loud kitchen alarm for five minutes after her bedside one. Every morning she races to stop it before it sounds. The night her power failed, she chose to sleep at a friend's house instead.",
+      "solution": "Priya lives alone after collapsing once, undetected for hours. Her neighbour listens each morning: if Priya is well she reaches the kitchen and stops the second alarm before it sounds; if it rings on, she may be unable to get up and needs help. Without power the safeguard could fail, so she stayed with a friend.",
+      "facts": [
+       {
+        "ask": "Is anyone else listening for the alarm?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "listening",
+          "listen",
+          "listens",
+          "listener",
+          "anyone",
+          "else",
+          "hear",
+          "hears",
+          "heard"
+         ],
+         [
+          "alarm",
+          "ringing",
+          "rings",
+          "morning",
+          "every",
+          "daily",
+          "signal"
+         ]
+        ],
+        "also_ask": [
+         "Is someone else listening every morning?",
+         "Would another person hear it if it rang?"
+        ]
+       },
+       {
+        "ask": "Is the second alarm meant as a signal to her neighbour?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "neighbour",
+          "neighbor",
+          "neigbour",
+          "neighbur",
+          "nextdoor",
+          "next-door",
+          "nearby"
+         ],
+         [
+          "alarm",
+          "signal",
+          "alert",
+          "sound",
+          "ringing",
+          "listening",
+          "listen"
+         ]
+        ],
+        "also_ask": [
+         "Would her neighbour be listening for the kitchen alarm?",
+         "Does the ringing alarm tell someone nearby something?"
+        ]
+       },
+       {
+        "ask": "If the alarm keeps ringing, does that mean Priya may need help?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "alarm",
+          "ringing",
+          "rings",
+          "sound",
+          "keeps"
+         ],
+         [
+          "help",
+          "emergency",
+          "trouble",
+          "danger",
+          "assistance",
+          "rescue",
+          "wrong",
+          "safety",
+          "safe",
+          "check",
+          "wellness",
+          "unwell",
+          "unable",
+          "wrong"
+         ]
+        ],
+        "also_ask": [
+         "Does a long-ringing alarm mean she is in trouble?",
+         "Is the alarm actually a safety check?"
+        ]
+       },
+       {
+        "ask": "Would the neighbour check on Priya if the alarm was not stopped?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "neighbour",
+          "neighbor",
+          "neigbour",
+          "nextdoor",
+          "next-door"
+         ],
+         [
+          "check",
+          "rescue",
+          "help",
+          "visit",
+          "investigate",
+          "call"
+         ]
+        ],
+        "also_ask": [
+         "Would someone nearby come to check if it rang on?",
+         "Is her neighbour supposed to respond to the alarm?"
+        ]
+       },
+       {
+        "ask": "Is the neighbour a relative of Priya?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "neighbour",
+          "neighbor",
+          "neigbour",
+          "nextdoor",
+          "next-door"
+         ],
+         [
+          "relative",
+          "family",
+          "mother",
+          "sister",
+          "brother",
+          "daughter",
+          "son",
+          "same"
+         ]
+        ],
+        "also_ask": [
+         "Is the person next door related to her?",
+         "Is her neighbour also a family member?"
+        ]
+       },
+       {
+        "ask": "Does Priya race to stop the alarm partly to avoid needlessly alarming her neighbour?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "stop",
+          "silence",
+          "off",
+          "disable",
+          "prevent"
+         ],
+         [
+          "neighbour",
+          "neighbor",
+          "neigbour",
+          "worry",
+          "panic",
+          "disturb",
+          "bother"
+         ]
+        ],
+        "also_ask": [
+         "Does she hurry so her neighbour will not worry?",
+         "Is she trying not to disturb the person next door?"
+        ]
+       },
+       {
+        "ask": "Did the power failure make the alarm safeguard unreliable?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "power",
+          "electricity",
+          "outage",
+          "blackout",
+          "electric",
+          "cut"
+         ],
+         [
+          "alarm",
+          "clock",
+          "safeguard",
+          "system",
+          "fail",
+          "unreliable"
+         ]
+        ],
+        "also_ask": [
+         "Did losing electricity break her safety plan?",
+         "Could the alarm fail without power?"
+        ]
+       },
+       {
+        "ask": "Was the power cut Priya's fault?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "power",
+          "electricity",
+          "outage",
+          "blackout",
+          "cut"
+         ],
+         [
+          "fault",
+          "blame",
+          "caused",
+          "cause",
+          "responsible",
+          "accident"
+         ]
+        ],
+        "also_ask": [
+         "Did she cause the power failure?",
+         "Was she responsible for the blackout?"
+        ]
+       },
+       {
+        "ask": "Is the kitchen alarm for cooking?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "kitchen",
+          "cooker",
+          "counter"
+         ],
+         [
+          "cooking",
+          "cook",
+          "timer",
+          "food",
+          "prepare",
+          "fire",
+          "smoke",
+          "burn",
+          "burning",
+          "oven"
+         ]
+        ],
+        "also_ask": [
+         "Is it a kitchen timer for food?",
+         "Is the alarm connected to cooking or preventing a fire?"
+        ]
+       },
+       {
+        "ask": "Did she stay at her friend's because of the power cut?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "friend",
+          "friends",
+          "mate"
+         ],
+         [
+          "power",
+          "outage",
+          "blackout",
+          "cut",
+          "failure",
+          "electricity"
+         ]
+        ],
+        "also_ask": [
+         "Did the power failure make her sleep at a friend's?",
+         "Did she stay there because the power failed?"
+        ]
+       },
+       {
+        "ask": "Did she stay there so someone would be with her overnight?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "overnight",
+          "company",
+          "accompanied",
+          "together",
+          "presence",
+          "someone"
+         ],
+         [
+          "stay",
+          "stayed",
+          "sleep",
+          "slept",
+          "friend",
+          "house"
+         ]
+        ],
+        "also_ask": [
+         "Did she stay so she would not be alone overnight?",
+         "Was she with someone that night for safety?"
+        ]
+       },
+       {
+        "ask": "Is she training herself to get up fast, or just forcing herself out of bed?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "force",
+          "forcing",
+          "train",
+          "training",
+          "practice",
+          "practising",
+          "discipline"
+         ],
+         [
+          "bed",
+          "up",
+          "out",
+          "fast",
+          "quick",
+          "wake",
+          "morning",
+          "get"
+         ]
+        ],
+        "also_ask": [
+         "Is it just to force herself out of bed?",
+         "Is she training herself to get up fast?"
+        ]
+       },
+       {
+        "ask": "Does she race because she hates the noise?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "race",
+          "rush",
+          "run",
+          "hurry",
+          "dash"
+         ],
+         [
+          "hate",
+          "dislike",
+          "noise",
+          "sound",
+          "loud",
+          "annoying"
+         ]
+        ],
+        "also_ask": [
+         "Does she hurry partly because she dislikes the loud sound?",
+         "Is avoiding the noise part of why she races?"
+        ]
+       },
+       {
+        "ask": "Did she want to annoy the neighbours?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "annoy",
+          "annoying",
+          "bother",
+          "disturb",
+          "upset",
+          "irritate"
+         ],
+         [
+          "neighbour",
+          "neighbours",
+          "neighbor",
+          "neighbors",
+          "neigbour"
+         ]
+        ],
+        "also_ask": [
+         "Was the alarm meant to annoy people next door?",
+         "Did she want to disturb her neighbours?"
+        ]
+       },
+       {
+        "ask": "Could a quiet alarm work instead?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "quiet",
+          "quieter",
+          "silent",
+          "soft",
+          "silence"
+         ],
+         [
+          "alarm",
+          "instead",
+          "replace",
+          "alternative",
+          "work",
+          "use"
+         ]
+        ],
+        "also_ask": [
+         "Could she use a quieter alarm instead?",
+         "Would a soft alarm give the same signal?"
+        ]
+       },
+       {
+        "ask": "Does she set the alarm on her phone?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "phone",
+          "mobile",
+          "smartphone"
+         ],
+         [
+          "set",
+          "sets",
+          "setting",
+          "alarm",
+          "clock"
+         ]
+        ],
+        "also_ask": [
+         "Is the kitchen alarm on her mobile?",
+         "Does she use her phone as that alarm?"
+        ]
+       },
+       {
+        "ask": "If she stops the alarm in time, does that prove she is OK?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "stop",
+          "stops",
+          "stopped",
+          "reaches",
+          "reach",
+          "silence"
+         ],
+         [
+          "ok",
+          "okay",
+          "well",
+          "fine",
+          "safe",
+          "prove",
+          "proves",
+          "proof",
+          "healthy",
+          "alive"
+         ]
+        ],
+        "also_ask": [
+         "Does stopping it show she is well that morning?",
+         "If she stops it in time, does that prove she's ok?"
+        ]
+       },
+       {
+        "ask": "Was she scared to sleep alone, or afraid of the dark during the power cut?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "scared",
+          "afraid",
+          "fear",
+          "frightened"
+         ],
+         [
+          "alone",
+          "sleep",
+          "night",
+          "dark",
+          "darkness",
+          "power",
+          "blackout",
+          "lights",
+          "every"
+         ]
+        ],
+        "also_ask": [
+         "Is she scared to sleep alone every night?",
+         "Did she leave because the blackout frightened her?"
+        ]
+       },
+       {
+        "ask": "Has Priya previously collapsed or been unable to get help?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "collapse",
+          "fainted",
+          "faint",
+          "fall",
+          "blackout",
+          "unconscious",
+          "episode",
+          "bad",
+          "happened",
+          "happen",
+          "incident",
+          "before",
+          "previously",
+          "undetected"
+         ]
+        ],
+        "also_ask": [
+         "Has she fainted and been left undetected before?",
+         "Did something bad happen to her before?"
+        ]
+       },
+       {
+        "ask": "Does Priya live alone?",
+        "reply": "yes",
+        "key": true,
+        "match": [
+         [
+          "live",
+          "living",
+          "alone",
+          "lives"
+         ]
+        ],
+        "also_ask": [
+         "Is there nobody else living with her?",
+         "Does she live by herself?"
+        ]
+       },
+       {
+        "ask": "Does she race to reach the kitchen alarm before it sounds every morning?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "race",
+          "rush",
+          "hurry",
+          "run",
+          "quickly",
+          "dash"
+         ]
+        ],
+        "also_ask": [
+         "Does she hurry to reach it in time?",
+         "Does she rush across her home each morning?"
+        ]
+       },
+       {
+        "ask": "Is the first alarm beside her bed?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "bedside",
+          "bedroom",
+          "bed",
+          "pillow",
+          "bedside-table"
+         ]
+        ],
+        "also_ask": [
+         "Is one alarm in her bedroom?",
+         "Does the first alarm wake her in bed?"
+        ]
+       },
+       {
+        "ask": "Is the second alarm placed in the kitchen?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "kitchen",
+          "cooker",
+          "oven",
+          "counter"
+         ]
+        ],
+        "also_ask": [
+         "Is the later alarm in another room, the kitchen?",
+         "Did she put the second clock where she cooks?"
+        ]
+       },
+       {
+        "ask": "Is the neighbour involved?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "neighbour",
+          "neighbor",
+          "neigbour",
+          "neighbur",
+          "nextdoor",
+          "next-door"
+         ]
+        ],
+        "also_ask": [
+         "Is it her neighbour?",
+         "Does the person next door play a part?"
+        ]
+       },
+       {
+        "ask": "Is Priya deaf or hard of hearing?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "deaf",
+          "hearing",
+          "ears",
+          "hard-of-hearing"
+         ]
+        ],
+        "also_ask": [
+         "Does she have trouble hearing alarms?",
+         "Is the loud alarm because of her hearing?"
+        ]
+       },
+       {
+        "ask": "Is the second alarm simply a backup in case the first fails, or is she a heavy sleeper?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "backup",
+          "back-up",
+          "reserve",
+          "failsafe",
+          "oversleep",
+          "overslept",
+          "heavy",
+          "sleeper",
+          "deep"
+         ]
+        ],
+        "also_ask": [
+         "Is it just there in case she sleeps through the first?",
+         "Is she a really heavy sleeper?"
+        ]
+       },
+       {
+        "ask": "Does she need the second alarm to wake her up?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "wake",
+          "waking",
+          "awaken",
+          "asleep",
+          "sleeping"
+         ]
+        ],
+        "also_ask": [
+         "Does the kitchen alarm actually wake her?",
+         "Would she stay asleep without the second alarm?"
+        ]
+       },
+       {
+        "ask": "Is she forgetful and afraid of forgetting something in the kitchen?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "forget",
+          "forgetful",
+          "memory",
+          "remember",
+          "forgot"
+         ]
+        ],
+        "also_ask": [
+         "Does the alarm remind her of something?",
+         "Is it about her poor memory?"
+        ]
+       },
+       {
+        "ask": "Does she race to the kitchen mainly for exercise?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "exercise",
+          "fitness",
+          "workout",
+          "steps",
+          "exercise-routine"
+         ]
+        ],
+        "also_ask": [
+         "Is the morning dash a way to keep fit?",
+         "Does she do it for her health routine rather than safety?"
+        ]
+       },
+       {
+        "ask": "Is her job the reason for the unusual alarm arrangement?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "job",
+          "work",
+          "shift",
+          "office",
+          "boss",
+          "employment"
+         ]
+        ],
+        "also_ask": [
+         "Does her work require this system?",
+         "Is it connected to getting to her job?"
+        ]
+       },
+       {
+        "ask": "Does she have an important appointment every morning?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "appointment",
+          "meeting",
+          "train",
+          "bus",
+          "deadline",
+          "schedule"
+         ]
+        ],
+        "also_ask": [
+         "Is she racing to catch transport each day?",
+         "Does she have a daily meeting she cannot miss?"
+        ]
+       },
+       {
+        "ask": "Is a pet involved in the alarm system?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "pet",
+          "cat",
+          "dog",
+          "animal",
+          "feed",
+          "feeding"
+         ]
+        ],
+        "also_ask": [
+         "Does an animal need feeding when it rings?",
+         "Is the alarm for a cat or dog?"
+        ]
+       },
+       {
+        "ask": "Is anyone else living in Priya's home part of the plan, or is she married?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "housemate",
+          "roommate",
+          "partner",
+          "husband",
+          "wife",
+          "lodger",
+          "married",
+          "marriage"
+         ]
+        ],
+        "also_ask": [
+         "Does a partner or roommate help monitor her?",
+         "Is she married?"
+        ]
+       },
+       {
+        "ask": "Is the friend she stayed with the same person as the neighbour?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "friend",
+          "friends",
+          "mate"
+         ]
+        ],
+        "also_ask": [
+         "Did she stay at the neighbour's house that night?",
+         "Was the friend part of the daily alarm plan?"
+        ]
+       },
+       {
+        "ask": "Could a crime or intruder explain the alarms?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "crime",
+          "criminal",
+          "burglar",
+          "intruder",
+          "thief",
+          "break-in",
+          "stolen"
+         ]
+        ],
+        "also_ask": [
+         "Is she trying to deter a burglar?",
+         "Was there a break-in behind this?"
+        ]
+       },
+       {
+        "ask": "Is Priya in danger from another person?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "threat",
+          "threatened",
+          "stalker",
+          "attacker",
+          "enemy",
+          "revenge"
+         ]
+        ],
+        "also_ask": [
+         "Is someone threatening her?",
+         "Is she hiding from a person?"
+        ]
+       },
+       {
+        "ask": "Did anyone die in the events behind the alarm system?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "die",
+          "died",
+          "death",
+          "dead",
+          "killed",
+          "murder"
+         ]
+        ],
+        "also_ask": [
+         "Was somebody killed?",
+         "Is a death part of the story?"
+        ]
+       },
+       {
+        "ask": "Is Priya seriously ill every day?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "ill",
+          "sick",
+          "illness",
+          "disease",
+          "condition",
+          "diagnosis"
+         ]
+        ],
+        "also_ask": [
+         "Does she have a health condition that concerns her?",
+         "Is she unwell in a way that makes falling a risk?"
+        ]
+       },
+       {
+        "ask": "Could Priya have a medical emergency while alone?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "medical",
+          "health",
+          "heart",
+          "stroke",
+          "seizure",
+          "diabetes",
+          "emergency"
+         ]
+        ],
+        "also_ask": [
+         "Is there a health risk if she becomes ill alone?",
+         "Could she suddenly become unable to call for help?"
+        ]
+       },
+       {
+        "ask": "Is she elderly?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "elderly",
+          "old",
+          "age",
+          "aged",
+          "senior",
+          "pensioner"
+         ]
+        ],
+        "also_ask": [
+         "Is Priya an old woman?",
+         "Does her age explain the system?"
+        ]
+       },
+       {
+        "ask": "Was the two-alarm system planned deliberately?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "planned",
+          "plan",
+          "deliberate",
+          "intentional",
+          "arranged",
+          "designed"
+         ]
+        ],
+        "also_ask": [
+         "Did she set this up on purpose with a plan?",
+         "Was the arrangement agreed in advance?"
+        ]
+       },
+       {
+        "ask": "Did the neighbour agree to listen and respond, and can she trust them?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "agree",
+          "agreed",
+          "agreement",
+          "arrangement",
+          "promise",
+          "promised",
+          "trust",
+          "trusted",
+          "rely",
+          "reliable"
+         ]
+        ],
+        "also_ask": [
+         "Was this an agreed arrangement with the neighbour?",
+         "Does she trust the person next door?"
+        ]
+       },
+       {
+        "ask": "Is the loudness of the kitchen alarm important?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "loud",
+          "loudly",
+          "loudness",
+          "volume",
+          "noisy",
+          "audible"
+         ]
+        ],
+        "also_ask": [
+         "Does it need to be loud enough to hear through a wall?",
+         "Is the volume part of the plan?"
+        ]
+       },
+       {
+        "ask": "Could the walls between the homes let the neighbour hear it?",
+        "reply": "yes",
+        "key": false,
+        "match": [
+         [
+          "wall",
+          "walls",
+          "thin",
+          "adjoining",
+          "attached",
+          "through"
+         ]
+        ],
+        "also_ask": [
+         "Can the sound be heard from next door?",
+         "Are the homes close enough for that?"
+        ]
+       },
+       {
+        "ask": "Does Priya dislike the sound and simply want silence in the morning?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "dislike",
+          "hate",
+          "annoying",
+          "irritating",
+          "silence",
+          "quiet"
+         ]
+        ],
+        "also_ask": [
+         "Does she simply want her home quiet?",
+         "Is she just trying to keep her home quiet?"
+        ]
+       },
+       {
+        "ask": "Is water important to the explanation?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "water",
+          "tap",
+          "drinking",
+          "boiler",
+          "kettle",
+          "shower",
+          "bath"
+         ]
+        ],
+        "also_ask": [
+         "Does water play a part?",
+         "Is a tap or kettle involved?"
+        ]
+       },
+       {
+        "ask": "Was she angry with the electricity company on the night of the failure?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "angry",
+          "mad",
+          "annoyed",
+          "furious",
+          "upset",
+          "complaint"
+         ]
+        ],
+        "also_ask": [
+         "Did she leave because she was annoyed about the outage?",
+         "Was anger the reason she stayed with a friend?"
+        ]
+       },
+       {
+        "ask": "Is money involved in the explanation?",
+        "reply": "no",
+        "key": false,
+        "match": [
+         [
+          "money",
+          "paid",
+          "pay",
+          "cost",
+          "expensive",
+          "cheap",
+          "bet",
+          "wager"
+         ]
+        ],
+        "also_ask": [
+         "Did she do it for money or a bet?",
+         "Was the alarm system expensive to arrange?"
+        ]
+       },
+       {
+        "ask": "Does the time of five minutes matter exactly?",
+        "reply": "irrelevant",
+        "key": false,
+        "match": [
+         [
+          "five",
+          "minutes",
+          "timing",
+          "exact",
+          "exactly",
+          "interval"
+         ]
+        ],
+        "also_ask": [
+         "Is five minutes a crucial precise interval?",
+         "Would four or six minutes change the story?"
+        ]
+       },
+       {
+        "ask": "Would a phone app alone give her the same protection?",
+        "reply": "partly",
+        "key": false,
+        "match": [
+         [
+          "phone",
+          "mobile",
+          "app",
+          "smartphone",
+          "text",
+          "call"
+         ],
+         [
+          "app",
+          "alone",
+          "protection",
+          "same",
+          "instead"
+         ]
+        ],
+        "also_ask": [
+         "Could she simply phone someone each morning instead?",
+         "Would an app alone protect her as well?"
+        ]
+       }
+      ],
+      "solve": [
+       [
+        [
+         "neighbour",
+         "neighbor",
+         "nextdoor",
+         "next-door",
+         "nearby"
+        ],
+        [
+         "help",
+         "emergency",
+         "trouble",
+         "unable",
+         "rescue",
+         "check"
+        ]
+       ],
+       [
+        [
+         "alone",
+         "live",
+         "living",
+         "herself",
+         "solo"
+        ],
+        [
+         "alarm",
+         "ringing",
+         "rings",
+         "signal",
+         "alert",
+         "sounds"
+        ]
+       ]
+      ],
+      "hints": [
+       "The second alarm is not really meant to wake Priya.",
+       "Think about who else might hear it if Priya failed to stop it.",
+       "Priya once had a health emergency at home, and no one knew."
+      ]
+     }
+    ]
+   },
+   "questions": [
+    {
+     "q": "does priya live alone",
+     "accept": [
+      "yes"
+     ]
+    },
+    {
+     "q": "is the kitchen alarm a backup in case she oversleeps",
+     "accept": [
+      "no"
+     ]
+    },
+    {
+     "q": "is she afraid of fire",
+     "accept": [
+      "no"
+     ]
+    },
+    {
+     "q": "does she have a medical condition",
+     "accept": [
+      "yes",
+      "partly"
+     ]
+    },
+    {
+     "q": "would someone hear the second alarm",
+     "accept": [
+      "yes"
+     ]
+    },
+    {
+     "q": "is the alarm a signal to someone else",
+     "accept": [
+      "yes"
+     ]
+    },
+    {
+     "q": "is she scared of the dark",
+     "accept": [
+      "no"
+     ]
+    },
+    {
+     "q": "does the alarm need electricity",
+     "accept": [
+      "yes"
+     ]
+    },
+    {
+     "q": "did the power cut break the alarm",
+     "accept": [
+      "yes",
+      "partly"
+     ]
+    },
+    {
+     "q": "is the friend important",
+     "accept": [
+      "no",
+      "irrelevant"
+     ]
+    },
+    {
+     "q": "does she have a pet",
+     "accept": [
+      "no"
+     ]
+    },
+    {
+     "q": "does she work early",
+     "accept": [
+      "no",
+      "irrelevant"
+     ]
+    },
+    {
+     "q": "is the neighbor involved",
+     "accept": [
+      "yes"
+     ]
+    },
+    {
+     "q": "is she hard of hearing",
+     "accept": [
+      "no"
+     ]
+    },
+    {
+     "q": "does she race to stop it so it doesnt wake anyone",
+     "accept": [
+      "partly",
+      "no"
+     ]
+    }
+   ]
+  }
+ ]
+}

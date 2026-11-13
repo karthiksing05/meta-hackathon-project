@@ -49,9 +49,11 @@ type Game struct {
 	Plays         int64       `bson:"plays"`
 	Finishes      int64       `bson:"finishes"`
 	CreatedAt     time.Time   `bson:"createdAt"`
-	Score         *ScoreModel `bson:"score,omitempty"`    // what the board ranks and how (nil: points, higher first)
-	Sound         *GameSound  `bson:"sound,omitempty"`    // the sound that plays behind it
-	Unlisted      bool        `bson:"unlisted,omitempty"` // a draft: reachable by id and in its owner's creations, but not in the feed, search or Group lists
+	Score         *ScoreModel `bson:"score,omitempty"`     // what the board ranks and how (nil: points, higher first)
+	GroupPlay     *GroupPlay  `bson:"groupPlay,omitempty"` // how friends play it together (same seed, compare after)
+	Sound         *GameSound  `bson:"sound,omitempty"`     // the sound that plays behind it
+	Sponsor       *Sponsor    `bson:"sponsor,omitempty"`   // a brand's playable ad
+	Unlisted      bool        `bson:"unlisted,omitempty"`  // a draft: reachable by id and in its owner's creations, but not in the feed, search or Group lists
 }
 
 type GameView struct {
@@ -74,6 +76,8 @@ type GameView struct {
 	ManifestURL   string         `json:"manifestUrl"`
 	CoverURL      string         `json:"coverUrl,omitempty"`
 	Unlisted      bool           `json:"unlisted,omitempty"`
+	Sponsor       *Sponsor       `json:"sponsor,omitempty"`
+	GroupPlay     *GroupPlay     `json:"group_play,omitempty"`
 	Sound         *GameSoundView `json:"sound,omitempty"`
 	Score         *ScoreView     `json:"score,omitempty"`
 	CreatedAt     time.Time      `json:"createdAt"`
@@ -191,21 +195,24 @@ type Job struct {
 	Brief   map[string]any `bson:"brief,omitempty"`
 	// Context is what the harness worked out before the call (kinds of game, tools, plan). Only the server sets it,
 	// never a client: it goes into the generator's system prompt.
-	Context    map[string]any `bson:"context,omitempty"`
-	Anatomy    string         `bson:"anatomy,omitempty"`    // the agreed game anatomy, kept apart from the 2,000 character request
-	Sound      *GameSound     `bson:"sound,omitempty"`      // put behind the finished game
-	Draft      bool           `bson:"draft,omitempty"`      // the finished game starts unlisted
-	BaseGameID string         `bson:"baseGameId,omitempty"` // set when the job changes an existing game (a tweak, a new look, a next level, a remix)
-	NextLevel  bool           `bson:"nextLevel,omitempty"`
-	Level      int            `bson:"level,omitempty"`
-	Status     string         `bson:"status"`
-	Events     []JobEvent     `bson:"events"`
-	GameID     string         `bson:"gameId,omitempty"`
-	Error      string         `bson:"error,omitempty"`
-	Stats      map[string]any `bson:"stats,omitempty"`
-	CreatedAt  time.Time      `bson:"createdAt"`
-	UpdatedAt  time.Time      `bson:"updatedAt"`
-	FinishedAt *time.Time     `bson:"finishedAt,omitempty"`
+	Context    map[string]any    `bson:"context,omitempty"`
+	Spec       string            `bson:"spec,omitempty"`       // a game-spec/1 the person already agreed (JSON): the plan is not made again
+	Answers    map[string]string `bson:"answers,omitempty"`    // the person's answers to the plan's clarifying questions, by slot
+	Anatomy    string            `bson:"anatomy,omitempty"`    // the agreed game anatomy, kept apart from the 2,000 character request
+	Sound      *GameSound        `bson:"sound,omitempty"`      // put behind the finished game
+	Sponsor    *Sponsor          `bson:"sponsor,omitempty"`    // set on the finished game (brand accounts only)
+	Draft      bool              `bson:"draft,omitempty"`      // the finished game starts unlisted
+	BaseGameID string            `bson:"baseGameId,omitempty"` // set when the job changes an existing game (a tweak, a new look, a next level, a remix)
+	NextLevel  bool              `bson:"nextLevel,omitempty"`
+	Level      int               `bson:"level,omitempty"`
+	Status     string            `bson:"status"`
+	Events     []JobEvent        `bson:"events"`
+	GameID     string            `bson:"gameId,omitempty"`
+	Error      string            `bson:"error,omitempty"`
+	Stats      map[string]any    `bson:"stats,omitempty"`
+	CreatedAt  time.Time         `bson:"createdAt"`
+	UpdatedAt  time.Time         `bson:"updatedAt"`
+	FinishedAt *time.Time        `bson:"finishedAt,omitempty"`
 }
 
 // JobUpdate is what finishing a job records.

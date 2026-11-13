@@ -9,12 +9,14 @@ import SwiftUI
 /// - `FB_BEST_OF_5=<userID>`: show the best-of-5 offer for that friend (as after adding them)
 /// - `FB_AUTH=screen|guest`: force the sign-in screen, or continue as a guest
 /// - `FB_OPEN`: one of
-///   `bubble:<id>`, `board:<id>`, `library`, `challenges`, `find-friends`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
+///   `bubble:<id>`, `board:<id>`, `library`, `challenges`, `find-friends`, `sound:<id>`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
 ///   `studio`, `studio:<prompt>`, `edit:<id>`, `remix:<id>`, `next:<id>`, `daily:<groupID>`,
 ///   `group:<id>`, `event:<id>`, `profile:<userID>`, `reels`, `story:<userID>`,
 ///   `feature:<key>/<screen>[/<arg>]` for the collaboration features' screens (docs/BUBBLES.md 7.1;
 ///   keys: challenge, groups-search, together, remix, story, nextline, learn, length, saves)
 /// - `FB_SKIP_SPLASH=1`: no splash delay.
+/// - `FB_STUDIO_PLAN=normal|questions|gap|opinion|story|loading|failed|off`: Studio's Plan step answers
+///   with a preview plan (`GamePlanFixtures`) instead of the server, for screenshots.
 /// - `FB_API_URL`: overrides the games API base URL (default `https://api.ol4ol.com`). Point it at an
 ///   unreachable host to see the loading and error states.
 /// - `FB_RESUME_DEMO=<seconds>` / `FB_RESUME_AUTO=1`: the Resume prompt in the player (see
@@ -53,6 +55,7 @@ enum DebugLaunch {
         case "library": router.push(.bubbleLibrary)
         case "challenges": router.push(.challengesInbox)
         case "find-friends": router.push(.findFriends)
+        case "sound": router.push(.sound(arg))
         case "chain": router.push(.bubbleChain(arg))
         case "marketplace": router.push(.marketplace)
         case "play": router.play(arg)

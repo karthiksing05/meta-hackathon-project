@@ -16,6 +16,11 @@ struct StudioTryStep: View {
                     }
                     if let result = model.currentResult {
                         StudioPlayerCard(model: model, result: result)
+                        if let changes = model.buildChanges {
+                            // Edits and answers made while it built: one tap adds them.
+                            StudioBuildChangesCard(model: model, changes: changes)
+                                .transition(.opacity.combined(with: .move(edge: .top)))
+                        }
                         StudioDetailsCard(model: model, result: result)
                             .id("details")
                     }

@@ -561,6 +561,25 @@ func (m *Mongo) FailStaleJobs(ctx context.Context, reason string) (int, error) {
 	return int(r.ModifiedCount), nil
 }
 
+func (m *Mongo) RecsUserIDs(ctx context.Context, limit int) ([]string, error) {
+	cur, err := m.coll(cRecs).Find(ctx, bson.D{}, options.Find().SetProjection(bson.D{{Key: "_id", Value: 1}}).
+		SetSort(bson.D{{Key: "updatedAt", Value: -1}}).SetLimit(int64(limit)))
+	if err != nil {
+		return nil, err
+	}
+	var rows []struct {
+		ID string `bson:"_id"`
+	}
+	if err := cur.All(ctx, &rows); err != nil {
+		return nil, err
+	}
+	out := make([]string, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, r.ID)
+	}
+	return out, nil
+}
+
 func (m *Mongo) GetRecs(ctx context.Context, userID string) (*model.RecsRecord, error) {
 	var r model.RecsRecord
 	if err := m.coll(cRecs).FindOne(ctx, bson.D{{Key: "_id", Value: userID}}).Decode(&r); err != nil {

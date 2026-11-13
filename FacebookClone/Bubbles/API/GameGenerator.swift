@@ -2,39 +2,53 @@ import Foundation
 
 // Server-side game generation (Max's `POST /v1/generate`, posted 2026-11-12 16:01 PST).
 //
-//     POST /v1/generate               {"request", "brief": BubbleBrief}  -> 202 {"jobId"}
-//     POST /v1/generate               {"baseGameId", "change"?, "look"?, "nextLevel"?, "brief"?}
+//     POST /v1/generate               {"request", "brief": BubbleBrief, "anatomy"?, "draft"?}  -> 202 {"jobId"}
+//     POST /v1/generate               {"baseGameId", "change"?, "look"?, "nextLevel"?, "brief"?, "anatomy"?}
 //                                     -> 202 {"jobId"}: change a game (a tweak, a new look, the next
 //                                        level or a remix). The result is always a new game with
 //                                        `remixOf` set to the base; same job and polling as a new game.
 //     GET  /v1/generate/{jobId}       {"status": queued|running|done|failed, "events": [...], "game"?, "error"?}
 //     GET  /v1/generate               my jobs
-//     DELETE /v1/generate/{jobId}     (asked for; 404/405 are ignored)
+//     DELETE /v1/generate/{jobId}     cancel a queued or running job (it ends as failed, "Cancelled.")
+//     POST /v1/creations/{id}/publish list a draft in the feed, search and its Group
+//     DELETE /v1/creations/{id}       delete one of my games
+//
+// `anatomy` is the agreed game anatomy text (up to 16 KB, apart from the 2,000-character request).
+// `draft: true` keeps a new game unlisted until it is published; a change is a draft by default.
+// Studio makes every game as a draft and publishes the ones the person shares.
 //
 // Events are `MicrogameComposer` events run on the server (drafting, expanding, repairing,
-// playtesting, playtested, done, failed), each with `seq`, `kind`, `summary` and `issues`. Fields we
+// polishing, playtesting, playtested, done, failed), each with `seq`, `kind`, `summary` and `issues`. Fields we
 // asked for but that aren't confirmed are all optional here: `data` on events, `position` while
 // queued, `code` on failure, `?after=<seq>` (sent anyway; events are deduped by `seq`).
 // When the job is done, `game` is the normal `RemoteGame`; its manifest is fetched from
 // `manifestUrl` and decoded as is (`content.game_json` stays the exact text the server wrote).
 //
 //     let generator = GameGeneratorFactory.current          // always the server
-//     for try await update in generator.generate(request: "...", brief: brief) { ... }
+//     for try await update in generator.generate(request: "...", brief: brief, anatomy: nil, draft: true) { ... }
 //     for try await update in generator.generate(revision: GameRevision(baseGameID: id, change: "slower")) { ... }
 //
-// Cancelling the consuming task ends the job (`DELETE`, best effort).
+// Cancelling the consuming task ends the job (`DELETE`, best effort). The server runs one job per
+// person, so a start that hears "already have a game being made" (a job just cancelled is still
+// winding down) waits and tries again a few times, reported as `.waiting(position: nil)`.
 
 /// One server-side generation backend. Implementations only speak the wire; `generate` (below)
 /// does the polling, dedupe, cap and cancel for all of them.
 protocol GameGenerator: Sendable {
-    /// `POST /v1/generate`; returns the job id.
-    func start(request: String, brief: BubbleBrief) async throws -> String
+    /// `POST /v1/generate`; returns the job id. `anatomy` is the agreed anatomy text; `draft` keeps
+    /// the finished game out of the feed until `publish`; `sound` is a library sound to play behind
+    /// it (`soundId`, `offsetMs`, `mix`).
+    func start(request: String, brief: BubbleBrief, anatomy: String?, draft: Bool, sound: RemoteGameSound?) async throws -> String
     /// `POST /v1/generate` with `baseGameId`: a change to a game the server has. Returns the job id.
     func start(revision: GameRevision) async throws -> String
     /// `GET /v1/generate/{id}`, with `after` = the last `seq` seen (nil on the first poll).
     func job(id: String, after: Int?) async throws -> GenerationJob
     /// `DELETE /v1/generate/{id}`. Best effort: never throws.
     func cancel(id: String) async
+    /// `POST /v1/creations/{id}/publish`: lists a draft (a server id, or an app id linked to one).
+    func publish(gameID: String) async throws
+    /// `DELETE /v1/creations/{id}`: removes a draft nobody will see. Best effort: never throws.
+    func discard(gameID: String) async
     /// The finished game's manifest, from `game.manifestURL`.
     func manifest(for game: RemoteGame) async throws -> BubbleManifest
     /// How long to wait between polls.
@@ -56,6 +70,12 @@ struct GameRevision: Sendable {
     var nextLevel = false
     /// The reviewed brief, for remixes; nil keeps the base game's own brief.
     var brief: BubbleBrief?
+    /// A sound to swap in; nil keeps the base game's sound (the server's rule).
+    var sound: RemoteGameSound? = nil
+    /// The agreed anatomy with the change in it (`GameAnatomy.agreedText`), when the change comes
+    /// from "How the game works". The server adds it to the request; it doesn't count against
+    /// `maxChangeCharacters`.
+    var anatomy: String?
 
     /// The server's limit on the request text it builds from these fields.
     static let maxChangeCharacters = 1_800
@@ -103,7 +123,15 @@ struct GenerationJob: Decodable, Sendable {
 /// One `MicrogameComposer` event, as the server reports it.
 struct GenerationEvent: Decodable, Hashable, Sendable {
     enum Kind: String, Sendable {
-        case drafting, expanding, repairing, playtesting, playtested, done, failed, other
+        case drafting, expanding, repairing, polishing, playtesting, playtested, done, failed, other
+        /// Harness v2's score step (authoring/expander/score-step.mjs): code checks, Muse's review, one
+        /// score-only repair, then the verdict (`ranked`, `order`, `reason`).
+        case scoreChecking = "score_checking"
+        case scoreReviewing = "score_reviewing"
+        case scoreRepairing = "score_repairing"
+        case scoreChecked = "score_checked"
+        /// The visual stage's art pass (backend/generator/src/art.mjs): `count` pieces.
+        case painting, painted
     }
 
     var seq: Int
@@ -214,8 +242,9 @@ enum GameGenerationError: LocalizedError, Equatable {
 
 extension GameGenerator {
     /// Starts a job and streams it to the end. Cancelling the consumer cancels the job.
-    func generate(request: String, brief: BubbleBrief) -> AsyncThrowingStream<GenerationUpdate, Error> {
-        stream { try await start(request: request, brief: brief) }
+    func generate(request: String, brief: BubbleBrief, anatomy: String? = nil, draft: Bool = true,
+                  sound: RemoteGameSound? = nil) -> AsyncThrowingStream<GenerationUpdate, Error> {
+        stream { try await start(request: request, brief: brief, anatomy: anatomy, draft: draft, sound: sound) }
     }
 
     /// Starts a change to an existing game and streams it to the end, exactly like a new game. A
@@ -229,12 +258,7 @@ extension GameGenerator {
             let task = Task {
                 var jobID: String?
                 do {
-                    let id: String
-                    do {
-                        id = try await begin()
-                    } catch let error as GamesAPIError {
-                        throw GameGenerationError.from(error) ?? error
-                    }
+                    let id = try await startWaitingIfBusy(begin, continuation: continuation)
                     jobID = id
                     try await poll(id: id, continuation: continuation)
                     continuation.finish()
@@ -248,6 +272,28 @@ extension GameGenerator {
                 }
             }
             continuation.onTermination = { _ in task.cancel() }
+        }
+    }
+
+    /// Starts the job. "You already have a game being made" right after a cancel means the old job
+    /// is still winding down on the server, so it waits a moment and tries again (up to about 8 s).
+    private func startWaitingIfBusy(
+        _ begin: @Sendable () async throws -> String,
+        continuation: AsyncThrowingStream<GenerationUpdate, Error>.Continuation
+    ) async throws -> String {
+        var attempt = 0
+        while true {
+            do {
+                let id = try await begin()
+                if attempt > 0 { continuation.yield(.running) }
+                return id
+            } catch let error as GamesAPIError {
+                let mapped = GameGenerationError.from(error)
+                guard case .busy = mapped, attempt < 4 else { throw mapped ?? error }
+                if attempt == 0 { continuation.yield(.waiting(position: nil)) }
+                attempt += 1
+                try await Task.sleep(nanoseconds: 2_000_000_000)
+            }
         }
     }
 

@@ -13,7 +13,12 @@ struct BubbleChainView: View {
         let levels = bubbleStore.chain(chainID)
         Group {
             if levels.isEmpty {
-                ContentUnavailableView("Chain not found", systemImage: "link", description: Text("It may have been removed."))
+                LiveDataStateView(
+                    kind: .empty("Its levels may have been removed."),
+                    title: "This chain isn't here",
+                    action: LiveDataStateView.Action(title: "Play something else", symbol: "play.fill") { router.select(.bubbles) }
+                )
+                .frame(maxHeight: .infinity)
             } else {
                 content(levels)
             }

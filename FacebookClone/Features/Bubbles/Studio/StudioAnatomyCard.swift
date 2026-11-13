@@ -7,6 +7,8 @@ import SwiftUI
 /// rereads the whole thing.
 struct StudioAnatomyCard: View {
     let thread: StudioAnatomyThread
+    /// On the Build step: how edits made now reach the game (a quick change once it's ready).
+    var buildNote: StudioAnatomyBuildNote? = nil
 
     @State private var editingSlot: String?
     @State private var draftText = ""
@@ -19,6 +21,10 @@ struct StudioAnatomyCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: FBSpacing.m) {
             StudioSectionTitle(title: "How the game works", detail: thread.anatomy.map { "\($0.partCount) parts" }, symbol: "puzzlepiece.extension")
+            if let buildNote {
+                buildNoteRow(buildNote)
+                    .transition(.opacity)
+            }
             if let anatomy = thread.anatomy {
                 summary(anatomy)
                 if let reply = thread.lastReply {
@@ -97,6 +103,26 @@ struct StudioAnatomyCard: View {
     }
 
     // MARK: Pieces
+
+    private func buildNoteRow(_ note: StudioAnatomyBuildNote) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Image(systemName: note.isChange ? "wand.and.stars" : "hammer")
+                .font(.system(size: FBIconSize.xs, weight: .semibold))
+            Text(note.text)
+                .font(.fbMeta)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .foregroundStyle(note.isChange ? FBColor.primaryText : FBColor.secondaryText)
+        .padding(.horizontal, FBSpacing.m)
+        .padding(.vertical, FBSpacing.s)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            RoundedRectangle(cornerRadius: FBMetrics.radiusLarge, style: .continuous)
+                .fill(note.isChange ? AnyShapeStyle(GameColor.violet.opacity(0.14)) : AnyShapeStyle(StudioGlow.fieldFill))
+        }
+        .animation(.easeInOut(duration: 0.25), value: note)
+        .accessibilityElement(children: .combine)
+    }
 
     private func summary(_ anatomy: GameAnatomy) -> some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -214,6 +240,13 @@ struct StudioAnatomyCard: View {
         }
         .padding(.top, FBSpacing.s)
     }
+}
+
+/// The line "How the game works" shows while the game builds.
+struct StudioAnatomyBuildNote: Equatable {
+    var text: String
+    /// True once the person changed something the running build doesn't have.
+    var isChange: Bool
 }
 
 // MARK: - Shared rows

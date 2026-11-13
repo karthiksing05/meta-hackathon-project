@@ -32,7 +32,7 @@ import (
 // follows its progress, and publishes the finished game as an immutable package.
 
 const (
-	jobTimeout       = 10 * time.Minute
+	jobTimeout       = 15 * time.Minute
 	maxRequestChars  = 2000
 	maxBriefBytes    = 8 << 10
 	maxAnatomyBytes  = 16 << 10
@@ -54,14 +54,21 @@ type generateIn struct {
 	// Anatomy is the agreed game anatomy text. It is kept apart from the request so it doesn't count against the
 	// 2,000 character limit (it can be up to 16 KB).
 	Anatomy string `json:"anatomy"`
+	// Spec is a game-spec/1 the person already agreed (from POST /v1/harness/plan): the server uses it as the plan and
+	// does not plan again. Answers are the person's answers to the plan's clarifying questions, by slot name; they
+	// replace the planner's guesses. Both are for new games only.
+	Spec    json.RawMessage   `json:"spec"`
+	Answers map[string]string `json:"answers"`
 	// Draft makes the finished game unlisted: reachable by id and in the owner's creations, but not in the feed or
 	// search until it is published. A change is a draft unless this is false; a new game is public unless this is true.
 	Draft *bool `json:"draft"`
 	// A sound to put behind the finished game (a sound id from /v1/sounds), where in the loop to start, and how loud it
 	// is against the game's own sound effects (0 to 1). A change to a game keeps the original's sound unless this names another.
-	SoundID  string   `json:"soundId"`
-	OffsetMs *int64   `json:"offsetMs"`
-	Mix      *float64 `json:"mix"`
+	// Sponsor makes the finished game a brand's ad. Only a brand account may send it.
+	Sponsor  *sponsorIn `json:"sponsor"`
+	SoundID  string     `json:"soundId"`
+	OffsetMs *int64     `json:"offsetMs"`
+	Mix      *float64   `json:"mix"`
 }
 
 // genHealthCache remembers the generator's last health answer for a few seconds.
@@ -134,6 +141,23 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		in.Brief["intent"] = in.Request // the brief's intent defaults to the request
 	}
 
+	specJSON, answers, specMsg := checkSpecAnswers(&in, base != nil)
+	if specMsg != "" {
+		writeErr(w, 400, specMsg)
+		return
+	}
+	var sponsor *model.Sponsor
+	if in.Sponsor != nil {
+		if !s.isBrand(userFrom(r)) {
+			writeErr(w, 403, "only a brand account can sponsor a game")
+			return
+		}
+		var msg string
+		if sponsor, msg = sponsorFrom(in.Sponsor); sponsor == nil {
+			writeErr(w, 400, msg)
+			return
+		}
+	}
 	var sound *model.GameSound
 	switch {
 	case strings.TrimSpace(in.SoundID) != "":
@@ -206,7 +230,9 @@ func (s *Server) createJob(w http.ResponseWriter, r *http.Request) {
 		}
 		job.Anatomy = a
 	}
+	job.Spec, job.Answers = specJSON, answers
 	job.Sound = sound
+	job.Sponsor = sponsor
 	job.Draft = base != nil // a change stays a draft until it is published
 	if in.Draft != nil {
 		job.Draft = *in.Draft
@@ -498,6 +524,12 @@ func (s *Server) finishJob(ctx context.Context, job model.Job, owner model.User,
 		}
 		s.failJob(ctx, job.ID, "Couldn't save the game: "+perr.Msg)
 		return
+	}
+	if job.Sponsor != nil {
+		if err := s.Store.SetGameSponsor(context.WithoutCancel(ctx), g.ID, job.Sponsor); err != nil {
+			log.Warn("generate: could not mark the game sponsored", "err", err)
+		}
+		g.Sponsor = job.Sponsor
 	}
 	if job.Sound != nil {
 		if err := s.attachSound(context.WithoutCancel(ctx), g, job.Sound.ID, job.Sound.OffsetMs, job.Sound.Mix); err != nil {

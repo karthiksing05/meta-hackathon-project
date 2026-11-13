@@ -40,7 +40,7 @@ jobs:
       - name: Generator self-test (a scripted Muse, no key)
         run: node generator/selftest.mjs
       - name: Shell script syntax
-        run: bash -n deploy/deploy.sh && bash -n deploy/backup.sh && bash -n deploy/dbinit.sh
+        run: bash -n deploy/deploy.sh && bash -n deploy/backup.sh && bash -n deploy/dbinit.sh && bash -n deploy/apply-env.sh
       - name: Compose file is valid
         run: |
           sudo mkdir -p /etc/game-platform && sudo touch /etc/game-platform/api.env /etc/game-platform/mongo.env
@@ -103,7 +103,7 @@ jobs:
     permissions:
       contents: read
       packages: read          # lets this job's token pull the images on the server
-    environment: production   # holds VPS_HOST, VPS_USER, VPS_SSH_KEY, VPS_KNOWN_HOSTS, MUSE_API_KEY (and optional API_PUBLIC_URL)
+    environment: production   # holds VPS_HOST, VPS_USER, VPS_SSH_KEY, VPS_KNOWN_HOSTS, MUSE_API_KEY; variables API_ENV, GENERATOR_ENV, API_PUBLIC_URL (all optional)
     steps:
       - uses: actions/checkout@v4
       - name: Prepare SSH
@@ -121,22 +121,59 @@ jobs:
         run: |
           scp -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
             backend/deploy/docker-compose.prod.yml backend/deploy/mongo-init.js \
-            backend/deploy/deploy.sh backend/deploy/dbinit.sh backend/deploy/backup.sh \
+            backend/deploy/deploy.sh backend/deploy/dbinit.sh backend/deploy/backup.sh backend/deploy/apply-env.sh \
             "$USER_@$HOST:/srv/game-platform/app/"
-      - name: Give the generator the Muse key (only if the secret is set)
+      - name: Apply the settings kept in GitHub to the server's env files
+        # One place for config: GitHub. API_ENV and GENERATOR_ENV are environment *variables* holding KEY=VALUE lines
+        # (plain switches such as DEBUG_DELETE=1 or SPONSOR_USERS=fizzco); MUSE_API_KEY is a *secret*. They are merged
+        # into /etc/game-platform/api.env and generator.env: only the keys you set change, everything else stays, so the
+        # server's own secrets (Mongo password, JWT_SECRET) are never touched. Nothing set = nothing changes.
+        id: envs
         env:
           HOST: ${{ secrets.VPS_HOST }}
           USER_: ${{ secrets.VPS_USER }}
           MUSE_API_KEY: ${{ secrets.MUSE_API_KEY }}
+          API_ENV: ${{ vars.API_ENV }}
+          GENERATOR_ENV: ${{ vars.GENERATOR_ENV }}
+          # Single settings can also be their own variable or secret with the setting's name (this is what people try first).
+          DEBUG_DELETE: ${{ vars.DEBUG_DELETE || secrets.DEBUG_DELETE }}
+          SPONSOR_USERS: ${{ vars.SPONSOR_USERS || secrets.SPONSOR_USERS }}
+          HARNESS_CONTEXT: ${{ vars.HARNESS_CONTEXT || secrets.HARNESS_CONTEXT }}
+          GENERATOR_IMAGE_ART: ${{ vars.GENERATOR_IMAGE_ART || secrets.GENERATOR_IMAGE_ART }}
+          # Push notifications (APNs): the .p8 key is a secret (paste the whole file); the ids are plain settings.
+          APNS_KEY_P8: ${{ secrets.APNS_KEY_P8 }}
+          APNS_KEY_ID: ${{ vars.APNS_KEY_ID || secrets.APNS_KEY_ID }}
+          APNS_TEAM_ID: ${{ vars.APNS_TEAM_ID || secrets.APNS_TEAM_ID }}
+          APNS_TOPIC: ${{ vars.APNS_TOPIC || secrets.APNS_TOPIC }}
+          VIRAL_MATCH: ${{ vars.VIRAL_MATCH || secrets.VIRAL_MATCH }}
+          VIRAL_MIN_PLAYERS: ${{ vars.VIRAL_MIN_PLAYERS || secrets.VIRAL_MIN_PLAYERS }}
+          VIRAL_COSINE: ${{ vars.VIRAL_COSINE || secrets.VIRAL_COSINE }}
         run: |
-          if [ -z "$MUSE_API_KEY" ]; then
-            echo "MUSE_API_KEY is not set in the production environment: leaving /etc/game-platform/generator.env as it is"
-            exit 0
+          [ -z "$DEBUG_DELETE" ] || API_ENV=$(printf '%s\nDEBUG_DELETE=%s' "$API_ENV" "$DEBUG_DELETE")
+          [ -z "$SPONSOR_USERS" ] || API_ENV=$(printf '%s\nSPONSOR_USERS=%s' "$API_ENV" "$SPONSOR_USERS")
+          [ -z "$HARNESS_CONTEXT" ] || API_ENV=$(printf '%s\nHARNESS_CONTEXT=%s' "$API_ENV" "$HARNESS_CONTEXT")
+          # the key goes in as one base64 line, so the env file stays one setting per line
+          [ -z "$APNS_KEY_P8" ] || API_ENV=$(printf '%s\nAPNS_KEY_P8_B64=%s' "$API_ENV" "$(printf '%s\n' "$APNS_KEY_P8" | base64 | tr -d '\n')")
+          for k in APNS_KEY_ID APNS_TEAM_ID APNS_TOPIC VIRAL_MATCH VIRAL_MIN_PLAYERS VIRAL_COSINE; do
+            v=$(eval "printf '%s' \"\$$k\"")
+            [ -z "$v" ] || API_ENV=$(printf '%s\n%s=%s' "$API_ENV" "$k" "$v")
+          done
+          [ -z "$GENERATOR_IMAGE_ART" ] || GENERATOR_ENV=$(printf '%s\nGENERATOR_IMAGE_ART=%s' "$GENERATOR_ENV" "$GENERATOR_IMAGE_ART")
+          API_ENV=$(printf '%s' "$API_ENV" | sed '/^$/d'); GENERATOR_ENV=$(printf '%s' "$GENERATOR_ENV" | sed '/^$/d')
+          S="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes $USER_@$HOST"
+          api=""; gen=""
+          if [ -n "$API_ENV" ]; then
+            printf '%s\n' "$API_ENV" | $S 'sh /srv/game-platform/app/apply-env.sh /etc/game-platform/api.env'
+            api=1
           fi
-          # The key goes over SSH stdin (never on a command line) into a root-only file on the server, which
-          # the generator container reads when it is recreated by the deploy below. GitHub masks it in logs.
-          printf 'MUSE_API_KEY=%s\n' "$MUSE_API_KEY" | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER_@$HOST" \
-            'umask 077 && cat > /etc/game-platform/generator.env.new && mv /etc/game-platform/generator.env.new /etc/game-platform/generator.env'
+          # The key goes over SSH stdin (never on a command line). GitHub masks it in logs.
+          if [ -n "$MUSE_API_KEY" ] || [ -n "$GENERATOR_ENV" ]; then
+            { printf '%s\n' "$GENERATOR_ENV"; [ -z "$MUSE_API_KEY" ] || printf 'MUSE_API_KEY=%s\n' "$MUSE_API_KEY"; } \
+              | $S 'sh /srv/game-platform/app/apply-env.sh /etc/game-platform/generator.env'
+            gen=1
+          fi
+          echo "api=$api" >> "$GITHUB_OUTPUT"
+          echo "gen=$gen" >> "$GITHUB_OUTPUT"
       - name: Deploy (rolls back automatically if /readyz fails)
         env:
           HOST: ${{ secrets.VPS_HOST }}
@@ -149,6 +186,16 @@ jobs:
           # long-lived registry credential is stored on the server.
           printf '%s' "$GHCR_TOKEN" | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER_@$HOST" \
             "docker login ghcr.io -u '$GHCR_USER' --password-stdin >/dev/null && chmod +x /srv/game-platform/app/*.sh && /srv/game-platform/app/deploy.sh deploy '$TAG'; rc=\$?; docker logout ghcr.io >/dev/null 2>&1; exit \$rc"
+      - name: Restart what read new settings
+        if: ${{ steps.envs.outputs.api != '' || steps.envs.outputs.gen != '' }}
+        env:
+          HOST: ${{ secrets.VPS_HOST }}
+          USER_: ${{ secrets.VPS_USER }}
+          API: ${{ steps.envs.outputs.api }}
+          GEN: ${{ steps.envs.outputs.gen }}
+        run: |
+          [ -z "$GEN" ] || ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER_@$HOST" "/srv/game-platform/app/deploy.sh restart-generator"
+          [ -z "$API" ] || ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER_@$HOST" "/srv/game-platform/app/deploy.sh restart-api"
       - name: Verify public readiness (optional)
         id: verify
         if: ${{ vars.API_PUBLIC_URL != '' }}

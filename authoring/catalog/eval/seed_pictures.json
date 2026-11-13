@@ -1,0 +1,8 @@
+[
+  { "request": "Wildlife photography trivia: zoom in on a tiny crop of a photo and guess the animal before it zooms out", "expect": ["zoom_out_picture_trivia", "zoomed_image_guess"], "notes": "Kevin #32" },
+  { "request": "Spot the difference game with two nearly identical chaotic group-chat screenshots", "expect": ["spot_difference"], "notes": "Kevin #28" },
+  { "request": "Guess what the French person is saying: quotes from funny famous French people with funny images of French people", "expect": ["cartoon_quote_guess"], "notes": "Kevin #16; real people become generic cartoon characters" },
+  { "request": "what is this close-up? guess the kitchen object", "expect": ["zoom_out_picture_trivia", "zoomed_image_guess"] },
+  { "request": "find the 7 differences between two messy bedrooms", "expect": ["spot_difference"] },
+  { "request": "guess the meaning of grandma's old sayings with cartoon pictures", "expect": ["cartoon_quote_guess"] }
+]

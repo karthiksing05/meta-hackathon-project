@@ -1,10 +1,13 @@
-// The sound library and the manifest's `sound` section (authoring/SPEC.md 2.9). Pure JS with no
-// imports, so the app can bundle it with the expander.
+// The sound library and the manifest's `sound` section (authoring/SPEC.md 2.9). Pure JS that imports
+// only melody.mjs, so the app can bundle it with the expander.
 //
 // Fragments and games never write synth notes for the common moments. They write
 // `{ "moment": "pickup" }` in a feedback `do` list, and the expander swaps in the game's sound for
 // that moment: from the chosen sound set, the game's overrides and its volume. Everything is
-// synthesized: engine synth notes, slides and jingles, and music rendered here into a short WAV loop.
+// synthesized: engine synth notes, slides and jingles, music rendered here into a short WAV loop, and
+// melody clips (`clips`, melody.mjs) rendered into WAV sound assets clip_0, clip_1, ….
+
+import { compileClips } from './melody.mjs';
 
 export const MOMENTS = ['tap', 'pickup', 'hit', 'combo', 'level', 'countdown', 'win', 'lose'];
 export const MOMENT_DOCS = {
@@ -130,15 +133,16 @@ const round3 = (v) => Math.round(v * 1000) / 1000;
  *   moment(name) → list of engine feedback actions (empty when muted),
  *   volume (master, 0..1), scale(action) → the action with its volume scaled,
  *   music: {asset, presentation} | null,
+ *   clips: {assets: {clip_<i>: {sound}}, ms: [clip lengths], longest_ms},
  * }.
  */
-export function compileSound(section, err) {
+export function compileSound(section, err, warn) {
   const sec = section ?? {};
   const at = '/sound';
   if (section !== undefined && (typeof section !== 'object' || Array.isArray(section) || section === null)) {
     err('A_SOUND_FIELD', at, 'sound must be an object like {"set": "arcade"}');
   }
-  for (const k of Object.keys(sec)) if (!['set', 'volume', 'music', 'moments'].includes(k)) err('A_SOUND_FIELD', `${at}/${k}`, `sound has no field '${k}' (set, volume, music, moments)`);
+  for (const k of Object.keys(sec)) if (!['set', 'volume', 'music', 'moments', 'clips'].includes(k)) err('A_SOUND_FIELD', `${at}/${k}`, `sound has no field '${k}' (set, volume, music, moments, clips)`);
   const setName = sec.set ?? 'classic';
   let set = SETS[setName];
   if (!set) { err('A_SOUND_SET', `${at}/set`, `no sound set named '${setName}'`, { hint: `one of ${Object.keys(SETS).join(', ')}` }); set = SETS.classic; }
@@ -204,7 +208,9 @@ export function compileSound(section, err) {
       presentation: { asset: 'music', volume: round3((musicSpec.volume ?? 0.3) * volume) },
     };
   }
-  return { moment, scale, volume, music, set: setName };
+  // Clips are content (a listen-and-answer round), so they render even when the game's volume is 0.
+  const clips = compileClips(sec.clips, err, warn);
+  return { moment, scale, volume, music, clips, set: setName };
 }
 
 function checkMusic(m) {

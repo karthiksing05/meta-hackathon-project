@@ -1,0 +1,75 @@
+{
+ "authoring": "microgame-authoring/0.1",
+ "meta": {
+  "title": "Ask Me Why",
+  "instructions": "Read the strange story. Type yes or no questions and tap Ask. When you know what happened, type it and tap Solve.",
+  "duration_s": 150
+ },
+ "uses": [
+  {
+   "fragment": "keyboard",
+   "params": {
+    "letters": "qwertyuiopasdfghjklzxcvbnm <>",
+    "cols": 10,
+    "rows": 3,
+    "key_size": 31,
+    "gap": 3,
+    "x": 9,
+    "y": 420
+   }
+  },
+  {
+   "fragment": "qa_bank",
+   "params": {
+    "questions": 20
+   }
+  }
+ ],
+ "functions": {
+  "qa_setups": {
+   "params": {},
+   "returns": "list<string>",
+   "body": "content_qa_setups"
+  },
+  "qa_reveals": {
+   "params": {},
+   "returns": "list<string>",
+   "body": "content_qa_reveals"
+  },
+  "qa_facts": {
+   "params": {},
+   "returns": "list<string>",
+   "body": "content_qa_facts"
+  },
+  "qa_solves": {
+   "params": {},
+   "returns": "list<string>",
+   "body": "content_qa_solves"
+  }
+ },
+ "objectives": {
+  "time_limit": "150s",
+  "on_timeout": "lose"
+ },
+ "playtest": {
+  "progress": "qa_progress()"
+ },
+ "content": {
+  "qa_setups": [
+   "A man walks into a bar and asks for a glass of water. The bartender pulls out a gun and points it at him. The man says ’Thank you’ and leaves. Why?",
+   "Priya sets a loud kitchen alarm for five minutes after her bedside one. Every morning she races to stop it before it sounds. The night her power failed, she chose to sleep at a friend’s house instead."
+  ],
+  "qa_reveals": [
+   "The man had hiccups and hoped water would cure them. The bartender realised this and pointed a gun at him to frighten him. The shock cured his hiccups, so he no longer needed the water. He thanked the bartender and left.",
+   "Priya lives alone after collapsing once, undetected for hours. Her neighbour listens each morning: if Priya is well she reaches the kitchen and stops the second alarm before it sounds; if it rings on, she may be unable to get up and needs help. Without power the safeguard could fail, so she stayed with a friend."
+  ],
+  "qa_facts": [
+   "n|Was the man just thirsty?|just=only=simply=merely=solely|thirsty=thirst=parched=dehydrated;n|Did the bartender plan it before he walked in?|bartender=barman=barkeep=server|plan=planned=planning=premeditated=advance=before;n|Did he leave just because he was scared?|leave=left=leaving=exit=depart|scare=scared=fright=frightened=afraid=fear=just=only;n|Was the thank you sarcastic?|thank=thanks=thanked=gratitude|sarcastic=sarcasm=ironic=insincere=mocking=joking;n|Was he thanking him for the water?|thank=thanks=thanked=grateful|water=drink=glass=beverage;n|Did the man do something wrong earlier?|wrong=bad=offend=offended=misbehave=trouble=fault=wrongdoing|earlier=before=previously=prior;y|Did it actually cure him?|actually=really=truly|cure=cured=curing=fix=fixed=healed=gone;p|Did his voice sound weird when he spoke?|voice=sound=sounded=speech=spoke=speak=speaking=talk=talking|weird=strange=odd=unusual=different=funny;p|Was the problem with his breathing?|problem=issue=condition=trouble|breathing=breath=breathe=breaths=respiratory;i|Did he pay for anything?|pay=paid=payment=buy=bought=purchase=paying|anything=something=water=drink=glass;y|So he didn’t need the water anymore?|water=drink=glass|anymore=longer=need=needed=necessary=require;y|Would the water have helped by itself?|water=drink=glass|help=helped=helping=itself=alone=cure=cured;y*|Did the bartender intend to scare the man to cure his hiccups?|bartender=barman=barkeep=server|hiccup=hiccough=hiccups=hiccuping=cure=cured;y*|Did the man ask for water because of his hiccups?|water=drink=glass|hiccup=hiccough=hiccups=hiccuping=cure=cured=stop;y*|Did the man thank the bartender because his hiccups were gone?|thank=thanks=thanked=grateful=gratitude|hiccup=hiccough=hiccups=gone=cured=stopped;y*|Did the bartender point the gun at the man to frighten him?|bartender=barman=barkeep=server|scare=scared=fright=frighten=startle=shock=surprise=spook;n|Did the bartender intend to shoot the man?|bartender=barman=barkeep=server|shoot=shot=kill=murder=fire=firing;n|Was the bartender angry with the man?|bartender=barman=barkeep=server|angry=mad=annoyed=upset=furious=irritated;n|Did the bartender know the man from before?|bartender=barman=barkeep=server|know=knew=known=recognise=recognize=friend=stranger;y*|Did the bartender want to help the man?|bartender=barman=barkeep=server|help=helped=helping=assist=kind=cure;n|Did the man actually drink any water?|water=drink=glass=drank=drinking|drink=drank=drunk=sip=sipped=swallow=taste;n|Did the bartender give the man any water?|bartender=barman=barkeep=give=gave=serve=served|water=drink=glass=beverage;n|Was the gun fired?|gun=pistol=firearm=weapon=revolver|fire=fired=shoot=shot=shooting=bang=discharge;n|Was there an argument between the man and the bartender?|bartender=barman=barkeep|argument=argue=fight=quarrel=dispute=row=conflict;y*|Did the man have hiccups when he walked in?|hiccup=hiccough=hiccups=hiccuping=hiccuped;p|Was the man mainly thirsty?|thirsty=thirst=parched=dehydrated=dry;y*|Did the shock cure the man’s problem?|shock=scare=scared=fright=startle=surprise=spook;i|Was the gun real?|gun=pistol=firearm=weapon=revolver;p|Is the water important?|water=drink=glass;y|Did it cure him?|cure=cured=curing=fix=fixed=healed;i|Was the gun loaded?|loaded=bullets=bullet=ammunition=ammo=unloaded;n|Was the man in actual danger of being shot?|danger=dangerous=threat=threatened=risk=harm=harmed=hurt;n|Did the man rob or try to rob the bar?|rob=robbery=steal=stealing=thief=holdup=burglary;n|Was a crime committed?|crime=criminal=illegal=law=police=arrest=offence=offense;n|Was the man drunk?|drunk=alcohol=beer=whiskey=whisky=wine=intoxicated=liquor;p|Was the man ill or having a medical emergency?|ill=sick=illness=medical=doctor=hospital=emergency=unwell;n|Was the man choking?|choke=choking=choked=cough=coughing=throat;n|Was the man joking or playing a prank?|joke=joking=prank=funny=trick=humour=humor=laugh;p|Was the bartender joking or playing a prank?|bartender=barman=barkeep|joke=joking=prank=trick=funny=humour=humor;y|Did the man ask for water politely and normally?|ask=asked=asking=request=requested=order=ordered;y|Did the man leave because he no longer needed the water?|leave=left=leaving=exit=depart;n|Did the man leave because he was afraid for his life?|afraid=fear=terrified=panic=panicked=flee=fled=run=ran;n|Did anyone else in the bar intervene?|customer=customers=patron=patrons=witness=witnesses=crowd=bystander=other=others=people;n|Was anyone else involved in what happened?|involved=involvement=accomplice=partner=helper=third=another;n|Was the whole thing planned in advance?|planned=plan=premeditated=arranged=staged=rehearsed=setup;y|Did the bartender act on the spur of the moment?|improvise=improvised=spur=impulse=impulsive=suddenly=spontaneous=idea;y|Did the bartender understand why the man wanted water?|understand=understood=realise=realize=realised=realized=notice=noticed=guess=guessed=figure;n|Did the man expect the bartender to pull out a gun?|expect=expected=anticipate=anticipated=predict=predicted;y|Was the man happy or pleased at the end?|happy=pleased=relieved=relief=satisfied=glad=delighted;n|Was the man angry at the end?|angry=mad=furious=annoyed=upset=offended=insulted;i|Does it matter exactly what time of day this happened?|time=morning=afternoon=evening=night=day=clock=hour;i|Does it matter exactly which bar this was?|bar=pub=tavern=inn=saloon=location=place=city=town;i|Does the man’s name or age matter?|name=age=old=young=identity=occupation=job=appearance=look;n|Was money involved in any way?|money=pay=paid=cash=bill=tab=debt=owe=owed=cost;n|Was revenge a motive for the bartender?|revenge=vengeance=payback=punish=punishment=retaliate=grudge",
+   "y*|Is anyone else listening for the alarm?|listening=listen=listens=listener=anyone=else=hear=hears=heard|alarm=ringing=rings=morning=every=daily=signal;y*|Is the second alarm meant as a signal to her neighbour?|neighbour=neighbor=neigbour=neighbur=nextdoor=next-door=nearby|alarm=signal=alert=sound=ringing=listening=listen;y*|If the alarm keeps ringing, does that mean Priya may need help?|alarm=ringing=rings=sound=keeps|help=emergency=trouble=danger=assistance=rescue=wrong=safety=safe=check=wellness=unwell=unable=wrong;y*|Would the neighbour check on Priya if the alarm was not stopped?|neighbour=neighbor=neigbour=nextdoor=next-door|check=rescue=help=visit=investigate=call;n|Is the neighbour a relative of Priya?|neighbour=neighbor=neigbour=nextdoor=next-door|relative=family=mother=sister=brother=daughter=son=same;p|Does Priya race to stop the alarm partly to avoid needlessly alarming her neighbour?|stop=silence=off=disable=prevent|neighbour=neighbor=neigbour=worry=panic=disturb=bother;y*|Did the power failure make the alarm safeguard unreliable?|power=electricity=outage=blackout=electric=cut|alarm=clock=safeguard=system=fail=unreliable;n|Was the power cut Priya’s fault?|power=electricity=outage=blackout=cut|fault=blame=caused=cause=responsible=accident;n|Is the kitchen alarm for cooking?|kitchen=cooker=counter|cooking=cook=timer=food=prepare=fire=smoke=burn=burning=oven;y|Did she stay at her friend’s because of the power cut?|friend=friends=mate|power=outage=blackout=cut=failure=electricity;y|Did she stay there so someone would be with her overnight?|overnight=company=accompanied=together=presence=someone|stay=stayed=sleep=slept=friend=house;p|Is she training herself to get up fast, or just forcing herself out of bed?|force=forcing=train=training=practice=practising=discipline|bed=up=out=fast=quick=wake=morning=get;p|Does she race because she hates the noise?|race=rush=run=hurry=dash|hate=dislike=noise=sound=loud=annoying;n|Did she want to annoy the neighbours?|annoy=annoying=bother=disturb=upset=irritate|neighbour=neighbours=neighbor=neighbors=neigbour;n|Could a quiet alarm work instead?|quiet=quieter=silent=soft=silence|alarm=instead=replace=alternative=work=use;n|Does she set the alarm on her phone?|phone=mobile=smartphone|set=sets=setting=alarm=clock;y|If she stops the alarm in time, does that prove she is OK?|stop=stops=stopped=reaches=reach=silence|ok=okay=well=fine=safe=prove=proves=proof=healthy=alive;n|Was she scared to sleep alone, or afraid of the dark during the power cut?|scared=afraid=fear=frightened|alone=sleep=night=dark=darkness=power=blackout=lights=every;y*|Has Priya previously collapsed or been unable to get help?|collapse=fainted=faint=fall=blackout=unconscious=episode=bad=happened=happen=incident=before=previously=undetected;y*|Does Priya live alone?|live=living=alone=lives;y|Does she race to reach the kitchen alarm before it sounds every morning?|race=rush=hurry=run=quickly=dash;y|Is the first alarm beside her bed?|bedside=bedroom=bed=pillow=bedside-table;y|Is the second alarm placed in the kitchen?|kitchen=cooker=oven=counter;y|Is the neighbour involved?|neighbour=neighbor=neigbour=neighbur=nextdoor=next-door;n|Is Priya deaf or hard of hearing?|deaf=hearing=ears=hard-of-hearing;n|Is the second alarm simply a backup in case the first fails, or is she a heavy sleeper?|backup=back-up=reserve=failsafe=oversleep=overslept=heavy=sleeper=deep;n|Does she need the second alarm to wake her up?|wake=waking=awaken=asleep=sleeping;n|Is she forgetful and afraid of forgetting something in the kitchen?|forget=forgetful=memory=remember=forgot;n|Does she race to the kitchen mainly for exercise?|exercise=fitness=workout=steps=exercise-routine;i|Is her job the reason for the unusual alarm arrangement?|job=work=shift=office=boss=employment;n|Does she have an important appointment every morning?|appointment=meeting=train=bus=deadline=schedule;n|Is a pet involved in the alarm system?|pet=cat=dog=animal=feed=feeding;n|Is anyone else living in Priya’s home part of the plan, or is she married?|housemate=roommate=partner=husband=wife=lodger=married=marriage;n|Is the friend she stayed with the same person as the neighbour?|friend=friends=mate;n|Could a crime or intruder explain the alarms?|crime=criminal=burglar=intruder=thief=break-in=stolen;n|Is Priya in danger from another person?|threat=threatened=stalker=attacker=enemy=revenge;n|Did anyone die in the events behind the alarm system?|die=died=death=dead=killed=murder;p|Is Priya seriously ill every day?|ill=sick=illness=disease=condition=diagnosis;y|Could Priya have a medical emergency while alone?|medical=health=heart=stroke=seizure=diabetes=emergency;i|Is she elderly?|elderly=old=age=aged=senior=pensioner;y|Was the two-alarm system planned deliberately?|planned=plan=deliberate=intentional=arranged=designed;y|Did the neighbour agree to listen and respond, and can she trust them?|agree=agreed=agreement=arrangement=promise=promised=trust=trusted=rely=reliable;y|Is the loudness of the kitchen alarm important?|loud=loudly=loudness=volume=noisy=audible;y|Could the walls between the homes let the neighbour hear it?|wall=walls=thin=adjoining=attached=through;i|Does Priya dislike the sound and simply want silence in the morning?|dislike=hate=annoying=irritating=silence=quiet;i|Is water important to the explanation?|water=tap=drinking=boiler=kettle=shower=bath;i|Was she angry with the electricity company on the night of the failure?|angry=mad=annoyed=furious=upset=complaint;n|Is money involved in the explanation?|money=paid=pay=cost=expensive=cheap=bet=wager;i|Does the time of five minutes matter exactly?|five=minutes=timing=exact=exactly=interval;p|Would a phone app alone give her the same protection?|phone=mobile=app=smartphone=text=call|app=alone=protection=same=instead"
+  ],
+  "qa_solves": [
+   "hiccup=hiccough=hiccups=hiccuping|scare=scared=fright=frighten=startle=shock=gun;hiccup=hiccough=hiccups=hiccuping|cure=cured=gone=stopped=water",
+   "neighbour=neighbor=nextdoor=next-door=nearby|help=emergency=trouble=unable=rescue=check;alone=live=living=herself=solo|alarm=ringing=rings=signal=alert=sounds"
+  ]
+ }
+}

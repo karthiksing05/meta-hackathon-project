@@ -12,6 +12,8 @@ struct BubbleDetailView: View {
     @State private var showFloat = false
     @State private var showShare = false
     @State private var isLoadingGame = false
+    /// Bumped by Try again to fetch the game once more.
+    @State private var loadAttempt = 0
 
     var body: some View {
         Group {
@@ -20,10 +22,10 @@ struct BubbleDetailView: View {
             } else if isLoadingGame {
                 LiveDataStateView(kind: .loading)
             } else {
-                ContentUnavailableView("\(ProductName.singular) not found", systemImage: "sparkles", description: Text("The server doesn't have it."))
+                BubbleMissingState(retry: { loadAttempt += 1 })
             }
         }
-        .task(id: bubbleID) {
+        .task(id: "\(bubbleID)/\(loadAttempt)") {
             guard bubbleStore.bubble(id: bubbleID) == nil else { return }
             isLoadingGame = true
             _ = await bubbleStore.loadGame(id: bubbleID)
@@ -44,6 +46,7 @@ struct BubbleDetailView: View {
                 tags(bubble)
                 museRow(bubble)
                 popInButton(bubble)
+                GroupPlaySendButton(bubble: bubble)
                 stats(bubble)
                 actions(bubble)
                 ShowcaseDetailSection(bubble: bubble)
@@ -453,9 +456,57 @@ struct BubbleFloatSheet: View {
     }
 
     private func send(to group: FBGroup?, name: String) {
+        // BubbleSurfaceHooks.float shows the "Shared to …" toast itself.
         BubbleSurfaceHooks.float(bubble, result: nil, to: group, message: "Play \(bubble.title)", appStore: appStore, bubbleStore: bubbleStore)
-        appStore.showToast("Shared to \(name)", symbol: "checkmark.circle.fill")
+        Haptics.success()
         onDone()
+    }
+}
+
+/// Shows `content` for a game by id, fetching it first when this launch hasn't seen it
+/// (`GET /v1/games/{id}`), with loading and Try again in between.
+struct LoadedBubble<Content: View>: View {
+    let bubbleID: String
+    @ViewBuilder let content: (Bubble) -> Content
+
+    @Environment(BubbleStore.self) private var bubbleStore
+    @State private var isLoading = false
+    @State private var attempt = 0
+
+    var body: some View {
+        Group {
+            if let bubble = bubbleStore.bubble(id: bubbleID) {
+                content(bubble)
+            } else if isLoading {
+                LiveDataStateView(kind: .loading)
+                    .frame(maxHeight: .infinity)
+            } else {
+                BubbleMissingState(retry: { attempt += 1 })
+            }
+        }
+        .task(id: "\(bubbleID)/\(attempt)") {
+            guard bubbleStore.bubble(id: bubbleID) == nil else { return }
+            isLoading = true
+            _ = await bubbleStore.loadGame(id: bubbleID)
+            isLoading = false
+        }
+    }
+}
+
+/// A game that didn't load (deleted, or the connection dropped): Try again, or play something else.
+struct BubbleMissingState: View {
+    let retry: () -> Void
+
+    @Environment(Router.self) private var router
+
+    var body: some View {
+        LiveDataStateView(
+            kind: .failed("It may have been deleted, or the connection dropped."),
+            title: "Couldn't open this \(ProductName.singular)",
+            retry: retry,
+            action: LiveDataStateView.Action(title: "Play something else") { router.select(.bubbles) }
+        )
+        .frame(maxHeight: .infinity)
     }
 }
 

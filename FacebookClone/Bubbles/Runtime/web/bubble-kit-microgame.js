@@ -88,7 +88,7 @@
       game,
       cw, ch,
       s, ox: (W - cw * s) / 2, oy: (H - ch * s) / 2,
-      assets: hasDOM && meta.assets > 0 ? new L.AssetStore(game.assets(), { audioCtx: () => audioOut(sdk)?.ctx || null }) : null,
+      assets: hasDOM && meta.assets > 0 ? new L.AssetStore(game.assets(), { audioCtx: () => audioContext(sdk) }) : null,
       music: hasDOM ? new L.MusicPlayer() : null,
       musicTimer: null,
       down: null,
@@ -111,6 +111,17 @@
 
   function audioOut(sdk) {
     return sdk.fx && typeof sdk.fx.audio === "function" ? sdk.fx.audio() : null;
+  }
+
+  // An AudioContext for decoding the game's sounds, even while muted or before audio is unlocked
+  // (decoding works on a suspended context), so a run that opens silent still has its sounds and
+  // music once audio starts. Older runtimes without fx.audioContext fall back to the playing one.
+  function audioContext(sdk) {
+    if (sdk.fx && typeof sdk.fx.audioContext === "function") {
+      try { return sdk.fx.audioContext() || null; } catch (e) { return null; }
+    }
+    const out = audioOut(sdk);
+    return out ? out.ctx : null;
   }
 
   // Playfield (360x640) <-> engine canvas coordinates.
@@ -175,7 +186,8 @@
           if (t.text) sdk.fx.float(t.text, W / 2, H * 0.28);
         }
         if (sess.music) {
-          sess.music.sync(out, f.music, sess.assets);
+          // A library sound playing behind the game (`backing`) replaces the game's own music.
+          sess.music.sync(out && !out.backing ? out : null, f.music, sess.assets);
           // Stop the music if this run stops being drawn (scrolled away, paused, evicted).
           if (sess.musicTimer) clearTimeout(sess.musicTimer);
           if (sess.music.cur) sess.musicTimer = setTimeout(() => sess.music.stop(), 350);
@@ -435,10 +447,28 @@
   function share(sdk) {
     const m = sdk.state.microgame || {};
     const secs = Math.round((m.time_ms || 0) / 1000);
-    return {
+    const out = {
       headline: sdk.manifest.title,
       score_text: sdk.score + " points" + (secs ? " · " + secs + " s" : ""),
     };
+    // Story games (story_vars, harness-gaps/story.md) keep their own result in state: the share line
+    // ("I became king in 6 choices") replaces the points, and the ending, choices and path go in the
+    // result tag, which the app and group play read. Presentation only: it reads state, never sets it.
+    const sess = sessions.get(sdk.state);
+    let st = null;
+    try { st = sess && sess.game ? sess.game.state() : null; } catch (e) { st = null; }
+    if (st && typeof st === "object") {
+      const line = typeof st.sg_share_line === "string" ? st.sg_share_line.trim() : "";
+      if (line) out.score_text = line.slice(0, 120);
+      const ending = st.ending == null ? "" : String(st.ending);
+      if (ending) {
+        const tag = ["ending=" + ending];
+        if (typeof st.choices_used === "number") tag.push("choices=" + st.choices_used);
+        if (typeof st.sg_path === "string" && st.sg_path) tag.push("path=" + st.sg_path);
+        out.tag = tag.join(";");
+      }
+    }
+    return out;
   }
 
   // A small complete game, so the formula has an example that validates and plays everywhere.
