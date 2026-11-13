@@ -1,0 +1,2498 @@
+[
+  {
+    "id": "step_sequencer_beat_maker",
+    "name": "Step-sequencer beat maker",
+    "aliases": [
+      "Drum machine",
+      "Groovepad",
+      "Beat maker",
+      "Beat Maker Go",
+      "Chrome Music Lab Rhythm",
+      "Launchpad"
+    ],
+    "family": "music_making",
+    "subfamily": "beat making",
+    "summary": "Toggle cells on a looping grid of drum sounds and steps to compose a beat that plays back continuously.",
+    "core_loop": "pick a kit → tap cells on the grid → hear the loop → adjust tempo → save or share",
+    "verbs": [
+      "compose",
+      "tap"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "step grid",
+      "drum kit rows",
+      "playhead",
+      "tempo dial"
+    ],
+    "rules": [
+      "one loop of 8 or 16 steps",
+      "each row is one sound"
+    ],
+    "win": "no win state: the loop is the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends can remix or react",
+    "session_seconds": [
+      30,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "post beats to a Group",
+      "friends remix your loop"
+    ],
+    "content_needs": [
+      "sound kits"
+    ],
+    "difficulty_levers": [
+      "steps",
+      "rows",
+      "tempo"
+    ],
+    "tools": [
+      "step_grid",
+      "audio_synth",
+      "loop_player",
+      "metronome",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a beat maker with a lofi kit",
+      "make a drum machine I can share with friends",
+      "sequencer where each row is a different animal sound"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "melody_piano_roll_composer",
+    "name": "Piano-roll melody composer",
+    "aliases": [
+      "Song Maker",
+      "Chrome Music Lab Song Maker",
+      "Melody maker",
+      "Piano roll",
+      "Compose a tune"
+    ],
+    "family": "music_making",
+    "subfamily": "composition",
+    "summary": "Place notes on a pitch-by-time grid in a chosen scale to compose a short melody and play it back.",
+    "core_loop": "pick scale → tap notes on the grid → play back → tweak → save",
+    "verbs": [
+      "compose",
+      "tap"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "pitch grid",
+      "playhead",
+      "instrument choice"
+    ],
+    "rules": [
+      "notes snap to the chosen scale",
+      "melody is short, a few bars"
+    ],
+    "win": "no win state: the melody is the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to the melody",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "send a melody for a friend to continue",
+      "birthday jingle for a Group member"
+    ],
+    "content_needs": [
+      "instruments"
+    ],
+    "difficulty_levers": [
+      "bars",
+      "scale",
+      "notes limited"
+    ],
+    "tools": [
+      "note_grid",
+      "audio_synth",
+      "loop_player",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a melody maker in a spooky scale",
+      "song maker where I can send the tune to a friend",
+      "write a birthday jingle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "loop_station_layering",
+    "name": "Loop station layering",
+    "aliases": [
+      "Loop station",
+      "Looper",
+      "BandLab",
+      "Loopy",
+      "Layer loops"
+    ],
+    "family": "music_making",
+    "subfamily": "looping",
+    "summary": "Record or choose short loops and layer them one after another into a growing arrangement over a shared tempo.",
+    "core_loop": "start a loop → add a new layer on top → mute or solo layers → build a full track",
+    "verbs": [
+      "layer",
+      "record"
+    ],
+    "inputs": [
+      "tap",
+      "voice"
+    ],
+    "pieces": [
+      "loop tracks",
+      "record button",
+      "layer mutes",
+      "tempo"
+    ],
+    "rules": [
+      "all layers share a length",
+      "layers snap to the beat"
+    ],
+    "win": "no win state: the track is the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends add a layer to your loop"
+    ],
+    "content_needs": [
+      "loop libraries"
+    ],
+    "difficulty_levers": [
+      "layers",
+      "loop length"
+    ],
+    "tools": [
+      "loop_player",
+      "audio_synth",
+      "mic_input",
+      "metronome",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a loop station with my voice",
+      "layer sounds into a track",
+      "looper for beatboxing"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tap_the_melody_echo",
+    "name": "Melody echo",
+    "aliases": [
+      "Simon",
+      "Simon Says tones",
+      "Piano memory",
+      "Repeat the tune"
+    ],
+    "family": "music_making",
+    "subfamily": "memory",
+    "summary": "A short melody plays on colored keys and the player repeats it by tapping the same keys, with the melody growing each round.",
+    "core_loop": "hear melody → tap it back → melody extends by one note → repeat until a miss",
+    "verbs": [
+      "listen",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "keys",
+      "melody playback",
+      "round counter"
+    ],
+    "rules": [
+      "melody grows by one note",
+      "mistake ends the run"
+    ],
+    "win": "longest melody",
+    "lose": "first wrong note",
+    "scoring": "melody length",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "beat a friend's length",
+      "Group's best melody length"
+    ],
+    "content_needs": [
+      "melodies"
+    ],
+    "difficulty_levers": [
+      "note speed",
+      "key count"
+    ],
+    "tools": [
+      "piano_keys",
+      "sequence_memory",
+      "audio_synth",
+      "lives",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "simon but with piano keys",
+      "repeat the melody game",
+      "memorize the tune game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "sing_pitch_match",
+    "name": "Sing the pitch",
+    "aliases": [
+      "Singstar",
+      "Yousician",
+      "Pitch match",
+      "Match the note",
+      "Karaoke pitch"
+    ],
+    "family": "music_making",
+    "subfamily": "vocal",
+    "summary": "The player sings into the mic and a pitch tracker scores how close each held note is to a target.",
+    "core_loop": "hear note → sing it → meter shows pitch → hold within tolerance → next",
+    "verbs": [
+      "sing",
+      "hold"
+    ],
+    "inputs": [
+      "voice"
+    ],
+    "pieces": [
+      "target notes",
+      "pitch meter",
+      "mic input"
+    ],
+    "rules": [
+      "tolerance in cents",
+      "must hold for a second"
+    ],
+    "win": "highest accuracy",
+    "lose": "none; it cannot be failed",
+    "scoring": "accuracy per note",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compete on the same melody",
+      "leaderboard"
+    ],
+    "content_needs": [
+      "note sequences"
+    ],
+    "difficulty_levers": [
+      "tolerance",
+      "notes",
+      "range"
+    ],
+    "tools": [
+      "mic_input",
+      "pitch_detect",
+      "score",
+      "rounds",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a game where I sing the note shown",
+      "vocal warmup game",
+      "sing along pitch matching"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "hum_to_notes_transcribe",
+    "name": "Hum to notes",
+    "aliases": [
+      "Hum to search",
+      "Hum a tune",
+      "Voice to melody",
+      "SoundHound hum"
+    ],
+    "family": "music_making",
+    "subfamily": "vocal",
+    "summary": "The player hums a tune and sees it transcribed into notes, then plays it back in a chosen instrument.",
+    "core_loop": "hum → app transcribes → pick instrument → play and share",
+    "verbs": [
+      "hum",
+      "compose"
+    ],
+    "inputs": [
+      "voice"
+    ],
+    "pieces": [
+      "mic input",
+      "notes display",
+      "instrument choice"
+    ],
+    "rules": [
+      "short hummed phrase"
+    ],
+    "win": "no win state: the transcription is the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      20,
+      60
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "send a hummed melody to a friend"
+    ],
+    "content_needs": [
+      "instruments"
+    ],
+    "difficulty_levers": [
+      "phrase length"
+    ],
+    "tools": [
+      "mic_input",
+      "pitch_detect",
+      "audio_synth",
+      "note_grid",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "hum a tune and turn it into a piano melody",
+      "hum to song maker",
+      "voice to notes"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "rhythm_echo_tap_back",
+    "name": "Rhythm echo",
+    "aliases": [
+      "Clap back",
+      "Rhythm copy",
+      "Tap the rhythm",
+      "Echo game"
+    ],
+    "family": "music_making",
+    "subfamily": "rhythm skill",
+    "summary": "A rhythm of taps plays and the player taps it back with matching timing.",
+    "core_loop": "hear rhythm → tap it back → timing scored → pattern grows harder",
+    "verbs": [
+      "listen",
+      "tap"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "rhythm playback",
+      "tap pad",
+      "timing meter"
+    ],
+    "rules": [
+      "timing tolerance in ms",
+      "patterns grow"
+    ],
+    "win": "highest round",
+    "lose": "three misses",
+    "scoring": "timing accuracy",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare rounds with friends"
+    ],
+    "content_needs": [
+      "rhythm patterns"
+    ],
+    "difficulty_levers": [
+      "pattern length",
+      "tolerance",
+      "tempo"
+    ],
+    "tools": [
+      "beat_target",
+      "metronome",
+      "sequence_memory",
+      "score",
+      "lives",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "copy the rhythm game",
+      "tap back the beat",
+      "rhythm memory echo"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "interval_ear_trainer",
+    "name": "Interval ear trainer",
+    "aliases": [
+      "Ear training",
+      "Interval quiz",
+      "Functional ear trainer",
+      "Perfect pitch trainer"
+    ],
+    "family": "music_making",
+    "subfamily": "ear training",
+    "summary": "Two notes play and the player identifies the interval between them.",
+    "core_loop": "hear two notes → pick interval → feedback → next",
+    "verbs": [
+      "listen",
+      "identify"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "audio notes",
+      "answer buttons",
+      "streak"
+    ],
+    "rules": [
+      "choices limited to taught intervals"
+    ],
+    "win": "highest streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "streak leaderboard"
+    ],
+    "content_needs": [
+      "intervals"
+    ],
+    "difficulty_levers": [
+      "interval set",
+      "speed"
+    ],
+    "tools": [
+      "audio_synth",
+      "quiz",
+      "lives",
+      "score",
+      "rounds",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "ear training game for intervals",
+      "can you tell the interval",
+      "train my pitch ear"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "name_that_note",
+    "name": "Name that note",
+    "aliases": [
+      "Perfect pitch",
+      "Note ID",
+      "Which note is this",
+      "Tuning ear"
+    ],
+    "family": "music_making",
+    "subfamily": "ear training",
+    "summary": "A single note plays and the player names it, optionally with a reference tone.",
+    "core_loop": "hear a note → pick its name → feedback",
+    "verbs": [
+      "listen",
+      "identify"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "audio note",
+      "note buttons"
+    ],
+    "rules": [
+      "one chance per note"
+    ],
+    "win": "highest streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends compare streaks"
+    ],
+    "content_needs": [
+      "notes"
+    ],
+    "difficulty_levers": [
+      "reference tone",
+      "octaves"
+    ],
+    "tools": [
+      "audio_synth",
+      "piano_keys",
+      "quiz",
+      "lives",
+      "score",
+      "combo"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "name that note game",
+      "test my perfect pitch",
+      "note naming"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "chord_builder_puzzle",
+    "name": "Chord builder",
+    "aliases": [
+      "Chord game",
+      "Build the chord",
+      "Chord trainer",
+      "Chords puzzle"
+    ],
+    "family": "music_making",
+    "subfamily": "theory",
+    "summary": "The player builds a named chord from a keyboard or fretboard, or hears a chord and names it.",
+    "core_loop": "see chord name → tap notes → check → next",
+    "verbs": [
+      "build",
+      "recall"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "piano or fretboard",
+      "chord name"
+    ],
+    "rules": [
+      "notes must match the chord"
+    ],
+    "win": "streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare streaks"
+    ],
+    "content_needs": [
+      "chords"
+    ],
+    "difficulty_levers": [
+      "chord set",
+      "timer"
+    ],
+    "tools": [
+      "piano_keys",
+      "quiz",
+      "lives",
+      "score",
+      "rounds"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "build the chords game",
+      "chord trainer for guitar",
+      "piano chords quiz"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "beat_battle_async",
+    "name": "Beat battle",
+    "aliases": [
+      "Beat battle",
+      "Remix duel",
+      "Producer battle",
+      "Beat swap"
+    ],
+    "family": "music_making",
+    "subfamily": "challenge",
+    "summary": "Two players each make a beat from the same samples, and friends vote on the better one.",
+    "core_loop": "get sample pack → build beat → submit → votes",
+    "verbs": [
+      "compose",
+      "vote"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "sample pack",
+      "grid",
+      "voting"
+    ],
+    "rules": [
+      "same samples for both"
+    ],
+    "win": "most votes",
+    "lose": "none; it cannot be failed",
+    "scoring": "votes",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "async_friends"
+    ],
+    "social_hooks": [
+      "friends vote",
+      "weekly battles"
+    ],
+    "content_needs": [
+      "sample packs"
+    ],
+    "difficulty_levers": [
+      "sample count"
+    ],
+    "tools": [
+      "step_grid",
+      "audio_synth",
+      "vote_tally",
+      "rounds",
+      "friend_pairing"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "beat battle with my friend",
+      "make a beat from the same samples",
+      "producer battle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "song_stem_pass_collab",
+    "name": "Song stem pass",
+    "aliases": [
+      "Collab track",
+      "Pass the track",
+      "Exquisite corpse song",
+      "Round-robin song"
+    ],
+    "family": "music_making",
+    "subfamily": "collaborative",
+    "summary": "Each friend adds one stem, such as drums, bass or melody, to a growing track.",
+    "core_loop": "get track → add a stem → pass on",
+    "verbs": [
+      "compose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "tracks",
+      "stems",
+      "passing"
+    ],
+    "rules": [
+      "one stem each"
+    ],
+    "win": "a finished track",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score; friends react to or vote on the result",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "live"
+    ],
+    "social_hooks": [
+      "each friend one stem",
+      "final song shared in Group"
+    ],
+    "content_needs": [
+      "track starts"
+    ],
+    "difficulty_levers": [
+      "stem count"
+    ],
+    "tools": [
+      "step_grid",
+      "loop_player",
+      "audio_synth",
+      "turns",
+      "group_roster"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "build a song with friends one stem at a time",
+      "pass the beat",
+      "collab track"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dj_crossfade_mashup",
+    "name": "DJ mashup",
+    "aliases": [
+      "DJ mix",
+      "Mixcraft",
+      "Mashup",
+      "Crossfade"
+    ],
+    "family": "music_making",
+    "subfamily": "mixing",
+    "summary": "Two loops play on decks and the player crossfades, filters and times them to make a smooth mashup.",
+    "core_loop": "load decks → move crossfader → apply filters → build the mix",
+    "verbs": [
+      "mix"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "two decks",
+      "crossfader",
+      "filters"
+    ],
+    "rules": [
+      "keep loops in sync"
+    ],
+    "win": "no win state: the mix is the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      60,
+      240
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share mixes"
+    ],
+    "content_needs": [
+      "loops"
+    ],
+    "difficulty_levers": [
+      "bpm gap"
+    ],
+    "tools": [
+      "loop_player",
+      "audio_synth",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "dj mashup of two songs",
+      "crossfade game",
+      "mix tracks"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "dj_beat_match_sync",
+    "name": "Beat match sync",
+    "aliases": [
+      "Beat matching",
+      "DJ sync",
+      "Match the tempo"
+    ],
+    "family": "music_making",
+    "subfamily": "skill",
+    "summary": "Two beats play at different tempos and the player adjusts pitch until their beats align.",
+    "core_loop": "hear mismatch → drag tempo → align → score",
+    "verbs": [
+      "tune"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "two beats",
+      "tempo slider"
+    ],
+    "rules": [
+      "two loops run at different tempos",
+      "dragging a tempo slider speeds one deck up or down",
+      "score rises with the time the beats stay aligned within tolerance"
+    ],
+    "win": "highest accuracy",
+    "lose": "none; it cannot be failed",
+    "scoring": "alignment",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "beats"
+    ],
+    "difficulty_levers": [
+      "tolerance"
+    ],
+    "tools": [
+      "loop_player",
+      "metronome",
+      "slider_input",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a dj game where I match the beats of two songs",
+      "beat matching challenge",
+      "line up two tempos by ear"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "text_to_song_generate",
+    "name": "Text to song",
+    "aliases": [
+      "Suno",
+      "Udio",
+      "Make a song about",
+      "AI song"
+    ],
+    "family": "music_making",
+    "subfamily": "generative",
+    "summary": "The player describes a song and the server composes it, with lyrics and style, for sharing.",
+    "core_loop": "type description → generate → listen → share",
+    "verbs": [
+      "describe"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "prompt box",
+      "generated track"
+    ],
+    "rules": [
+      "short clips"
+    ],
+    "win": "no win state: the song is the result",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      20,
+      90
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "make a song about a friend"
+    ],
+    "content_needs": [
+      "generated audio"
+    ],
+    "difficulty_levers": [
+      "length",
+      "genre"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "song_generator",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "make a song about my friend's birthday",
+      "suno style generator",
+      "a rap about our road trip"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "rhyme_battle_verse_builder",
+    "name": "Rhyme builder",
+    "aliases": [
+      "Rap battle",
+      "Rhyme time",
+      "Verse builder",
+      "Rhyme with"
+    ],
+    "family": "music_making",
+    "subfamily": "wordplay",
+    "summary": "The player completes verses by choosing or typing rhyming lines to a beat.",
+    "core_loop": "read couplet start → choose a rhyme → beat plays → verse scored",
+    "verbs": [
+      "rhyme",
+      "write"
+    ],
+    "inputs": [
+      "tap",
+      "type"
+    ],
+    "pieces": [
+      "verse",
+      "rhyme options",
+      "beat"
+    ],
+    "rules": [
+      "last words must rhyme"
+    ],
+    "win": "highest flow",
+    "lose": "none; it cannot be failed",
+    "scoring": "rhyme quality",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends continue the verse"
+    ],
+    "content_needs": [
+      "rhyme sets"
+    ],
+    "difficulty_levers": [
+      "rhyme difficulty"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "word_check",
+      "metronome",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "rhyme game over a beat",
+      "rap battle builder",
+      "rhyme with my friend's name"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "karaoke_lyric_follow",
+    "name": "Karaoke follow",
+    "aliases": [
+      "Karaoke",
+      "Lyrics follow",
+      "Sing along",
+      "Lyric timing"
+    ],
+    "family": "music_making",
+    "subfamily": "vocal",
+    "summary": "Lyrics scroll in time and the player taps or sings along, scored on timing.",
+    "core_loop": "lyrics scroll → sing or tap on beat → scored",
+    "verbs": [
+      "sing",
+      "tap"
+    ],
+    "inputs": [
+      "voice",
+      "tap"
+    ],
+    "pieces": [
+      "lyrics",
+      "playhead",
+      "score"
+    ],
+    "rules": [
+      "timing windows"
+    ],
+    "win": "highest timing score",
+    "lose": "none; it cannot be failed",
+    "scoring": "timing",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "duet with friends"
+    ],
+    "content_needs": [
+      "lyrics and timing"
+    ],
+    "difficulty_levers": [
+      "window"
+    ],
+    "tools": [
+      "beat_target",
+      "mic_input",
+      "score",
+      "ghost_score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "karaoke with my friends",
+      "sing along game",
+      "lyrics timing"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "instrument_by_ear",
+    "name": "Instrument by ear",
+    "aliases": [
+      "Name the instrument",
+      "Guess the instrument",
+      "Instrument quiz"
+    ],
+    "family": "music_making",
+    "subfamily": "ear training",
+    "summary": "A short sound plays and the player names the instrument.",
+    "core_loop": "hear → pick → next",
+    "verbs": [
+      "listen",
+      "identify"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "audio sample",
+      "choices"
+    ],
+    "rules": [
+      "one short sample plays per question",
+      "four instrument choices, one correct",
+      "samples replay on request"
+    ],
+    "win": "highest streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "streak compare"
+    ],
+    "content_needs": [
+      "samples"
+    ],
+    "difficulty_levers": [
+      "choices"
+    ],
+    "tools": [
+      "audio_clip_player",
+      "quiz",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "guess the instrument game",
+      "which instrument is that quiz",
+      "orchestra sound quiz with harry potter theme music instruments"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "rhythm_name_that_tune",
+    "name": "Tap-rhythm tune guess",
+    "aliases": [
+      "Name that tune",
+      "Tap the song rhythm",
+      "Guess the song by rhythm"
+    ],
+    "family": "music_making",
+    "subfamily": "guessing",
+    "summary": "A song's rhythm plays without pitch and the player names the song.",
+    "core_loop": "hear rhythm → guess → score",
+    "verbs": [
+      "listen",
+      "guess"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "rhythm clip",
+      "guess box"
+    ],
+    "rules": [
+      "only the rhythm of a well-known tune plays, no pitch",
+      "guess by typing the title",
+      "a hint reveals the first word of the title"
+    ],
+    "win": "name it",
+    "lose": "clips run out",
+    "scoring": "score",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "clips"
+    ],
+    "difficulty_levers": [
+      "clip length"
+    ],
+    "tools": [
+      "audio_clip_player",
+      "typed_answer",
+      "keyboard",
+      "fuzzy_match"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "guess the song from the rhythm taps",
+      "name that tune from only the beat",
+      "tap rhythm guessing for disney songs"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "sound_pad_soundboard",
+    "name": "Sound pad",
+    "aliases": [
+      "Sample pad",
+      "Soundboard",
+      "Launchpad",
+      "Sound pad"
+    ],
+    "family": "music_making",
+    "subfamily": "performance",
+    "summary": "Tap pads to trigger sounds and perform a live jam, optionally recorded.",
+    "core_loop": "tap pads → hear sounds → record",
+    "verbs": [
+      "perform"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "pad grid",
+      "record"
+    ],
+    "rules": [
+      "each pad triggers one sample",
+      "pads can be one-shot or looped",
+      "a recording captures the performance"
+    ],
+    "win": "no win state: the performance",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      20,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "content_needs": [
+      "samples"
+    ],
+    "difficulty_levers": [
+      "pads"
+    ],
+    "tools": [
+      "sound_pads",
+      "audio_synth",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a soundboard of my friends' catchphrases",
+      "sample pad with animal sounds",
+      "launchpad game for jamming"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "touch_theremin_slide",
+    "name": "Touch theremin",
+    "aliases": [
+      "Theremin",
+      "Slide synth",
+      "Touch instrument",
+      "Air synth"
+    ],
+    "family": "music_making",
+    "subfamily": "performance",
+    "summary": "Slide a finger to change pitch and volume continuously.",
+    "core_loop": "slide → sound → record",
+    "verbs": [
+      "perform"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "pad area",
+      "pitch and volume axes"
+    ],
+    "rules": [
+      "horizontal position sets pitch continuously",
+      "vertical position sets volume",
+      "an optional scale snap makes it easier"
+    ],
+    "win": "no win state: the performance",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      20,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "range"
+    ],
+    "tools": [
+      "audio_synth",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "a touch theremin",
+      "slide synth I can play with one finger",
+      "spooky theremin for halloween"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "marble_music_composer",
+    "name": "Marble music composer",
+    "aliases": [
+      "Marble run music",
+      "Music box",
+      "Pin board melody"
+    ],
+    "family": "music_making",
+    "subfamily": "composition",
+    "summary": "Drop marbles onto pegs that play notes, arranging pegs to form a melody.",
+    "core_loop": "place pegs → drop marbles → listen",
+    "verbs": [
+      "compose"
+    ],
+    "inputs": [
+      "tap",
+      "drag"
+    ],
+    "pieces": [
+      "pegs",
+      "marbles"
+    ],
+    "rules": [
+      "pegs placed on a board each play a note when a marble hits",
+      "marbles fall by gravity from a dropper",
+      "peg position sets pitch and timing"
+    ],
+    "win": "no win state: the tune",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      45,
+      240
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "peg count"
+    ],
+    "tools": [
+      "audio_synth",
+      "physics_world",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "marble music maker",
+      "music box where balls hit pegs",
+      "drop marbles to make a tune"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "character_layer_band",
+    "name": "Character band",
+    "aliases": [
+      "Incredibox",
+      "Sprunki",
+      "Band maker",
+      "Beat characters"
+    ],
+    "family": "music_making",
+    "subfamily": "composition",
+    "summary": "Drag sounds onto characters in a band, each adding a layer, to build a song.",
+    "core_loop": "drag sound to character → layer → unlock bonus",
+    "verbs": [
+      "compose"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "characters",
+      "sound icons"
+    ],
+    "rules": [
+      "each character slot accepts one sound at a time",
+      "sounds belong to beat, effect, melody or voice groups",
+      "right combinations unlock a bonus layer"
+    ],
+    "win": "no win state: song",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "content_needs": [
+      "sounds"
+    ],
+    "difficulty_levers": [
+      "slots"
+    ],
+    "tools": [
+      "loop_player",
+      "audio_synth",
+      "drag_drop_slots",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "incredibox style band",
+      "make a beat with cartoon characters",
+      "sprunki style music builder"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tap_to_animate_patatap",
+    "name": "Tap to sound and animate",
+    "aliases": [
+      "Patatap",
+      "Keyboard music visual",
+      "Sound toy"
+    ],
+    "family": "music_making",
+    "subfamily": "toy",
+    "summary": "Each tap or key triggers a sound with a matching animation.",
+    "core_loop": "tap → sound and animation",
+    "verbs": [
+      "play"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "keys",
+      "animations"
+    ],
+    "rules": [
+      "every key or tap maps to a distinct sound and animation",
+      "sounds are drawn from one coherent palette",
+      "no scoring or failure"
+    ],
+    "win": "no win state: a play session",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      30,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "content_needs": [
+      "sounds"
+    ],
+    "difficulty_levers": [
+      "palette"
+    ],
+    "tools": [
+      "audio_synth",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "patatap style toy",
+      "tap for sound and colors",
+      "sound and animation toy for kids"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "rhythm_notation_matching",
+    "name": "Rhythm reading",
+    "aliases": [
+      "Rhythm reading",
+      "Notation match",
+      "Rhythm score"
+    ],
+    "family": "music_making",
+    "subfamily": "theory",
+    "summary": "A rhythm plays and the player picks matching notation.",
+    "core_loop": "hear → pick",
+    "verbs": [
+      "listen",
+      "read"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "notation choices"
+    ],
+    "rules": [
+      "a rhythm plays once or twice",
+      "pick the matching notation from four choices",
+      "choices differ by one note value or rest"
+    ],
+    "win": "streak",
+    "lose": "three misses",
+    "scoring": "streak",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "rhythms"
+    ],
+    "difficulty_levers": [
+      "complexity"
+    ],
+    "tools": [
+      "quiz",
+      "lives",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "rhythm reading quiz",
+      "which notation matches the beat",
+      "music theory rhythm trainer"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "drum_pattern_replicate",
+    "name": "Drum pattern replicate",
+    "aliases": [
+      "Pattern copy",
+      "Drum pattern"
+    ],
+    "family": "music_making",
+    "subfamily": "ear training",
+    "summary": "A drum pattern plays and the player reproduces it on the step grid.",
+    "core_loop": "hear → toggle cells → compare",
+    "verbs": [
+      "listen",
+      "compose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "grid"
+    ],
+    "rules": [
+      "a one-bar drum pattern plays",
+      "the player toggles cells to reproduce it",
+      "feedback marks matching and missing cells"
+    ],
+    "win": "accuracy",
+    "lose": "none; it cannot be failed",
+    "scoring": "accuracy",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "patterns"
+    ],
+    "difficulty_levers": [
+      "length"
+    ],
+    "tools": [
+      "step_grid",
+      "audio_synth",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "copy the drum pattern by ear",
+      "replicate this beat on the grid",
+      "drum ear training game"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "beatbox_voice_loop",
+    "name": "Beatbox loop",
+    "aliases": [
+      "Beatbox",
+      "Voice loop",
+      "Vocal percussion"
+    ],
+    "family": "music_making",
+    "subfamily": "looping",
+    "summary": "Record vocal percussion sounds that are classified and layered into a beat.",
+    "core_loop": "beatbox → classified → looped",
+    "verbs": [
+      "beatbox"
+    ],
+    "inputs": [
+      "voice"
+    ],
+    "pieces": [
+      "mic",
+      "sound classes"
+    ],
+    "rules": [
+      "mic input is classified into kick, snare or hat sounds",
+      "classified hits snap to the grid",
+      "the recorded bar loops"
+    ],
+    "win": "no win state: beat",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "sensitivity"
+    ],
+    "tools": [
+      "mic_input",
+      "sound_classifier",
+      "loop_player"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "beatbox beat maker",
+      "turn my mouth sounds into drums",
+      "voice drum loop for the group chat"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "foley_sound_scene",
+    "name": "Foley scene",
+    "aliases": [
+      "Foley",
+      "Sound effects",
+      "Voice acting a scene"
+    ],
+    "family": "music_making",
+    "subfamily": "creative",
+    "summary": "Record sounds for events in a short silent scene.",
+    "core_loop": "watch scene → record sound → play",
+    "verbs": [
+      "record"
+    ],
+    "inputs": [
+      "voice"
+    ],
+    "pieces": [
+      "scene",
+      "record"
+    ],
+    "rules": [
+      "a short silent clip shows events with timestamps",
+      "the player records a sound for each event",
+      "recordings are synced to the clip"
+    ],
+    "win": "no win state: scene",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "content_needs": [
+      "scenes"
+    ],
+    "difficulty_levers": [
+      "duration"
+    ],
+    "tools": [
+      "mic_input",
+      "video_scene",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "foley sound game",
+      "make the sounds for a cartoon scene",
+      "voice the sound effects of a silent clip"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "playlist_theme_curator",
+    "name": "Playlist curator",
+    "aliases": [
+      "Playlist battle",
+      "Curate a playlist",
+      "Mixtape"
+    ],
+    "family": "music_making",
+    "subfamily": "curation",
+    "summary": "Players pick tracks for a themed playlist and friends vote.",
+    "core_loop": "theme → pick tracks → vote",
+    "verbs": [
+      "curate",
+      "vote"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "theme",
+      "tracks"
+    ],
+    "rules": [
+      "a theme and a slot count are given",
+      "each player picks tracks that fit",
+      "friends vote on the best playlist"
+    ],
+    "win": "most votes",
+    "lose": "none; it cannot be failed",
+    "scoring": "votes",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends vote"
+    ],
+    "content_needs": [
+      "tracks"
+    ],
+    "difficulty_levers": [
+      "slots"
+    ],
+    "tools": [
+      "track_picker",
+      "vote_tally"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "playlist battle with my friends",
+      "build a themed mixtape",
+      "curate a road trip playlist and vote"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "lyric_swap_madlib",
+    "name": "Lyric swap",
+    "aliases": [
+      "Mad libs lyrics",
+      "Parody lyrics",
+      "Weird Al style"
+    ],
+    "family": "music_making",
+    "subfamily": "wordplay",
+    "summary": "A song template has blanks for the player to fill with rhymes and syllables.",
+    "core_loop": "fill blanks → hear → share",
+    "verbs": [
+      "write"
+    ],
+    "inputs": [
+      "type"
+    ],
+    "pieces": [
+      "template",
+      "blanks"
+    ],
+    "rules": [
+      "each blank has a required syllable count or rhyme",
+      "filled lyrics play back over the track",
+      "no failure state"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      45,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "content_needs": [
+      "templates"
+    ],
+    "difficulty_levers": [
+      "blank count"
+    ],
+    "tools": [
+      "typed_answer",
+      "keyboard",
+      "word_check",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "parody song about my family",
+      "lyric madlib for our group",
+      "fill in blanks to make a funny song"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "mix_levels_target_match",
+    "name": "Mixing levels target",
+    "aliases": [
+      "Audio mixing",
+      "Mixing console",
+      "Mix match"
+    ],
+    "family": "music_making",
+    "subfamily": "skill",
+    "summary": "Adjust volumes of tracks to match a reference mix.",
+    "core_loop": "listen → adjust → compare",
+    "verbs": [
+      "mix"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "faders"
+    ],
+    "rules": [
+      "a reference mix plays",
+      "the player sets track faders to match it",
+      "score depends on the distance of each fader from the reference"
+    ],
+    "win": "accuracy",
+    "lose": "none; it cannot be failed",
+    "scoring": "accuracy",
+    "session_seconds": [
+      45,
+      150
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "mixes"
+    ],
+    "difficulty_levers": [
+      "tolerance"
+    ],
+    "tools": [
+      "slider_input",
+      "loop_player",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "mixing game match the mix",
+      "balance the instruments to match the song",
+      "audio engineer puzzle"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "harmonize_melody_add_line",
+    "name": "Harmonize a melody",
+    "aliases": [
+      "Harmony game",
+      "Add a harmony",
+      "Counterpoint"
+    ],
+    "family": "music_making",
+    "subfamily": "composition",
+    "summary": "A melody plays and the player adds a harmony line that fits.",
+    "core_loop": "hear → add notes → listen",
+    "verbs": [
+      "compose"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "piano roll"
+    ],
+    "rules": [
+      "a melody plays in a key",
+      "added notes are checked against consonant intervals",
+      "notes may only land on the key's scale"
+    ],
+    "win": "a harmonious result",
+    "lose": "none; it cannot be failed",
+    "scoring": "consonance",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "friends harmonize"
+    ],
+    "content_needs": [
+      "melodies"
+    ],
+    "difficulty_levers": [
+      "key"
+    ],
+    "tools": [
+      "note_grid",
+      "audio_synth",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "add a harmony to this tune",
+      "harmonize game",
+      "write the second voice for this melody"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tempo_tap_bpm_guess",
+    "name": "Tap the tempo",
+    "aliases": [
+      "Tap tempo",
+      "BPM guess",
+      "Metronome guess"
+    ],
+    "family": "music_making",
+    "subfamily": "rhythm skill",
+    "summary": "Hear a song and tap its tempo to match its BPM.",
+    "core_loop": "hear → tap → compare",
+    "verbs": [
+      "listen",
+      "tap"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "tap pad",
+      "bpm readout"
+    ],
+    "rules": [
+      "a clip plays without a click",
+      "the player taps along",
+      "score depends on the difference between tapped and true BPM"
+    ],
+    "win": "accuracy",
+    "lose": "none; it cannot be failed",
+    "scoring": "accuracy",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "clips"
+    ],
+    "difficulty_levers": [
+      "tolerance"
+    ],
+    "tools": [
+      "metronome",
+      "score",
+      "audio_clip_player"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "bpm guess game",
+      "tap the tempo of the song",
+      "tap tempo challenge with my friends"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "tuning_ear_string",
+    "name": "Tune the string",
+    "aliases": [
+      "Tuner",
+      "Tune the guitar",
+      "Pitch tune"
+    ],
+    "family": "music_making",
+    "subfamily": "skill",
+    "summary": "Turn a peg to tune a string to a reference pitch.",
+    "core_loop": "hear target → turn → match",
+    "verbs": [
+      "tune"
+    ],
+    "inputs": [
+      "drag"
+    ],
+    "pieces": [
+      "peg",
+      "pitch meter"
+    ],
+    "rules": [
+      "a reference tone plays",
+      "the player drags a peg to change string pitch",
+      "success when within a few cents for a second"
+    ],
+    "win": "accuracy",
+    "lose": "none; it cannot be failed",
+    "scoring": "accuracy",
+    "session_seconds": [
+      30,
+      90
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "strings"
+    ],
+    "difficulty_levers": [
+      "tolerance"
+    ],
+    "tools": [
+      "slider_input",
+      "audio_synth",
+      "pitch_detect",
+      "score"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "tune the guitar game",
+      "tuning ear trainer",
+      "match the pitch by turning the peg"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "strum_pattern_chord_change",
+    "name": "Strum and chord change",
+    "aliases": [
+      "Guitar Hero acoustic",
+      "Strumming",
+      "Chord changes"
+    ],
+    "family": "music_making",
+    "subfamily": "rhythm skill",
+    "summary": "Tap strumming patterns while changing chords on time.",
+    "core_loop": "see chord → strum pattern → change",
+    "verbs": [
+      "strum"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "chord chart",
+      "strum"
+    ],
+    "rules": [
+      "chord changes arrive on the beat",
+      "strums follow a shown pattern",
+      "a missed change breaks the combo"
+    ],
+    "win": "accuracy",
+    "lose": "miss",
+    "scoring": "score",
+    "session_seconds": [
+      60,
+      180
+    ],
+    "players": [
+      "solo",
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "compare"
+    ],
+    "content_needs": [
+      "songs"
+    ],
+    "difficulty_levers": [
+      "tempo"
+    ],
+    "tools": [
+      "beat_target",
+      "piano_keys",
+      "score",
+      "lives"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "guitar strum game",
+      "practice chord changes with a beat",
+      "learn campfire songs by strumming"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "live_jam_session_shared",
+    "name": "Live jam session",
+    "aliases": [
+      "Jam session",
+      "Band live",
+      "Multiplayer jam"
+    ],
+    "family": "music_making",
+    "subfamily": "collaborative",
+    "summary": "Friends share a live room where each controls one instrument pad, in sync to the same tempo.",
+    "core_loop": "join room → play pads → hear mix",
+    "verbs": [
+      "perform"
+    ],
+    "inputs": [
+      "tap"
+    ],
+    "pieces": [
+      "room",
+      "pads"
+    ],
+    "rules": [
+      "each friend controls one instrument pad",
+      "everyone shares a tempo clock",
+      "the room records the jam"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      60,
+      300
+    ],
+    "players": [
+      "live"
+    ],
+    "social_hooks": [
+      "friends jam together"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "instruments"
+    ],
+    "tools": [
+      "sound_pads",
+      "audio_synth",
+      "metronome",
+      "realtime_room"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "jam session with friends",
+      "band in a room",
+      "live music jam with my group"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "draw_melody_contour",
+    "name": "Draw a melody",
+    "aliases": [
+      "Draw music",
+      "Melody contour",
+      "Paint music"
+    ],
+    "family": "music_making",
+    "subfamily": "composition",
+    "summary": "Draw a curve and the app turns it into a melody.",
+    "core_loop": "draw → listen → adjust",
+    "verbs": [
+      "draw",
+      "compose"
+    ],
+    "inputs": [
+      "draw"
+    ],
+    "pieces": [
+      "canvas",
+      "scale"
+    ],
+    "rules": [
+      "the y position of the stroke maps to pitch",
+      "the x position maps to time",
+      "pitches snap to a chosen scale"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      30,
+      120
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "scale"
+    ],
+    "tools": [
+      "drawing_canvas",
+      "audio_synth",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "draw a melody",
+      "paint music with my finger",
+      "sketch a tune and hear it"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  },
+  {
+    "id": "field_recording_track",
+    "name": "Field recording track",
+    "aliases": [
+      "Sound collage",
+      "Field recording",
+      "Sample from life"
+    ],
+    "family": "music_making",
+    "subfamily": "creative",
+    "summary": "Record sounds from daily life and arrange into a track.",
+    "core_loop": "record → arrange → play",
+    "verbs": [
+      "record",
+      "arrange"
+    ],
+    "inputs": [
+      "voice"
+    ],
+    "pieces": [
+      "recorder",
+      "timeline"
+    ],
+    "rules": [
+      "record short sounds from the environment",
+      "sounds are placed on a timeline",
+      "each sound may be pitched or looped"
+    ],
+    "win": "no win state",
+    "lose": "none; it cannot be failed",
+    "scoring": "no score",
+    "session_seconds": [
+      120,
+      300
+    ],
+    "players": [
+      "async_friends",
+      "group_daily"
+    ],
+    "social_hooks": [
+      "share"
+    ],
+    "content_needs": [
+      "none"
+    ],
+    "difficulty_levers": [
+      "length"
+    ],
+    "tools": [
+      "mic_input",
+      "loop_player",
+      "gallery"
+    ],
+    "engine_gaps": [],
+    "gate_profile": "calm",
+    "example_prompts": [
+      "record sounds around me into a song",
+      "field recording collage",
+      "turn my day into a track"
+    ],
+    "status": "seed",
+    "source": "seed-karthik",
+    "refs": []
+  }
+]
