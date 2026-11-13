@@ -278,6 +278,15 @@ console.log(`v0.2 ops/audio seen: ${JSON.stringify(seen)}`);
     check(!vb.ok && vb.problems.some((p) => p.includes('final.score')), `${name}: a raised score should fail engine.verify`);
     check(!engine.verify(game + ' ', text).game_hash_ok, `${name}: another game file should fail the hash check`);
     check(!engine.verify(game, '{"format":"nope"}').ok, `${name}: a malformed log should fail`);
+    // `result`: the replay's end state, all of it or just the names asked for (group_play.result.state).
+    check(v.result && typeof v.result === 'object' && !Array.isArray(v.result), `${name}: verify should return the end state as result`);
+    const names = Object.keys(v.result);
+    if (names.length) {
+      const one = engine.verify(game, text, [names[0], 'no_such_var']);
+      check(JSON.stringify(one.result) === JSON.stringify({ [names[0]]: v.result[names[0]], no_such_var: null }),
+        `${name}: verify(state) should pick the named values: ${JSON.stringify(one.result)}`);
+      check(JSON.stringify(engine.verify(game, text, names).result) === JSON.stringify(v.result), `${name}: the same replay gives the same end state`);
+    }
   }
   console.log(`engine.verify: ${Object.keys(logs).length} logs verified in WASM, raised scores and other games rejected`);
 }

@@ -73,7 +73,7 @@ export class Microgame {
 
   static validate(json) { return requireDefault().validate(json); }
   static load(json, seed) { return requireDefault().load(json, seed); }
-  static verify(gameText, log) { return requireDefault().verify(gameText, log); }
+  static verify(gameText, log, state) { return requireDefault().verify(gameText, log, state); }
 
   constructor(exports) {
     this.x = exports;
@@ -109,9 +109,13 @@ export class Microgame {
    * it claims: `{ok, game_hash_ok, steps, recomputed, claimed, problems}`. `gameText` must be the
    * exact game file text the run was loaded from (its hash is in the log). Lets a server or a
    * friend's phone confirm a challenge score without trusting the player's device.
+   * `result` holds the end values of the game's state from the replay: the names in `state` (the
+   * manifest's `group_play.result.state`, e.g. `["ending", "choices_used"]`), or all of it.
    */
-  verify(gameText, log) {
-    const req = JSON.stringify({ game: String(gameText), log: typeof log === 'string' ? log : log });
+  verify(gameText, log, state) {
+    const body = { game: String(gameText), log: typeof log === 'string' ? log : log };
+    if (state != null) body.state = state;
+    const req = JSON.stringify(body);
     let len;
     try {
       len = this._withBytes(utf8enc.encode(req), (p, n) => this.x.mg_verify(p, n));

@@ -257,10 +257,15 @@ doesn't match the steps replayed so far is reported too. `--json` prints
 `{ok, game_hash_ok, steps, recomputed, claimed, problems}`.
 
 The same check runs in WebAssembly: `mg_verify(ptr, len)` takes UTF-8 JSON
-`{"game": <exact game file text>, "log": <log text or object>}` and returns the
-same `{ok, game_hash_ok, steps, recomputed, claimed, problems}`. In JS it is
-`engine.verify(gameText, log)` (or `Microgame.verify`), and in the app's
-bundle `MicrogameEngine.verify(game_json, log)`. So a Node server that loads
+`{"game": <exact game file text>, "log": <log text or object>, "state"?: [names]}`
+and returns the same `{ok, game_hash_ok, steps, recomputed, claimed, problems}`
+plus `result`: the end values of the game's state after the replay. With
+`state` (the manifest's `group_play.result.state`, e.g. `["ending",
+"choices_used"]`) it holds just those names (unknown ones are `null`);
+without it, every state variable. A server compares story endings and opinion
+picks from this, never from the phone. In JS it is
+`engine.verify(gameText, log, state?)` (or `Microgame.verify`), and in the app's
+bundle `MicrogameEngine.verify(game_json, log, state?)`. So a Node server that loads
 the engine bundle (the games generator already does) can verify a submitted
 run without the native CLI. `mg_hit_targets` also counts as a frame build in
 the log, since it builds the layout the next tap hits; the app's runtime calls
