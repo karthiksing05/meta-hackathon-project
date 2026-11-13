@@ -56,4 +56,4 @@ Karthik's ask (2026-11-13): section 3 covers the whole AI stack and how it plugs
 - "In a play" signals: `docs/RANKING.md` 1.1 (takeover, preview ≥ 6 s, skip < 1.2 s, finished, replays, quit mid-run, ended the session, saved).
 - "Between people": the app posts `remix`, `share`, `co_make_contribution`, `group_chat_play`, `game_night_play`, `challenge_won` and `add_friend_from_game` (`BubbleSocialSignals.post` calls on `main`); the server records `challenge_sent` and `challenge_accepted` itself (`backend/README.md`, Max's 09:04 audit). Add friend from a game is the strongest single signal (+4, RANKING 1.1). `challenge_rematch` is weighted but never sent, so it's not on the slide.
 - "In the Curio itself": 24 manifest features; bot playtest results; same-seed replayed scores, with skill spread used by Group Blend (RANKING 1.5).
-- "What's next, collected, not used yet": prompts, photos, sounds and sponsored-Curio plays are stored with each game or event but don't feed the ranker today. Creator payouts and ad targeting are proposals (`FEATURES.md` #13).
+- (The "What's next" column was removed at Karthik's ask, 2026-11-13.)
