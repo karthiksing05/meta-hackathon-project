@@ -187,6 +187,7 @@ extension AppStore {
             viewCount: r.views ?? 0
         )
         post.allowsBubbles = r.allowsGames ?? false
+        if let gameID = r.gameId, !gameID.isEmpty { post.bubbleID = gameID }
         live.serverPostIDs.insert(r.id)
         return post
     }
@@ -324,8 +325,14 @@ extension AppStore {
         let text = post.text, groupID = post.group?.id, background = post.backgroundIndex
         let feeling = post.feeling?.name, location = post.location
         Task { @MainActor [weak self] in
+            // Read here, not above: a game post gets its game right after `createPost` returns.
+            let gameID = post.bubbleID
+            // A guest (this phone's device account) keeps game posts on this phone's feed, like
+            // its profile, which keeps the demo identity and saves nothing to the server.
+            if gameID != nil, GamesAccount.shared.isGuest { return }
             guard let made = try? await FacebookAPILive.shared.createPost(
-                text: text, groupID: groupID, background: background, feeling: feeling, location: location) else { return }
+                text: text, groupID: groupID, background: background, feeling: feeling, location: location,
+                gameID: gameID) else { return }
             self?.live.serverPostIDs.insert(made.id)
         }
     }

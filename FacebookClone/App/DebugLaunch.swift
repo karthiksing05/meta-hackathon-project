@@ -11,7 +11,7 @@ import SwiftUI
 /// - `FB_OPEN`: one of
 ///   `bubble:<id>`, `board:<id>`, `library`, `challenges`, `find-friends`, `sound:<id>`, `chain:<id>`, `marketplace`, `play:<id>`, `burst:<id>`,
 ///   `play-file:<path>` (a game manifest JSON file on the Mac running the simulator: added for this session and played),
-///   `studio`, `studio:<prompt>`, `edit:<id>`, `remix:<id>`, `next:<id>`, `daily:<groupID>`,
+///   `studio`, `studio:<prompt>`, `studio-result[:<id>]` (with `FB_STUDIO_STEP=result`), `edit:<id>`, `remix:<id>`, `next:<id>`, `daily:<groupID>`,
 ///   `group:<id>`, `event:<id>`, `profile:<userID>`, `reels`, `story:<userID>`,
 ///   `feature:<key>/<screen>[/<arg>]` for the collaboration features' screens (docs/BUBBLES.md 7.1;
 ///   keys: challenge, groups-search, together, remix, story, nextline, learn, length, saves)
@@ -83,6 +83,18 @@ enum DebugLaunch {
             let replay = bubbleStore.bubble(id: arg)?.featuredRun?.replay
             router.play(arg, replay: replay)
         case "studio": router.openStudio(StudioLaunch(prompt: arg))
+        case "studio-result":
+            // Studio's Try step with a made game (`FB_STUDIO_STEP=result`, see `StudioModel`):
+            // the game by id, or the first one in the feed.
+            Task { @MainActor in
+                var bubble = arg.isEmpty ? nil : await bubbleStore.loadGame(id: arg)
+                for _ in 0..<20 where bubble == nil {
+                    bubble = bubbleStore.feedBubbles.first
+                    if bubble == nil { try? await Task.sleep(nanoseconds: 500_000_000) }
+                }
+                guard let bubble else { return }
+                router.openStudio(StudioLaunch(mode: .create, baseBubbleID: bubble.id))
+            }
         case "edit": router.openStudio(StudioLaunch(mode: .edit, baseBubbleID: arg))
         case "remix": router.openStudio(StudioLaunch(mode: .remix, baseBubbleID: arg))
         case "next": router.openStudio(StudioLaunch(mode: .nextLevel, baseBubbleID: arg))

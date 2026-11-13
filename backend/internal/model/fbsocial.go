@@ -60,6 +60,8 @@ type FBPost struct {
 	Sponsored  bool           `bson:"sponsored,omitempty" json:"sponsored,omitempty"`
 	// AllowsGames marks a post the app may turn into a game (the New in SF intros).
 	AllowsGames bool `bson:"allowsGames,omitempty" json:"allowsGames,omitempty"`
+	// GameID is the game a post carries as a playable card (a Curio posted from Muse Studio).
+	GameID string `bson:"gameId,omitempty" json:"gameId,omitempty"`
 	// Reactions seeded with the demo world (type -> count), plus each signed-in person's own reaction.
 	BaseReactions map[string]int    `bson:"baseReactions,omitempty" json:"-"`
 	ReactionsBy   map[string]string `bson:"reactionsBy,omitempty" json:"-"` // user id -> type

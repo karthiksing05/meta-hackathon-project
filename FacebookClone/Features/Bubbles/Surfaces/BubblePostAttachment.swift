@@ -14,6 +14,11 @@ struct BubblePostAttachment: View {
             card(bubble)
                 .padding(.horizontal, FBMetrics.gutter)
                 .padding(.bottom, 8)
+        } else {
+            // A friend's game post from the server (`gameId`): fetch the game, then show its card.
+            Color.clear
+                .frame(height: 0)
+                .task(id: bubbleID) { _ = await bubbleStore.loadGame(id: bubbleID) }
         }
     }
 
