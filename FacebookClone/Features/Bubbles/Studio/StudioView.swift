@@ -20,6 +20,9 @@ import SwiftUI
 /// - `FB_STUDIO_MICROGAME=1`: build it as a microgame when Muse (or a server generator) is available.
 /// - `FB_GENERATE=mock|mock-plain|mock-fail` (+ `FB_GENERATE_SPEED`): make the microgame as a
 ///   server job from a recorded run (see `App/DebugLaunch.swift`).
+///
+/// Narration: `MuseNarrator` speaks what Muse is doing (`StudioNarration`); the top bar's waveform
+/// button turns it off. It follows the app-wide game mute.
 struct StudioView: View {
     let launch: StudioLaunch
 
@@ -64,6 +67,7 @@ struct StudioView: View {
         .onChange(of: model.floatSignal) {
             float()
         }
+        .studioNarration(model)
         .confirmationDialog(closeTitle, isPresented: $isConfirmingClose, titleVisibility: .visible) {
             Button(model.isEditMode ? "Discard changes" : "Discard", role: .destructive) {
                 close()
@@ -177,6 +181,7 @@ private struct StudioTopBar: View {
                     StudioCircleButton(symbol: "xmark", accessibilityLabel: "Close", action: onClose)
                         .disabled(model.isPopping)
                     Spacer()
+                    StudioNarrationToggle()
                     status
                         .padding(.trailing, FBSpacing.s)
                 }
@@ -205,6 +210,28 @@ private struct StudioTopBar: View {
             .background(StudioGlow.cardFill, in: Capsule())
             .overlay(Capsule().strokeBorder(StudioGlow.cardStroke, lineWidth: 0.75))
             .accessibilityLabel("Muse is offline. Studio uses its built-in composer.")
+        }
+    }
+}
+
+/// Turns Muse's spoken narration on or off. Off (and struck through) while the game sound is muted.
+private struct StudioNarrationToggle: View {
+    @State private var narrator = MuseNarrator.shared
+
+    var body: some View {
+        let on = narrator.isActive
+        StudioCircleButton(
+            symbol: on ? "waveform" : "waveform.slash",
+            accessibilityLabel: on ? "Turn off Muse narration" : "Turn on Muse narration",
+            size: 32
+        ) {
+            Haptics.light()
+            if GameSound.isMuted {
+                GameSound.isMuted = false
+                narrator.isEnabled = true
+            } else {
+                narrator.isEnabled.toggle()
+            }
         }
     }
 }
