@@ -1,0 +1,81 @@
+{
+  "family": "spatial_puzzle",
+  "notes": "Picture-game checklists from docs/harness-gaps/images.md. No family default yet: the spatial_puzzle default is for the family owner to add.",
+  "checklists": [
+    {
+      "applies_to": [
+        "spot_difference"
+      ],
+      "slots": [
+        {
+          "id": "scene",
+          "ask": "What should the two pictures show?",
+          "why": "Muse writes this one scene as placed shapes, text and emoji; spot-diff.mjs makes the second picture and the answer key.",
+          "need": "required",
+          "extrapolate_from": "the setting in the request (a group chat, a bedroom, a street)",
+          "default": "a busy room",
+          "ask_when": "the request names no setting",
+          "choices": [
+            "a group chat",
+            "a busy room",
+            "a street scene",
+            "a picnic"
+          ],
+          "affects": [
+            "content",
+            "art"
+          ]
+        },
+        {
+          "id": "differences",
+          "ask": "How many differences?",
+          "why": "The generator's count (3 to 9); more means a longer search.",
+          "need": "nice",
+          "extrapolate_from": "a number in the request ('find 7 differences')",
+          "default": "7",
+          "choices": [
+            "5",
+            "7",
+            "9"
+          ],
+          "affects": [
+            "difficulty"
+          ]
+        },
+        {
+          "id": "subtlety",
+          "ask": "Obvious or sneaky differences?",
+          "why": "Picks the generator's kinds: obvious = remove and recolor; sneaky = small moves, resizes and changed words.",
+          "need": "nice",
+          "extrapolate_from": "'hard', 'sneaky', 'easy', 'for kids'",
+          "default": "mixed",
+          "choices": [
+            "obvious",
+            "mixed",
+            "sneaky"
+          ],
+          "affects": [
+            "difficulty"
+          ]
+        },
+        {
+          "id": "pressure",
+          "ask": "A timer, a miss limit, or both?",
+          "why": "Sets lives on spot_missed and the time limit.",
+          "need": "nice",
+          "default": "3 misses and 60 s",
+          "choices": [
+            "60 s timer",
+            "3 misses",
+            "3 misses and 60 s",
+            "relaxed"
+          ],
+          "affects": [
+            "rules",
+            "difficulty"
+          ]
+        }
+      ]
+    }
+  ]
+}

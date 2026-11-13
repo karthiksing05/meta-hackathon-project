@@ -577,5 +577,28 @@
     "api": "state facing (set by swipes or buttons); threats advance in tick only when not in the facing view",
     "status": "shipped",
     "notes": "custom rules from swipe_zones or tap buttons and tick_rules; real eye or head tracking is not available"
+  },
+  {
+    "id": "picture_choice",
+    "kind": "runtime_tool",
+    "name": "Picture choice round",
+    "aliases": [
+      "which picture",
+      "pick the picture",
+      "guess from the picture",
+      "image quiz"
+    ],
+    "summary": "A multiple-choice round built around one picture per question: picture_quiz for the answers and a picture above them, either still or zooming out (zoom_reveal). The pictures are frames of one sprite: SVG drawn by Muse, or a build-time raster image.",
+    "when_to_use": "Picture trivia (which animal, what landmark, whose cartoon), close-up guessing, picture rebus with choices, \"what is the French cartoon saying\" with a caricature of a generic character.",
+    "api": "uses [zoom_reveal (zoom_from 1 for a still picture), picture_quiz, rounds bound to question_done, lives bound to answered_wrong]; game functions zoom_index = get_or(order, qi, 0), zoom_hold = locked; art.sprites.picture = {svg: [one per question], w: 512, h: 512}. Example: authoring/games/zoom_safari.authoring.json",
+    "status": "shipped",
+    "path": "authoring/games/zoom_safari.authoring.json",
+    "example_types": [
+      "zoom_out_picture_trivia",
+      "cartoon_quote_guess",
+      "picture_reveal",
+      "picture_vocab"
+    ],
+    "notes": "SVG pictures work today inside the 192 KB art budget (about 6 KB per frame when there are 4 or more). Raster photos need generated_image or picture_pack and a sprite sheet made at build time"
   }
 ]

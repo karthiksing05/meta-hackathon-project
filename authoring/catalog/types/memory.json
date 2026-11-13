@@ -255,6 +255,8 @@
       "changes"
     ],
     "tools": [
+      "diff_spots",
+      "anomaly_generator",
       "reveal",
       "image_assets",
       "timer_bar"

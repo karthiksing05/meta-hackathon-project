@@ -445,10 +445,13 @@
       "image category"
     ],
     "tools": [
+      "zoom_reveal",
+      "picture_quiz",
       "reveal",
       "typed_answer",
       "fuzzy_match",
-      "timer_bar"
+      "timer_bar",
+      "image_gallery"
     ],
     "engine_gaps": [],
     "gate_profile": "trivia",
